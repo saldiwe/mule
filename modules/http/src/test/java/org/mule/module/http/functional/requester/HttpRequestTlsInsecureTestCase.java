@@ -10,8 +10,10 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.internal.matchers.ThrowableCauseMatcher.hasCause;
 import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
 import static org.junit.rules.ExpectedException.none;
+
 import org.mule.api.MessagingException;
 import org.mule.api.MuleEvent;
 import org.mule.construct.Flow;
@@ -22,6 +24,8 @@ import org.mule.tck.junit4.rule.SystemProperty;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+
+import javax.net.ssl.SSLHandshakeException;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -76,7 +80,9 @@ public class HttpRequestTlsInsecureTestCase extends FunctionalTestCase
         Flow flow = (Flow) getFlowConstruct("testSecureRequest");
         expectedException.expect(MessagingException.class);
         expectedException.expectCause(isA(IOException.class));
-        expectedException.expectCause(hasMessage(containsString("General SSLEngine problem")));
+        expectedException.expectCause(hasMessage(containsString("Connection is closed")));
+        expectedException.expectCause(hasCause(isA(SSLHandshakeException.class)));
+        expectedException.expectCause(hasCause(hasMessage(containsString("General SSLEngine problem"))));
         flow.process(getTestEvent(TEST_PAYLOAD));
     }
 
