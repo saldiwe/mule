@@ -138,33 +138,12 @@ public class BeanDefinitionFactory
         ReferenceProcessorBeanDefinitionCreator referenceProcessorBeanDefinitionCreator = new ReferenceProcessorBeanDefinitionCreator();
         ExceptionStrategyRefBeanDefinitionCreator exceptionStrategyRefBeanDefinitionCreator = new ExceptionStrategyRefBeanDefinitionCreator();
         FilterReferenceBeanDefinitionCreator filterReferenceBeanDefinitionCreator = new FilterReferenceBeanDefinitionCreator();
-        BeanDefinitionCreator endpointReferenceBeanDefinitionCreator = getEndpointReferenceBeanDefinitionCreator();
         CommonBeanDefinitionCreator commonComponentModelProcessor = new CommonBeanDefinitionCreator();
         referenceProcessorBeanDefinitionCreator.setNext(exceptionStrategyRefBeanDefinitionCreator);
         exceptionStrategyRefBeanDefinitionCreator.setNext(exceptionStrategyRefBeanDefinitionCreator);
         exceptionStrategyRefBeanDefinitionCreator.setNext(filterReferenceBeanDefinitionCreator);
-        filterReferenceBeanDefinitionCreator.setNext(endpointReferenceBeanDefinitionCreator);
-        endpointReferenceBeanDefinitionCreator.setNext(commonComponentModelProcessor);
+        filterReferenceBeanDefinitionCreator.setNext(commonComponentModelProcessor);
         return referenceProcessorBeanDefinitionCreator;
-    }
-
-    private BeanDefinitionCreator getEndpointReferenceBeanDefinitionCreator()
-    {
-        try
-        {
-            return (BeanDefinitionCreator) ClassUtils.getClass(Thread.currentThread().getContextClassLoader(), "org.mule.runtime.config.spring.EndpointReferenceBeanDefinitionCreator").newInstance();
-        }
-        catch (Exception e)
-        {
-            return new BeanDefinitionCreator()
-            {
-                @Override
-                public boolean handleRequest(CreateBeanDefinitionRequest createBeanDefinitionRequest)
-                {
-                    return false;
-                }
-            };
-        }
     }
 
     /**

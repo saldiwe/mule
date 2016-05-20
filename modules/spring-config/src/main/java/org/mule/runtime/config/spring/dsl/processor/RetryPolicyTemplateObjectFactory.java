@@ -7,24 +7,29 @@
 package org.mule.runtime.config.spring.dsl.processor;
 
 import org.mule.runtime.config.spring.dsl.api.ObjectFactory;
+import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.context.MuleContextAware;
+import org.mule.runtime.core.api.lifecycle.LifecycleUtils;
 import org.mule.runtime.core.api.retry.RetryPolicyTemplate;
 import org.mule.runtime.core.retry.async.AsynchronousRetryTemplate;
 import org.mule.runtime.core.retry.policies.SimpleRetryPolicyTemplate;
 
-public class RetryPolicyTemplateObjectFactory implements ObjectFactory<RetryPolicyTemplate>
+public class RetryPolicyTemplateObjectFactory implements ObjectFactory<RetryPolicyTemplate>, MuleContextAware
 {
 
     private boolean blocking;
     private Integer count = SimpleRetryPolicyTemplate.DEFAULT_RETRY_COUNT;;
     private Integer frequency = SimpleRetryPolicyTemplate.DEFAULT_FREQUENCY;
+    private MuleContext muleContext;
 
     @Override
     public RetryPolicyTemplate getObject() throws Exception
     {
-        RetryPolicyTemplate retryPolicyTemplate = new SimpleRetryPolicyTemplate(count, frequency);
+        SimpleRetryPolicyTemplate retryPolicyTemplate = new SimpleRetryPolicyTemplate(frequency, count);
+        retryPolicyTemplate.setMuleContext(muleContext);
         if (!blocking)
         {
-            retryPolicyTemplate = new AsynchronousRetryTemplate(retryPolicyTemplate);
+            return new AsynchronousRetryTemplate(retryPolicyTemplate);
         }
         return retryPolicyTemplate;
     }
@@ -42,5 +47,11 @@ public class RetryPolicyTemplateObjectFactory implements ObjectFactory<RetryPoli
     public void setFrequency(Integer frequency)
     {
         this.frequency = frequency;
+    }
+
+    @Override
+    public void setMuleContext(MuleContext context)
+    {
+        this.muleContext = context;
     }
 }

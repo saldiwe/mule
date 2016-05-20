@@ -65,8 +65,8 @@ import org.w3c.dom.Node;
 public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
 {
 
-    public static final String SPRING_PROTOTYPE_OBJECT = "prototype";
-
+    private static final String SPRING_PROTOTYPE_OBJECT = "prototype";
+    private static final String TRANSPORT_BEAN_DEFINITION_POST_PROCESSOR_CLASS = "org.mule.runtime.config.spring.parsers.specific.TransportElementBeanDefinitionPostProcessor";
     private static final ImmutableSet<ComponentIdentifier> MESSAGE_FILTER_WRAPPERS = new ImmutableSet.Builder<ComponentIdentifier>()
             .add(MESSAGE_FILTER_ELEMENT_IDENTIFIER)
             .add(MULE_IDENTIFIER)
@@ -79,7 +79,7 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
     {
         try
         {
-            this.beanDefinitionPostProcessor = (BeanDefinitionPostProcessor) ClassUtils.getClass(Thread.currentThread().getContextClassLoader(), "org.mule.runtime.config.spring.parsers.specific.TransportElementBeanDefinitionPostProcessor").newInstance();
+            this.beanDefinitionPostProcessor = (BeanDefinitionPostProcessor) ClassUtils.getClass(Thread.currentThread().getContextClassLoader(), TRANSPORT_BEAN_DEFINITION_POST_PROCESSOR_CLASS).newInstance();
         }
         catch (Exception e)
         {

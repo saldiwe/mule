@@ -227,6 +227,7 @@ public class ComponentBuildingDefinition
             builder.namespace = this.namespace;
             builder.definition.scope = this.definition.scope;
             builder.definition.typeDefinition = this.definition.typeDefinition;
+            builder.definition.objectFactoryType = this.definition.objectFactoryType;
             return builder;
         }
 

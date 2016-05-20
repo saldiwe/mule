@@ -16,18 +16,22 @@ import static org.mule.runtime.config.spring.dsl.api.AttributeDefinition.Builder
 import static org.mule.runtime.config.spring.dsl.processor.TypeDefinition.fromType;
 import org.mule.runtime.config.spring.dsl.api.ComponentBuildingDefinition;
 import org.mule.runtime.config.spring.dsl.api.ComponentBuildingDefinitionProvider;
+import org.mule.runtime.config.spring.dsl.api.TypeConverter;
 import org.mule.runtime.config.spring.factories.InboundEndpointFactoryBean;
 import org.mule.runtime.config.spring.factories.MessageProcessorChainFactoryBean;
 import org.mule.runtime.config.spring.factories.OutboundEndpointFactoryBean;
 import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.MuleRuntimeException;
 import org.mule.runtime.core.api.endpoint.InboundEndpoint;
 import org.mule.runtime.core.api.endpoint.OutboundEndpoint;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.retry.RetryPolicy;
 import org.mule.runtime.core.api.retry.RetryPolicyTemplate;
 import org.mule.runtime.core.api.transaction.TransactionConfig;
+import org.mule.runtime.core.config.i18n.CoreMessages;
 import org.mule.runtime.core.endpoint.EndpointURIEndpointBuilder;
 import org.mule.runtime.core.processor.AbstractRedeliveryPolicy;
+import org.mule.runtime.core.transaction.MuleTransactionConfig;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +43,11 @@ import java.util.Map;
 public class TransportComponentBuildingDefinitionProvider implements ComponentBuildingDefinitionProvider
 {
 
+    public static final String OUTBOUND_ENDPOINT_ELEMENT = "outbound-endpoint";
+    public static final String ENDPOINT_ELEMENT = "endpoint";
+    public static final String INBOUND_ENDPOINT_ELEMENT = "inbound-endpoint";
+    private static final String ENDPOINT_RESPONSE_ELEMENT = "response";
+
     private ComponentBuildingDefinition.Builder baseDefinition;
 
     @Override
@@ -48,17 +57,16 @@ public class TransportComponentBuildingDefinitionProvider implements ComponentBu
     }
 
     @Override
-    public final List<ComponentBuildingDefinition> getComponentBuildingDefinitions()
+    public List<ComponentBuildingDefinition> getComponentBuildingDefinitions()
     {
         LinkedList<ComponentBuildingDefinition> componentBuildingDefinitions = new LinkedList<>();
         componentBuildingDefinitions.add(getInboundEndpointBuildingDefinitionBuilder().build());
         componentBuildingDefinitions.add(getOutboundEndpointBuildingDefinitionBuilder().build());
         componentBuildingDefinitions.add(getEndpointBuildingDefinitionBuilder().build());
         componentBuildingDefinitions.add(baseDefinition.copy()
-                                                 .withIdentifier("response")
+                                                 .withIdentifier(ENDPOINT_RESPONSE_ELEMENT)
                                                  .withTypeDefinition(fromType(MessageProcessor.class))
                                                  .withObjectFactoryType(MessageProcessorChainFactoryBean.class)
-                                                 //.withSetterParameterDefinition("messageProcessors", fromChildListConfiguration(MessageProcessor.class).build())
                                                  .build());
         componentBuildingDefinitions.add(baseDefinition.copy()
                                                  .withIdentifier("service-overrides")
@@ -79,19 +87,13 @@ public class TransportComponentBuildingDefinitionProvider implements ComponentBu
                                                  .withSetterParameterDefinition("outboundExchangePatterns", fromSimpleParameter("outboundExchangePatterns").build())
                                                  .withSetterParameterDefinition("defaultExchangePattern", fromSimpleParameter("defaultExchangePattern").build())
                                                  .build());
-        componentBuildingDefinitions.addAll(getTransportSpecificDefinitionParsers());
         return componentBuildingDefinitions;
-    }
-
-    protected Collection<? extends ComponentBuildingDefinition> getTransportSpecificDefinitionParsers()
-    {
-        return Collections.emptyList();
     }
 
     protected ComponentBuildingDefinition.Builder getOutboundEndpointBuildingDefinitionBuilder()
     {
         return baseDefinition.copy()
-                .withIdentifier("outbound-endpoint")
+                .withIdentifier(OUTBOUND_ENDPOINT_ELEMENT)
                 .withObjectFactoryType(OutboundEndpointFactoryBean.class)
                 .withTypeDefinition(fromType(OutboundEndpoint.class))
                 .withSetterParameterDefinition("connector", fromSimpleReferenceParameter("connector-ref").build())
@@ -116,7 +118,7 @@ public class TransportComponentBuildingDefinitionProvider implements ComponentBu
     protected ComponentBuildingDefinition.Builder getEndpointBuildingDefinitionBuilder()
     {
         return baseDefinition.copy()
-                .withIdentifier("endpoint")
+                .withIdentifier(ENDPOINT_ELEMENT)
                 .withTypeDefinition(fromType(EndpointURIEndpointBuilder.class))
                 .withSetterParameterDefinition("connector", fromSimpleReferenceParameter("connector-ref").build())
                 .withSetterParameterDefinition("name", fromSimpleParameter("name").build())
@@ -141,7 +143,7 @@ public class TransportComponentBuildingDefinitionProvider implements ComponentBu
     protected ComponentBuildingDefinition.Builder getInboundEndpointBuildingDefinitionBuilder()
     {
         return baseDefinition.copy()
-                .withIdentifier("inbound-endpoint")
+                .withIdentifier(INBOUND_ENDPOINT_ELEMENT)
                 .withObjectFactoryType(InboundEndpointFactoryBean.class)
                 .withTypeDefinition(fromType(InboundEndpoint.class))
                 .withSetterParameterDefinition("connector", fromSimpleReferenceParameter("connector-ref").build())
@@ -161,5 +163,46 @@ public class TransportComponentBuildingDefinitionProvider implements ComponentBu
                 .withSetterParameterDefinition("exchangePattern", fromSimpleParameter("exchange-pattern").build())
                 .withSetterParameterDefinition("name", fromSimpleParameter("name").build())
                 .withSetterParameterDefinition("properties", fromUndefinedSimpleAttributes().build());
+    }
+
+    protected ComponentBuildingDefinition.Builder getBaseTransactionDefinitionBuilder()
+    {
+        return baseDefinition.copy()
+                .withIdentifier("transaction")
+                .withTypeDefinition(fromType(MuleTransactionConfig.class))
+                .withSetterParameterDefinition("action", fromSimpleParameter("action", getTransactionActionTypeConverter()).build());
+    }
+
+
+    private TypeConverter<String, Byte> getTransactionActionTypeConverter()
+    {
+        return new TypeConverter<String, Byte>()
+        {
+            @Override
+            public Byte convert(String action)
+            {
+                switch (action)
+                {
+                    case "ALWAYS_BEGIN":
+                        return TransactionConfig.ACTION_ALWAYS_BEGIN;
+                    case "ALWAYS_JOIN":
+                        return TransactionConfig.ACTION_ALWAYS_JOIN;
+                    case "JOIN_IF_POSSIBLE":
+                        return TransactionConfig.ACTION_JOIN_IF_POSSIBLE;
+                    case "NONE":
+                        return TransactionConfig.ACTION_NONE;
+                    case "BEGIN_OR_JOIN":
+                        return TransactionConfig.ACTION_BEGIN_OR_JOIN;
+                    case "INDIFFERENT":
+                        return TransactionConfig.ACTION_INDIFFERENT;
+                    case "NEVER":
+                        return TransactionConfig.ACTION_NEVER;
+                    case "NOT_SUPPORTED":
+                        return TransactionConfig.ACTION_NOT_SUPPORTED;
+                    default:
+                        throw new MuleRuntimeException(CoreMessages.createStaticMessage("Wrong transaction action configuration parameter: " + action));
+                }
+            }
+        };
     }
 }

@@ -433,11 +433,11 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
                 .withSetterParameterDefinition("blocking", fromSimpleParameter("blocking").build())
                 .withSetterParameterDefinition("frequency", fromSimpleParameter("frequency").build());
 
-        componentBuildingDefinitions.add(baseReconnectDefinition
+        componentBuildingDefinitions.add(baseReconnectDefinition.copy()
                                                  .withIdentifier("reconnect-forever")
                                                  .withSetterParameterDefinition("count", fromFixedValue(RETRY_COUNT_FOREVER).build())
                                                  .build());
-        componentBuildingDefinitions.add(baseReconnectDefinition
+        componentBuildingDefinitions.add(baseReconnectDefinition.copy()
                                                  .withIdentifier("reconnect")
                                                  .withSetterParameterDefinition("count", fromSimpleParameter("count").build())
                                                  .build());
