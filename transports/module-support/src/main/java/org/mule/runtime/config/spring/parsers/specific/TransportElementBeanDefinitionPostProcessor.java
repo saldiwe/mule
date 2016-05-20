@@ -12,10 +12,12 @@ import static org.mule.runtime.config.spring.TransportComponentBuildingDefinitio
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.MULE_PROPERTY_IDENTIFIER;
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.SPRING_PROPERTY_IDENTIFIER;
 import static org.mule.runtime.config.spring.dsl.spring.CommonBeanDefinitionCreator.areMatchingTypes;
+import static org.mule.runtime.config.spring.dsl.spring.PropertyComponentUtils.getPropertyValueFromPropertyComponent;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_MULE_CONTEXT;
 import org.mule.runtime.config.spring.dsl.model.ComponentIdentifier;
 import org.mule.runtime.config.spring.dsl.model.ComponentModel;
 import org.mule.runtime.config.spring.dsl.spring.CommonBeanDefinitionCreator;
+import org.mule.runtime.config.spring.dsl.spring.PropertyComponentUtils;
 import org.mule.runtime.config.spring.factories.MessageProcessorChainFactoryBean;
 import org.mule.runtime.core.endpoint.URIBuilder;
 import org.mule.runtime.core.processor.AbstractRedeliveryPolicy;
@@ -32,6 +34,10 @@ import org.springframework.beans.factory.support.ManagedMap;
 public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDefinitionCreator.BeanDefinitionPostProcessor
 {
 
+    private static final String PROPERTIES_ELEMENT = "properties";
+    private static final String TRANSFORMERS_SEPARATOR = " ";
+    private static final String REFERENCE_ATTRIBUTE = "ref";
+
     @Override
     public void postProcess(ComponentModel componentModel, AbstractBeanDefinition modelBeanDefinition)
     {
@@ -43,6 +49,7 @@ public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDe
             processAddressParameter(componentModel, modelBeanDefinition);
             processTransformerReferences(componentModel, modelBeanDefinition);
             ManagedList messageProcessors = processMessageProcessors(componentModel, modelBeanDefinition);
+            //TODO MULE-9728 - Provide a mechanism to hook per transport in the endpoint address parsing
             processRedeliveryPolicy(modelBeanDefinition, messageProcessors);
         }
         if (componentModel.getIdentifier().getName().endsWith(ENDPOINT_ELEMENT))
@@ -62,14 +69,14 @@ public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDe
                     ComponentIdentifier identifier = innerComponent.getIdentifier();
                     return identifier.equals(SPRING_PROPERTY_IDENTIFIER) || identifier.equals(MULE_PROPERTY_IDENTIFIER);
                 }).forEach(propertyComponentModel -> {
-                    PropertyValue propertyValue = CommonBeanDefinitionCreator.getPropertyValueFromPropertyComponent(propertyComponentModel);
+                    PropertyValue propertyValue = getPropertyValueFromPropertyComponent(propertyComponentModel);
                     modelBeanDefinition.getPropertyValues().removePropertyValue(propertyValue.getName());
                     propertiesMap.put(propertyValue.getName(), propertyValue.getValue());
                 });
         componentModel.getInnerComponents()
                 .stream()
                 .filter(innerComponent -> {
-                    return innerComponent.getIdentifier().getName().equals("properties");
+                    return innerComponent.getIdentifier().getName().equals(PROPERTIES_ELEMENT);
                 })
                 .findFirst()
                 .ifPresent(propertiesComponent -> {
@@ -79,7 +86,7 @@ public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDe
                 });
         if (!propertiesMap.isEmpty())
         {
-            modelBeanDefinition.getPropertyValues().addPropertyValue("properties", propertiesMap);
+            modelBeanDefinition.getPropertyValues().addPropertyValue(PROPERTIES_ELEMENT, propertiesMap);
         }
     }
 
@@ -136,7 +143,7 @@ public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDe
         String transformerRefs = componentModel.getParameters().get("transformer-refs");
         if (!StringUtils.isEmpty(transformerRefs))
         {
-            String[] refs = transformerRefs.split(" ");
+            String[] refs = transformerRefs.split(TRANSFORMERS_SEPARATOR);
             ManagedList managedList = new ManagedList();
             for (String ref : refs)
             {
@@ -147,7 +154,7 @@ public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDe
         String responseTransformerRefs = componentModel.getParameters().get("responseTransformer-refs");
         if (!StringUtils.isEmpty(responseTransformerRefs))
         {
-            String[] refs = responseTransformerRefs.split(" ");
+            String[] refs = responseTransformerRefs.split(TRANSFORMERS_SEPARATOR);
             ManagedList managedList = new ManagedList();
             for (String ref : refs)
             {
@@ -164,14 +171,17 @@ public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDe
         {
             addUriBuilderPropertyValue(modelBeanDefinition, addressValue);
         }
-        processSpecificAddressAttribute(componentModel, modelBeanDefinition);
+        else
+        {
+            processSpecificAddressAttribute(componentModel, modelBeanDefinition);
+        }
     }
 
     private void processReferenceParameter(ComponentModel componentModel, AbstractBeanDefinition modelBeanDefinition)
     {
-        if (componentModel.getParameters().containsKey("ref"))
+        if (componentModel.getParameters().containsKey(REFERENCE_ATTRIBUTE))
         {
-            modelBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference(componentModel.getParameters().get("ref")));
+            modelBeanDefinition.getConstructorArgumentValues().addGenericArgumentValue(new RuntimeBeanReference(componentModel.getParameters().get(REFERENCE_ATTRIBUTE)));
         }
     }
 
@@ -185,7 +195,8 @@ public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDe
 
     private void processSpecificAddressAttribute(ComponentModel componentModel, AbstractBeanDefinition modelBeanDefinition)
     {
-        if (componentModel.getIdentifier().getNamespace().equals("jms") && componentModel.getIdentifier().getName().endsWith("endpoint") && !componentModel.getParameters().containsKey("address") && !componentModel.getParameters().containsKey("ref"))
+        if (componentModel.getIdentifier().getNamespace().equals("jms") &&
+            !componentModel.getParameters().containsKey(REFERENCE_ATTRIBUTE))
         {
             StringBuilder address = new StringBuilder("jms://");
             if (componentModel.getParameters().containsKey("queue"))
@@ -194,7 +205,7 @@ public class TransportElementBeanDefinitionPostProcessor implements CommonBeanDe
             }
             else
             {
-                address.append("queue/" + componentModel.getParameters().get("topic"));
+                address.append("topic/" + componentModel.getParameters().get("topic"));
             }
             addUriBuilderPropertyValue(modelBeanDefinition, address.toString());
         }

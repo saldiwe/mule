@@ -14,6 +14,7 @@ import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.MULE_IDE
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.MULE_PROPERTY_IDENTIFIER;
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.SPRING_PROPERTY_IDENTIFIER;
 import static org.mule.runtime.config.spring.dsl.processor.xml.XmlCustomAttributeHandler.from;
+import static org.mule.runtime.config.spring.dsl.spring.PropertyComponentUtils.getPropertyValueFromPropertyComponent;
 import static org.mule.runtime.config.spring.parsers.AbstractMuleBeanDefinitionParser.processMetadataAnnotationsHelper;
 import static org.mule.runtime.core.api.AnnotatedObject.PROPERTY_NAME;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
@@ -227,50 +228,6 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
                 });
     }
 
-    public static PropertyValue getPropertyValueFromPropertyComponent(ComponentModel propertyComponentModel)
-    {
-        PropertyValue propertyValue;
-        String refKey = getReferenceAttributeName(propertyComponentModel.getIdentifier());
-        String nameKey = getNameAttributeName(propertyComponentModel.getIdentifier());
-        if (propertyComponentModel.getInnerComponents().isEmpty())
-        {
-            Object value;
-            if (propertyComponentModel.getParameters().containsKey(refKey))
-            {
-                value = new RuntimeBeanReference(propertyComponentModel.getParameters().get(refKey));
-            }
-            else
-            {
-                value = propertyComponentModel.getParameters().get("value");
-            }
-            propertyValue = new PropertyValue(propertyComponentModel.getParameters().get(nameKey), value);
-        }
-        else if (propertyComponentModel.getInnerComponents().get(0).getIdentifier().getName().equals("map"))
-        {
-            ComponentModel springMap = propertyComponentModel.getInnerComponents().get(0);
-            ManagedMap<String, Object> propertiesMap = new ManagedMap<>();
-            springMap.getInnerComponents().stream().forEach( mapEntry -> {
-                Object value;
-                if (mapEntry.getParameters().containsKey("value"))
-                {
-                    value = mapEntry.getParameters().get("value");
-                }
-                else
-                {
-                    value = new RuntimeBeanReference(mapEntry.getParameters().get("value-ref"));
-                }
-                propertiesMap.put(mapEntry.getParameters().get("key"), value);
-            });
-            propertyValue = new PropertyValue(propertyComponentModel.getNameAttribute(), propertiesMap);
-        }
-        else
-        {
-            //TODO Remove
-            throw new RuntimeException("remove this else if this case doesn't happen");
-        }
-        return propertyValue;
-    }
-
     public static List<PropertyValue> getPropertyValueFromPropertiesComponent(ComponentModel propertyComponentModel)
     {
         List<PropertyValue> propertyValues = new ArrayList<>();
@@ -278,30 +235,6 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
             propertyValues.add(new PropertyValue(entryComponentModel.getParameters().get("key"), entryComponentModel.getParameters().get("value")));
         });
         return propertyValues;
-    }
-
-    private static String getNameAttributeName(ComponentIdentifier identifier)
-    {
-        if (identifier.equals(MULE_PROPERTY_IDENTIFIER))
-        {
-            return "key";
-        }
-        else
-        {
-            return "name";
-        }
-    }
-
-    private static String getReferenceAttributeName(ComponentIdentifier identifier)
-    {
-        if (identifier.equals(MULE_PROPERTY_IDENTIFIER))
-        {
-            return "value-ref";
-        }
-        else
-        {
-            return "ref";
-        }
     }
 
     private void processObjectConstructionParameters(final ComponentModel componentModel,

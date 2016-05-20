@@ -28,6 +28,7 @@ import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.retry.RetryPolicy;
 import org.mule.runtime.core.api.retry.RetryPolicyTemplate;
 import org.mule.runtime.core.api.transaction.TransactionConfig;
+import org.mule.runtime.core.component.DefaultInterfaceBinding;
 import org.mule.runtime.core.config.i18n.CoreMessages;
 import org.mule.runtime.core.endpoint.EndpointURIEndpointBuilder;
 import org.mule.runtime.core.processor.AbstractRedeliveryPolicy;
