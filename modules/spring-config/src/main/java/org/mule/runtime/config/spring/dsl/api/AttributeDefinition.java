@@ -8,6 +8,8 @@ package org.mule.runtime.config.spring.dsl.api;
 
 import org.mule.runtime.config.spring.dsl.processor.AttributeDefinitionVisitor;
 
+import java.util.Optional;
+
 /**
  * Defines how to build an attribute from an object.
  * <p/>
@@ -31,6 +33,7 @@ public class AttributeDefinition
     private String referenceSimpleParameter;
     private boolean collection;
     private boolean valueFromTextContent;
+    private TypeConverter typeConverter;
 
     private AttributeDefinition()
     {
@@ -43,7 +46,7 @@ public class AttributeDefinition
     {
         if (configParameterName != null)
         {
-            visitor.onConfigurationParameter(configParameterName, defaultValue);
+            visitor.onConfigurationParameter(configParameterName, defaultValue, Optional.ofNullable(typeConverter));
         }
         else if (referenceObject != null)
         {
@@ -100,6 +103,14 @@ public class AttributeDefinition
         {
             Builder builder = new Builder();
             builder.attributeDefinition.configParameterName = configParameterName;
+            return builder;
+        }
+
+        public static Builder fromSimpleParameter(String configParameterName, TypeConverter typeConverter)
+        {
+            Builder builder = new Builder();
+            builder.attributeDefinition.configParameterName = configParameterName;
+            builder.attributeDefinition.typeConverter = typeConverter;
             return builder;
         }
 

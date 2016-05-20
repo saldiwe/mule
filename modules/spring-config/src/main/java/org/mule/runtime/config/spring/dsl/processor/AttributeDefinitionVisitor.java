@@ -7,6 +7,10 @@
 
 package org.mule.runtime.config.spring.dsl.processor;
 
+import org.mule.runtime.config.spring.dsl.api.TypeConverter;
+
+import java.util.Optional;
+
 /**
  * An {code AttributeDefinitionVisitor} is in charge of handling an attribute configuration when
  * building an object from a {@link org.mule.runtime.config.spring.dsl.model.ComponentModel}.
@@ -47,7 +51,7 @@ public interface AttributeDefinitionVisitor
      * @param parameterName configuration parameter name.
      * @param defaultValue default value for the configuration parameter if it has not value.
      */
-    void onConfigurationParameter(String parameterName, Object defaultValue);
+    void onConfigurationParameter(String parameterName, Object defaultValue, Optional<TypeConverter> typeConverter);
 
     /**
      * Called when the attribute holds all the simple configuration attributes not mapped to any other attribute.

@@ -12,7 +12,7 @@ package org.mule.runtime.config.spring.dsl.spring;
  *
  * @since 4.0
  */
-abstract class BeanDefinitionCreator
+public abstract class BeanDefinitionCreator
 {
 
     private BeanDefinitionCreator next;
@@ -51,6 +51,6 @@ abstract class BeanDefinitionCreator
      * @param createBeanDefinitionRequest the creation request.
      * @return true if it created the {@code BeanDefinition}, false otherwise.
      */
-    abstract boolean handleRequest(CreateBeanDefinitionRequest createBeanDefinitionRequest);
+    public abstract boolean handleRequest(CreateBeanDefinitionRequest createBeanDefinitionRequest);
 
 }

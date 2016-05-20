@@ -278,7 +278,7 @@ public class MuleHierarchicalBeanDefinitionParserDelegate extends BeanDefinition
         {
             String parentNodeNamespace = getNamespace(parentNode);
             String parentNodeName = parentNode.getLocalName();
-            if (parentNode.getNodeName().equals(MULE_ROOT_ELEMENT))
+            if (parentNode.getNodeName().equals(MULE_ROOT_ELEMENT) || parentNode.getLocalName().equals(MULE_DOMAIN_ROOT_ELEMENT))
             {
                 break;
             }

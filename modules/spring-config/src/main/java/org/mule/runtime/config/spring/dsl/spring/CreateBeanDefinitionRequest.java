@@ -14,7 +14,7 @@ import org.mule.runtime.config.spring.dsl.model.ComponentModel;
  *
  * @since 4.0
  */
-class CreateBeanDefinitionRequest
+public class CreateBeanDefinitionRequest
 {
 
     private final ComponentModel parentComponentModel;

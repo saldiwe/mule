@@ -6,15 +6,20 @@
  */
 package org.mule.runtime.config.spring.dsl.api;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static org.mule.runtime.core.util.Preconditions.checkState;
 import org.mule.runtime.config.spring.dsl.processor.TypeDefinition;
 import org.mule.runtime.config.spring.dsl.model.ComponentIdentifier;
 import org.mule.runtime.core.util.Preconditions;
 
+import com.google.common.collect.ImmutableSet;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Defines the mapping between a component configuration and how the object that represents
@@ -29,6 +34,7 @@ public class ComponentBuildingDefinition
     private boolean scope;
     private List<AttributeDefinition> constructorAttributeDefinition = new ArrayList<>();
     private Map<String, AttributeDefinition> setterParameterDefinitions = new HashMap<>();
+    private Set<String> ignoredConfigurationParameters = new HashSet<>();
     //TODO MULE-9638 Use generics. Generics cannot be used right now because this method colides with the ones defined in FactoryBeans.
     private Class<?> objectFactoryType;
     private boolean prototype;
@@ -68,6 +74,11 @@ public class ComponentBuildingDefinition
     public Map<String, AttributeDefinition> getSetterParameterDefinitions()
     {
         return setterParameterDefinitions;
+    }
+
+    public Set<String> getIgnoredConfigurationParameters()
+    {
+        return copyOf(ignoredConfigurationParameters);
     }
 
     /**
@@ -194,6 +205,12 @@ public class ComponentBuildingDefinition
         public Builder withObjectFactoryType(Class<?> objectFactoryType)
         {
             definition.objectFactoryType = objectFactoryType;
+            return this;
+        }
+
+        public Builder withIgnoredConfigurationParameter(String parameterName)
+        {
+            definition.ignoredConfigurationParameters.add(parameterName);
             return this;
         }
 

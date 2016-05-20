@@ -19,7 +19,7 @@ import org.mule.runtime.config.spring.dsl.model.ComponentBuildingDefinitionRegis
 import org.mule.runtime.config.spring.dsl.model.ComponentIdentifier;
 import org.mule.runtime.config.spring.dsl.model.ComponentModel;
 import org.mule.runtime.core.api.MuleRuntimeException;
-import org.mule.runtime.core.config.i18n.CoreMessages;
+import org.mule.runtime.core.util.ClassUtils;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -138,12 +138,33 @@ public class BeanDefinitionFactory
         ReferenceProcessorBeanDefinitionCreator referenceProcessorBeanDefinitionCreator = new ReferenceProcessorBeanDefinitionCreator();
         ExceptionStrategyRefBeanDefinitionCreator exceptionStrategyRefBeanDefinitionCreator = new ExceptionStrategyRefBeanDefinitionCreator();
         FilterReferenceBeanDefinitionCreator filterReferenceBeanDefinitionCreator = new FilterReferenceBeanDefinitionCreator();
+        BeanDefinitionCreator endpointReferenceBeanDefinitionCreator = getEndpointReferenceBeanDefinitionCreator();
         CommonBeanDefinitionCreator commonComponentModelProcessor = new CommonBeanDefinitionCreator();
         referenceProcessorBeanDefinitionCreator.setNext(exceptionStrategyRefBeanDefinitionCreator);
         exceptionStrategyRefBeanDefinitionCreator.setNext(exceptionStrategyRefBeanDefinitionCreator);
         exceptionStrategyRefBeanDefinitionCreator.setNext(filterReferenceBeanDefinitionCreator);
-        filterReferenceBeanDefinitionCreator.setNext(commonComponentModelProcessor);
+        filterReferenceBeanDefinitionCreator.setNext(endpointReferenceBeanDefinitionCreator);
+        endpointReferenceBeanDefinitionCreator.setNext(commonComponentModelProcessor);
         return referenceProcessorBeanDefinitionCreator;
+    }
+
+    private BeanDefinitionCreator getEndpointReferenceBeanDefinitionCreator()
+    {
+        try
+        {
+            return (BeanDefinitionCreator) ClassUtils.getClass(Thread.currentThread().getContextClassLoader(), "org.mule.runtime.config.spring.EndpointReferenceBeanDefinitionCreator").newInstance();
+        }
+        catch (Exception e)
+        {
+            return new BeanDefinitionCreator()
+            {
+                @Override
+                public boolean handleRequest(CreateBeanDefinitionRequest createBeanDefinitionRequest)
+                {
+                    return false;
+                }
+            };
+        }
     }
 
     /**
