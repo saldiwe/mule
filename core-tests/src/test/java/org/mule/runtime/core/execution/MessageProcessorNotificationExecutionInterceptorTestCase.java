@@ -11,7 +11,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-
 import org.mule.runtime.core.OptimizedRequestContext;
 import org.mule.runtime.core.RequestContext;
 import org.mule.runtime.core.api.MessagingException;
@@ -23,7 +22,6 @@ import org.mule.runtime.core.api.context.notification.ServerNotification;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.context.notification.MessageProcessorNotification;
 import org.mule.runtime.core.context.notification.ServerNotificationManager;
-import org.mule.runtime.core.processor.NonBlockingMessageProcessor;
 import org.mule.runtime.core.util.UUID;
 import org.mule.tck.junit4.AbstractMuleTestCase;
 import org.mule.tck.size.SmallTest;
@@ -175,8 +173,6 @@ public class MessageProcessorNotificationExecutionInterceptorTestCase extends Ab
     public void requestContextSetBeforeProcessingEventNonBlockingPrcocessor() throws MuleException
     {
         final List<ServerNotification> serverNotifications = new ArrayList<ServerNotification>();
-        mockMessageProcessor = Mockito.mock(MessageProcessor.class,
-                Mockito.withSettings().extraInterfaces(NonBlockingMessageProcessor.class));
 
         Mockito.when(mockMessageProcessor.process(mockMuleEvent)).thenReturn(mockResultMuleEvent);
         Mockito.when(mockMuleEvent.getMuleContext().getNotificationManager()).thenReturn(mockNotificationManager);

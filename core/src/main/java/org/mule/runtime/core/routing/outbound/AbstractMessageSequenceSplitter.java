@@ -7,10 +7,11 @@
 package org.mule.runtime.core.routing.outbound;
 
 import static org.mule.runtime.core.routing.CorrelationMode.NEVER;
-
+import static reactor.core.util.Exceptions.propagate;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.RequestContext;
 import org.mule.runtime.core.VoidMuleEvent;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
@@ -24,9 +25,12 @@ import org.mule.runtime.core.routing.AbstractSplitter;
 import org.mule.runtime.core.routing.CorrelationMode;
 import org.mule.runtime.core.routing.DefaultRouterResultsHandler;
 import org.mule.runtime.core.routing.MessageSequence;
+import org.mule.runtime.core.util.rx.FluxNullSafeMap;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.reactivestreams.Publisher;
 
 /**
  * Base implementation of a {@link MuleMessage} splitter, that converts its payload 
@@ -194,5 +198,24 @@ public abstract class AbstractMessageSequenceSplitter extends AbstractIntercepti
     public void setCounterVariableName(String counterVariableName)
     {
         this.counterVariableName = counterVariableName;
+    }
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        return new FluxNullSafeMap<>(publisher, event -> {
+            try
+            {
+                return process(event);
+            }
+            catch (MessagingException exception)
+            {
+                throw propagate(new MessagingException(event, exception.getCause(), this));
+            }
+            catch (Throwable throwable)
+            {
+                throw propagate(new MessagingException(event, throwable, this));
+            }
+        });
     }
 }

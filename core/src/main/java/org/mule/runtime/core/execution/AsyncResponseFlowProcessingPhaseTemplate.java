@@ -10,6 +10,8 @@ import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 
+import org.reactivestreams.Publisher;
+
 /**
  * Template methods for {@link org.mule.runtime.core.api.source.MessageSource} specific behavior during
  * flow execution.
@@ -30,6 +32,14 @@ public interface AsyncResponseFlowProcessingPhaseTemplate extends MessageProcess
      * @throws org.mule.runtime.core.api.MuleException
      */
     MuleEvent routeEvent(MuleEvent muleEvent) throws MuleException;
+
+    /**
+     * Routes the {@link org.mule.runtime.core.api.MuleEvent} through the processors chain using non-blocking semantics
+     *
+     * @param muleEvent {@link org.mule.runtime.core.api.MuleEvent} created from the raw message of this context
+     * @return the response {@link Publisher<MuleEvent>} which can be subscribed to to receive responses and errors.
+     */
+    Publisher<MuleEvent> routeEventAsStream(MuleEvent muleEvent);
 
     /**
      * Template method to send a response after processing the message.

@@ -10,9 +10,9 @@ import org.mule.runtime.core.VoidMuleEvent;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
-import org.mule.runtime.core.api.NonBlockingSupported;
 import org.mule.runtime.core.api.config.ThreadingProfile;
-import org.mule.runtime.core.api.connector.NonBlockingReplyToHandler;
+import org.mule.runtime.core.api.construct.FlowConstruct;
+import org.mule.runtime.core.api.construct.FlowConstructAware;
 import org.mule.runtime.core.api.construct.MessageProcessorPathResolver;
 import org.mule.runtime.core.api.context.WorkManager;
 import org.mule.runtime.core.api.context.WorkManagerSource;
@@ -31,6 +31,10 @@ import org.mule.runtime.core.transaction.MuleTransactionConfig;
 import org.mule.runtime.core.work.AbstractMuleEventWork;
 import org.mule.runtime.core.work.MuleWorkManager;
 
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.util.Exceptions;
+
 /**
  * Processes {@link MuleEvent}'s asynchronously using a {@link MuleWorkManager} to
  * schedule asynchronous processing of the next {@link MessageProcessor}. The next
@@ -39,7 +43,7 @@ import org.mule.runtime.core.work.MuleWorkManager;
  * present then an exception is thrown.
  */
 public class AsyncInterceptingMessageProcessor extends AbstractInterceptingMessageProcessor
-    implements Startable, Stoppable, MessagingExceptionHandlerAware, NonBlockingSupported
+    implements Startable, Stoppable, MessagingExceptionHandlerAware, FlowConstructAware
 {
 
     public static final String SYNCHRONOUS_NONBLOCKING_EVENT_ERROR_MESSAGE = "Unable to process a synchronous or non-blocking event asynchronously";
@@ -48,6 +52,7 @@ public class AsyncInterceptingMessageProcessor extends AbstractInterceptingMessa
     protected boolean doThreading = true;
     protected long threadTimeout;
     protected WorkManager workManager;
+    private FlowConstruct flowConstruct;
 
     private MessagingExceptionHandler messagingExceptionHandler;
 
@@ -88,6 +93,7 @@ public class AsyncInterceptingMessageProcessor extends AbstractInterceptingMessa
         }
     }
 
+    @Override
     public MuleEvent process(MuleEvent event) throws MuleException
     {
         if (next == null)
@@ -145,8 +151,7 @@ public class AsyncInterceptingMessageProcessor extends AbstractInterceptingMessa
 
     protected boolean canProcessAsync(MuleEvent event) throws MessagingException
     {
-        return !(event.isSynchronous() || event.isTransacted() || event.getReplyToHandler() instanceof
-                NonBlockingReplyToHandler);
+        return !(event.isSynchronous() || event.isTransacted());
     }
 
     protected void processNextAsync(MuleEvent event) throws MuleException
@@ -255,4 +260,34 @@ public class AsyncInterceptingMessageProcessor extends AbstractInterceptingMessa
         }
     }
 
+    @Override
+    public void setFlowConstruct(FlowConstruct flowConstruct)
+    {
+        this.flowConstruct = flowConstruct;
+        if (next instanceof FlowConstructAware)
+        {
+            ((FlowConstructAware) next).setFlowConstruct(flowConstruct);
+        }
+    }
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        return Flux.from(publisher).map(event -> {
+            try
+            {
+                if (!canProcessAsync(event))
+                {
+                    throw Exceptions.propagate(new MessagingException(
+                            CoreMessages.createStaticMessage(SYNCHRONOUS_NONBLOCKING_EVENT_ERROR_MESSAGE),
+                            event, this));
+                }
+            }
+            catch (MessagingException e)
+            {
+                throw Exceptions.propagate(e);
+            }
+            return event;
+        }).as(pub -> super.apply(pub));
+    }
 }

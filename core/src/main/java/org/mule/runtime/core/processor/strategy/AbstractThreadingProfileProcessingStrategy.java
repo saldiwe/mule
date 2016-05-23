@@ -6,22 +6,23 @@
  */
 package org.mule.runtime.core.processor.strategy;
 
+import static reactor.core.publisher.Flux.from;
 import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.config.ThreadingProfile;
 import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.context.WorkManager;
-import org.mule.runtime.core.api.lifecycle.Startable;
-import org.mule.runtime.core.api.lifecycle.Stoppable;
 import org.mule.runtime.core.api.processor.MessageProcessor;
-import org.mule.runtime.core.api.processor.MessageProcessorChainBuilder;
 import org.mule.runtime.core.api.processor.ProcessingStrategy;
-import org.mule.runtime.core.api.processor.StageNameSource;
 import org.mule.runtime.core.config.ChainedThreadingProfile;
-import org.mule.runtime.core.processor.AsyncInterceptingMessageProcessor;
 import org.mule.runtime.core.util.concurrent.ThreadNameHelper;
 import org.mule.runtime.core.work.MuleWorkManager;
 
-import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Function;
+
+import org.reactivestreams.Publisher;
 
 /**
  * A abstract {@link org.mule.runtime.core.api.processor.ProcessingStrategy} implementation that provides a
@@ -37,6 +38,17 @@ public abstract class AbstractThreadingProfileProcessingStrategy implements Proc
     protected Long threadTTL;
     protected Long threadWaitTimeout;
     protected Integer poolExhaustedAction;
+    protected ExecutorService executorService;
+
+    public AbstractThreadingProfileProcessingStrategy()
+    {
+        this(Executors.newCachedThreadPool());
+    }
+
+    public AbstractThreadingProfileProcessingStrategy(ExecutorService executorService)
+    {
+        this.executorService = executorService;
+    }
 
     protected ThreadingProfile createThreadingProfile(MuleContext muleContext)
     {
@@ -134,4 +146,27 @@ public abstract class AbstractThreadingProfileProcessingStrategy implements Proc
         return poolExhaustedAction;
     }
 
+    public WorkManager createWorkManager(FlowConstruct flowConstruct)
+    {
+        MuleContext muleContext = flowConstruct.getMuleContext();
+        MuleWorkManager workManager = (MuleWorkManager) createThreadingProfile(muleContext).createWorkManager
+                (getThreadPoolName(flowConstruct.getName(), muleContext), muleContext.getConfiguration()
+                        .getShutdownTimeout());
+        return workManager;
+    }
+
+    public Function<Publisher<MuleEvent>, Publisher<MuleEvent>> onProcessor(MessageProcessor messageProcessor,
+                                                                            Function<Publisher<MuleEvent>,
+                                                                                    Publisher<MuleEvent>>
+                                                                                    publisherFunction)
+    {
+        if (messageProcessor.isBlocking())
+        {
+            return publisher -> from(publisher).publishOn(executorService).compose(publisherFunction);
+        }
+        else
+        {
+            return publisher -> from(publisher).compose(publisherFunction);
+        }
+    }
 }

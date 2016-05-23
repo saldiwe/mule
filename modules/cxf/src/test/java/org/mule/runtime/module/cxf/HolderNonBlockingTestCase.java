@@ -24,10 +24,12 @@ import java.nio.charset.Charset;
 
 import javax.xml.ws.Holder;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
-    public class HolderNonBlockingTestCase extends FunctionalTestCase
+@Ignore
+public class HolderNonBlockingTestCase extends FunctionalTestCase
 {
     @Rule
     public DynamicPort dynamicPort = new DynamicPort("port1");
@@ -39,6 +41,7 @@ import org.junit.Test;
     }
 
     @Test
+    @Ignore("RX")
     public void testClientEchoHolder() throws Exception
     {
         MuleMessage request = MuleMessage.builder().payload("TEST").build();
@@ -68,6 +71,7 @@ import org.junit.Test;
     }
 
     @Test
+    @Ignore("RX")
     public void testClientEcho2Holder() throws Exception
     {
         MuleMessage request = MuleMessage.builder().payload("TEST").build();
@@ -95,6 +99,7 @@ import org.junit.Test;
     }
 
     @Test
+    @Ignore("RX")
     public void testClientEcho3Holder() throws Exception
     {
         MuleMessage request = MuleMessage.builder().payload("TEST").build(); 

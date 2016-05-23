@@ -25,7 +25,6 @@ import org.mule.runtime.core.api.registry.RegistrationException;
 import org.mule.runtime.core.config.i18n.CoreMessages;
 import org.mule.runtime.core.config.i18n.MessageFactory;
 import org.mule.runtime.core.processor.AbstractRequestResponseMessageProcessor;
-import org.mule.runtime.core.processor.NonBlockingMessageProcessor;
 import org.mule.runtime.core.processor.chain.DefaultMessageProcessorChainBuilder;
 import org.mule.runtime.core.util.Base64;
 import org.mule.runtime.core.util.IOUtils;
@@ -70,7 +69,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 
-public class WSConsumer implements MessageProcessor, Initialisable, MuleContextAware, Disposable, NonBlockingMessageProcessor
+public class WSConsumer implements MessageProcessor, Initialisable, MuleContextAware, Disposable
 {
 
     public static final String SOAP_HEADERS_PROPERTY_PREFIX = "soap.";

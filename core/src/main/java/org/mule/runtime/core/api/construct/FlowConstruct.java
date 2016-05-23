@@ -6,14 +6,22 @@
  */
 package org.mule.runtime.core.api.construct;
 
-import org.mule.runtime.core.api.MuleContext;
+import static reactor.core.publisher.Flux.error;
+import static reactor.core.publisher.Mono.just;
 import org.mule.runtime.api.meta.NamedObject;
+import org.mule.runtime.core.api.MessagingException;
+import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.exception.MessagingExceptionHandler;
 import org.mule.runtime.core.api.lifecycle.LifecycleStateEnabled;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.routing.MessageInfoMapping;
 import org.mule.runtime.core.api.source.MessageSource;
 import org.mule.runtime.core.management.stats.FlowConstructStatistics;
+
+import java.util.function.Function;
+
+import org.reactivestreams.Publisher;
 
 /**
  * A uniquely identified {@link FlowConstruct} that once implemented and configured defines a construct
@@ -44,5 +52,33 @@ public interface FlowConstruct extends NamedObject, LifecycleStateEnabled
      * @return This muleContext that this flow construct belongs to and runs in the context of.
      */
     MuleContext getMuleContext();
+
+    default Function<Throwable, Publisher<? extends MuleEvent>> getErrorHandler()
+    {
+        return exception -> {
+            if (exception instanceof MessagingException)
+            {
+                MessagingException msgException = (MessagingException) exception;
+                MuleEvent result;
+                if (getExceptionListener() != null)
+                {
+                    result = getExceptionListener().handleException(msgException, msgException.getEvent());
+                    msgException.setProcessedEvent(result);
+                }
+                if (msgException.handled())
+                {
+                    return just(msgException.getEvent());
+                }
+                else
+                {
+                    return error(msgException);
+                }
+            }
+            else
+            {
+                return error(exception);
+            }
+        };
+    }
 
 }

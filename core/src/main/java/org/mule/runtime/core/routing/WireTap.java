@@ -10,7 +10,6 @@ import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.OptimizedRequestContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
-import org.mule.runtime.core.api.NonBlockingSupported;
 import org.mule.runtime.core.api.connector.ReplyToHandler;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.routing.filter.Filter;
@@ -38,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * <b>EIP Reference:</b> <a href="http://www.eaipatterns.com/WireTap.html">http://www.eaipatterns.com/WireTap.html<a/>
  */
-public class WireTap extends AbstractMessageProcessorOwner implements MessageProcessor, NonBlockingSupported
+public class WireTap extends AbstractMessageProcessorOwner implements MessageProcessor
 {
     protected final transient Logger logger = LoggerFactory.getLogger(getClass());
     protected volatile MessageProcessor tap;

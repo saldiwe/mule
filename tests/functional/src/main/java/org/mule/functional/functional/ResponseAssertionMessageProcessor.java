@@ -6,22 +6,19 @@
  */
 package org.mule.functional.functional;
 
-import org.mule.runtime.core.DefaultMuleEvent;
-import org.mule.runtime.core.NonBlockingVoidMuleEvent;
+import static reactor.core.publisher.Flux.from;
 import org.mule.runtime.core.VoidMuleEvent;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
-import org.mule.runtime.core.api.MuleMessage;
-import org.mule.runtime.core.api.NonBlockingSupported;
-import org.mule.runtime.core.api.connector.NonBlockingReplyToHandler;
-import org.mule.runtime.core.api.connector.ReplyToHandler;
+import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.construct.FlowConstructAware;
 import org.mule.runtime.core.api.lifecycle.InitialisationException;
 import org.mule.runtime.core.api.lifecycle.Startable;
 import org.mule.runtime.core.api.processor.InterceptingMessageProcessor;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.execution.MessageProcessorExecutionTemplate;
+import org.mule.runtime.core.processor.chain.DefaultMessageProcessorChain;
 import org.mule.runtime.core.processor.chain.ProcessorExecutorFactory;
 
 import java.util.Collections;
@@ -29,9 +26,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.util.Exceptions;
 
 public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor implements
-        InterceptingMessageProcessor, FlowConstructAware, Startable, NonBlockingSupported
+        InterceptingMessageProcessor, FlowConstructAware, Startable
 {
 
     protected String responseExpression = "#[true]";
@@ -45,6 +45,32 @@ public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor
     private int responseInvocationCount = 0;
     private MuleEvent responseEvent;
     private boolean responseResult = true;
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        Flux<MuleEvent> flux = from(publisher).map(event -> {
+            try
+            {
+                return processRequest(event);
+            }
+            catch (MuleException e)
+            {
+                throw Exceptions.propagate(new MessagingException(event, e));
+            }
+        });
+        flux = Flux.from(flux.as(DefaultMessageProcessorChain.from(next)));
+        return flux.map(event -> {
+            try
+            {
+                return processResponse(event);
+            }
+            catch (MuleException e)
+            {
+                throw Exceptions.propagate(new MessagingException(event, e));
+            }
+        });
+    }
 
     @Override
     public void start() throws InitialisationException
@@ -62,35 +88,7 @@ public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor
         {
             return null;
         }
-
-        if (event.isAllowNonBlocking() && event.getReplyToHandler() != null)
-        {
-            final ReplyToHandler originalReplyToHandler = event.getReplyToHandler();
-            event = new DefaultMuleEvent(event, new NonBlockingReplyToHandler()
-            {
-                @Override
-                public void processReplyTo(MuleEvent event, MuleMessage returnMessage, Object replyTo) throws
-                                                                                                       MuleException
-                {
-                    originalReplyToHandler.processReplyTo(processResponse(event), null, null);
-                }
-
-                @Override
-                public void processExceptionReplyTo(MessagingException exception, Object replyTo)
-                {
-                    originalReplyToHandler.processExceptionReplyTo(exception, replyTo);
-                }
-            });
-        }
-        MuleEvent result = processNext(processRequest(event));
-        if (!(result instanceof NonBlockingVoidMuleEvent))
-        {
-            return processResponse(result);
-        }
-        else
-        {
-            return result;
-        }
+        return processResponse(processNext(processRequest(event)));
     }
 
     public MuleEvent processRequest(MuleEvent event) throws MuleException
@@ -214,6 +212,16 @@ public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor
         else
         {
             return countReached;
+        }
+    }
+
+    @Override
+    public void setFlowConstruct(FlowConstruct flowConstruct)
+    {
+        this.flowConstruct = flowConstruct;
+        if (next instanceof FlowConstructAware)
+        {
+            ((FlowConstructAware) next).setFlowConstruct(flowConstruct);
         }
     }
 }

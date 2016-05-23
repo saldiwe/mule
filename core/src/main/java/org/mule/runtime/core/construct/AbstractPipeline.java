@@ -56,6 +56,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections.Predicate;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 /**
  * Abstract implementation of {@link AbstractFlowConstruct} that allows a list of {@link MessageProcessor}s
@@ -250,6 +252,12 @@ public abstract class AbstractPipeline extends AbstractFlowConstruct implements 
             // Wrap chain to decouple lifecycle
             messageSource.setListener(new AbstractInterceptingMessageProcessor()
             {
+                @Override
+                public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+                {
+                    return Flux.from(publisher).as(pipeline);
+                }
+
                 @Override
                 public MuleEvent process(MuleEvent event) throws MuleException
                 {

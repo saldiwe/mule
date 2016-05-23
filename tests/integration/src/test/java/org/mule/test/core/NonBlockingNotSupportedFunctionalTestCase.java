@@ -57,24 +57,6 @@ public class NonBlockingNotSupportedFunctionalTestCase extends FunctionalTestCas
     }
 
     @Test
-    public void all() throws Exception
-    {
-        flowRunner("all").withPayload(TEST_MESSAGE).nonBlocking().run();
-    }
-
-    @Test
-    public void firstSuccessful() throws Exception
-    {
-        flowRunner("firstSuccessful").withPayload(TEST_MESSAGE).nonBlocking().run();
-    }
-
-    @Test
-    public void roundRobin() throws Exception
-    {
-        flowRunner("roundRobin").withPayload(TEST_MESSAGE).nonBlocking().run();
-    }
-
-    @Test
     public void requestReply() throws Exception
     {
         flowRunner("requestReply").withPayload(TEST_MESSAGE).nonBlocking().run();

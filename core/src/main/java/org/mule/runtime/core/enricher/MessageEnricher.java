@@ -6,16 +6,15 @@
  */
 package org.mule.runtime.core.enricher;
 
+import static org.mule.runtime.core.OptimizedRequestContext.unsafeSetEvent;
+import static reactor.core.publisher.Flux.just;
 import org.mule.runtime.core.DefaultMuleEvent;
-import org.mule.runtime.core.NonBlockingVoidMuleEvent;
-import org.mule.runtime.core.OptimizedRequestContext;
 import org.mule.runtime.core.VoidMuleEvent;
-import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.expression.ExpressionManager;
-import org.mule.runtime.core.api.processor.InternalMessageProcessor;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.processor.MessageProcessorChain;
 import org.mule.runtime.core.api.processor.MessageProcessorContainer;
@@ -23,14 +22,16 @@ import org.mule.runtime.core.api.processor.MessageProcessorPathElement;
 import org.mule.runtime.core.api.processor.MessageProcessors;
 import org.mule.runtime.core.metadata.TypedValue;
 import org.mule.runtime.core.processor.AbstractMessageProcessorOwner;
-import org.mule.runtime.core.processor.AbstractRequestResponseMessageProcessor;
-import org.mule.runtime.core.processor.NonBlockingMessageProcessor;
 import org.mule.runtime.core.processor.chain.InterceptingChainLifecycleWrapper;
 import org.mule.runtime.core.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.util.Exceptions;
 
 /**
  * The <code>Message Enricher</code> allows the current message to be augmented using data from a seperate
@@ -58,7 +59,7 @@ import java.util.List;
  * <b>EIP Reference:</b> <a
  * href="http://eaipatterns.com/DataEnricher.html">http://eaipatterns.com/DataEnricher.html<a/>
  */
-public class MessageEnricher extends AbstractMessageProcessorOwner implements NonBlockingMessageProcessor
+public class MessageEnricher extends AbstractMessageProcessorOwner implements MessageProcessor
 {
 
     private List<EnrichExpressionPair> enrichExpressionPairs = new ArrayList<>();
@@ -68,7 +69,23 @@ public class MessageEnricher extends AbstractMessageProcessorOwner implements No
     @Override
     public MuleEvent process(MuleEvent event) throws MuleException
     {
-        return new EnricherProcessor(enrichmentProcessor, muleContext).process(event);
+        return enrich(enrichmentProcessor.process(copyEventForEnrichment(event)), event);
+    }
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        return Flux.from(publisher).flatMap(event -> just(event).map(request -> copyEventForEnrichment(event))
+                .compose(enrichmentProcessor).map(response -> {
+                    try
+                    {
+                        return enrich(response, event);
+                    }
+                    catch (MuleException e)
+                    {
+                        throw Exceptions.propagate(new MessagingException(event, e));
+                    }
+                }));
     }
 
     protected void enrich(MuleEvent currentEvent,
@@ -133,6 +150,11 @@ public class MessageEnricher extends AbstractMessageProcessorOwner implements No
         this.enrichExpressionPairs.add(pair);
     }
 
+    private MuleEvent copyEventForEnrichment(MuleEvent event)
+    {
+        return unsafeSetEvent(DefaultMuleEvent.copy(event));
+    }
+
     public static class EnrichExpressionPair
     {
 
@@ -195,59 +217,18 @@ public class MessageEnricher extends AbstractMessageProcessorOwner implements No
         }
     }
 
-    /**
-     * Enriches the current event using the result of processing the next message processor (the enrichment processor)
-     * and the configured enrichment pairs.
-     */
-    private class EnricherProcessor extends AbstractRequestResponseMessageProcessor implements InternalMessageProcessor
+    protected MuleEvent enrich(final MuleEvent event, MuleEvent eventToEnrich) throws MuleException
     {
+        final ExpressionManager expressionManager = eventToEnrich.getMuleContext().getExpressionManager();
 
-        private MuleEvent eventToEnrich;
-
-        protected EnricherProcessor(MessageProcessor enrichmentProcessor, MuleContext muleContext)
+        if (event != null && !VoidMuleEvent.getInstance().equals(eventToEnrich))
         {
-            this.next = enrichmentProcessor;
-            this.muleContext = muleContext;
-        }
-
-        @Override
-        protected MuleEvent processBlocking(MuleEvent event) throws MuleException
-        {
-            this.eventToEnrich = event;
-            return super.processBlocking(copyEventForEnrichment(event));
-        }
-
-        @Override
-        protected MuleEvent processNonBlocking(MuleEvent event) throws MuleException
-        {
-            this.eventToEnrich = event;
-            MuleEvent result = processNext(copyEventForEnrichment(new DefaultMuleEvent(event, createReplyToHandler(event))));
-            if (!(result instanceof NonBlockingVoidMuleEvent))
+            for (EnrichExpressionPair pair : enrichExpressionPairs)
             {
-                result = processResponse(result, event);
+                enrich(eventToEnrich, event, pair.getSource(), pair.getTarget(), expressionManager);
             }
-            return result;
         }
-
-        private MuleEvent copyEventForEnrichment(MuleEvent event)
-        {
-            return OptimizedRequestContext.unsafeSetEvent(DefaultMuleEvent.copy(event));
-        }
-
-        @Override
-        protected MuleEvent processResponse(MuleEvent response, final MuleEvent request) throws MuleException
-        {
-            final ExpressionManager expressionManager = eventToEnrich.getMuleContext().getExpressionManager();
-
-            if (response != null && !VoidMuleEvent.getInstance().equals(eventToEnrich))
-            {
-                for (EnrichExpressionPair pair : enrichExpressionPairs)
-                {
-                    enrich(eventToEnrich, response, pair.getSource(), pair.getTarget(), expressionManager);
-                }
-            }
-            return OptimizedRequestContext.unsafeSetEvent(eventToEnrich);
-        }
-
+        return unsafeSetEvent(eventToEnrich);
     }
+
 }

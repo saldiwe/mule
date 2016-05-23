@@ -6,49 +6,83 @@
  */
 package org.mule.runtime.core.processor;
 
-import org.mule.runtime.core.DefaultMuleEvent;
-import org.mule.runtime.core.NonBlockingVoidMuleEvent;
-import org.mule.runtime.core.OptimizedRequestContext;
+import static reactor.core.publisher.Flux.from;
+import static reactor.core.publisher.Flux.just;
+import static reactor.core.tuple.Tuple.of;
+import static reactor.core.util.Exceptions.propagate;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
-import org.mule.runtime.core.api.MuleMessage;
-import org.mule.runtime.core.api.NonBlockingSupported;
-import org.mule.runtime.core.api.connector.NonBlockingReplyToHandler;
-import org.mule.runtime.core.api.connector.ReplyToHandler;
+
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.tuple.Tuple2;
 
 /**
- * Base implementation of a {@link org.mule.runtime.core.api.processor.MessageProcessor} that may performs processing
- * during both the request and response processing phases while supporting non-blocking execution.
+ * Base implementation of a {@link org.mule.runtime.core.api.processor.MessageProcessor} that may performs processing during both the
+ * request and response processing phases while supporting non-blocking execution.
  * <p/>
  *
  * In order to define the process during the request phase you should override the
- * {@link #processRequest(org.mule.runtime.core.api.MuleEvent)} method. Symmetrically, if you need to define a process
- * to be executed during the response phase, then you should override the {@link #processResponse(MuleEvent, MuleEvent)}
- * method.
+ * {@link #processRequest(org.mule.runtime.core.api.MuleEvent)} method. Symmetrically, if you need to define a process to be executed
+ * during the response phase, then you should override the {@link #processResponse(org.mule.runtime.core.api.MuleEvent)} method.
  * <p/>
  *
  * In some cases you'll have some code that should be always executed, even if an error occurs, for those cases you
- * should override the
- * {@link #processFinally(org.mule.runtime.core.api.MuleEvent, org.mule.runtime.core.api.MessagingException)} method.
+ * should override the {@link #processFinally(org.mule.runtime.core.api.MuleEvent, org.mule.runtime.core.api.MessagingException)} method.
  *
  * @since 3.7.0
  */
-public abstract class AbstractRequestResponseMessageProcessor extends AbstractInterceptingMessageProcessor implements
-        NonBlockingSupported
+public abstract class AbstractRequestResponseMessageProcessor extends AbstractInterceptingMessageProcessor
 {
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        Flux<Tuple2<MuleEvent, Publisher<MuleEvent>>> flux = from(publisher).map(event -> {
+            try
+            {
+                return of(event, processRequestAsStream(event));
+            }
+            catch (MuleException e)
+            {
+                if (e instanceof MessagingException)
+                {
+                    throw propagate(e);
+                }
+                else
+                {
+                    throw propagate(new MessagingException(event, e));
+                }
+            }
+        });
+        if (next != null)
+        {
+            flux = flux.map(tuple -> of(tuple.getT1(), from(from(tuple.getT2()).as(next))));
+        }
+        return flux.flatMap(tuple -> from(tuple.getT2()).flatMap(event -> {
+            try
+            {
+                return processResponseAsStream(event, tuple.getT1());
+            }
+            catch (MuleException e)
+            {
+                if (e instanceof MessagingException)
+                {
+                    throw propagate(e);
+                }
+                else
+                {
+                    throw propagate(new MessagingException(tuple.getT1(), e));
+                }
+            }
+        }));
+    }
 
     @Override
     public final MuleEvent process(MuleEvent event) throws MuleException
     {
-        if (isNonBlocking(event))
-        {
-            return processNonBlocking(event);
-        }
-        else
-        {
-            return processBlocking(event);
-        }
+        return processBlocking(event);
     }
 
     protected MuleEvent processBlocking(MuleEvent event) throws MuleException
@@ -69,108 +103,21 @@ public abstract class AbstractRequestResponseMessageProcessor extends AbstractIn
         }
     }
 
-    protected MuleEvent processNonBlocking(final MuleEvent request) throws MuleException
-    {
-        MessagingException exception = null;
-        MuleEvent eventToProcess = new DefaultMuleEvent(request, createReplyToHandler(request));
-        // Update RequestContext ThreadLocal for backwards compatibility
-        eventToProcess = OptimizedRequestContext.unsafeSetEvent(eventToProcess);
-
-        try
-        {
-            MuleEvent result = processNext(processRequest(eventToProcess));
-            if (!(result instanceof NonBlockingVoidMuleEvent))
-            {
-                return processResponse(recreateEventWithOriginalReplyToHandler(result, request.getReplyToHandler()), eventToProcess);
-            }
-            else
-            {
-                return result;
-            }
-        }
-        catch (MessagingException e)
-        {
-            exception = e;
-            return processCatch(request, e);
-        }
-        finally
-        {
-            processFinally(request, exception);
-        }
-    }
-
-    protected ReplyToHandler createReplyToHandler(final MuleEvent request)
-    {
-        final ReplyToHandler originalReplyToHandler = request.getReplyToHandler();
-        return new NonBlockingReplyToHandler()
-        {
-            @Override
-            public void processReplyTo(MuleEvent event, MuleMessage returnMessage, Object replyTo) throws MuleException
-            {
-                try
-                {
-                    MuleEvent response = processResponse(recreateEventWithOriginalReplyToHandler(event, originalReplyToHandler), request);
-                    if (!NonBlockingVoidMuleEvent.getInstance().equals(response))
-                    {
-                        originalReplyToHandler.processReplyTo(response, null, null);
-                    }
-                }
-                catch (Exception e)
-                {
-                    processExceptionReplyTo(new MessagingException(event, e), null);
-                }
-                finally
-                {
-                    processFinally(event, null);
-                }
-            }
-
-            @Override
-            public void processExceptionReplyTo(MessagingException exception, Object replyTo)
-            {
-                try
-                {
-                    MuleEvent handledEvent = processCatch(exception.getEvent(), exception);
-                    originalReplyToHandler.processReplyTo(handledEvent, null, null);
-                }
-                catch (Exception e)
-                {
-                    originalReplyToHandler.processExceptionReplyTo(exception, replyTo);
-                }
-                finally
-                {
-                    processFinally(exception.getEvent(), exception);
-                }
-            }
-        };
-    }
-
-    private MuleEvent recreateEventWithOriginalReplyToHandler(MuleEvent event, ReplyToHandler originalReplyToHandler)
-    {
-        if (event != null)
-        {
-            event = new DefaultMuleEvent(event, originalReplyToHandler);
-            // Update RequestContext ThreadLocal for backwards compatibility
-            OptimizedRequestContext.unsafeSetEvent(event);
-        }
-        return event;
-    }
-
-    protected boolean isNonBlocking(MuleEvent event)
-    {
-        return event.isAllowNonBlocking() && event.getReplyToHandler() != null;
-    }
-
     /**
      * Processes the request phase before the next message processor is invoked.
      *
-     * @param request event to be processed.
+     * @param event event to be processed.
      * @return result of request processing.
      * @throws MuleException exception thrown by implementations of this method whiile performing response processing
      */
-    protected MuleEvent processRequest(MuleEvent request) throws MuleException
+    protected MuleEvent processRequest(MuleEvent event) throws MuleException
     {
-        return request;
+        return event;
+    }
+
+    protected Publisher<MuleEvent> processRequestAsStream(MuleEvent event) throws MuleException
+    {
+        return just(processRequest(event));
     }
 
     /**
@@ -184,6 +131,11 @@ public abstract class AbstractRequestResponseMessageProcessor extends AbstractIn
     protected MuleEvent processResponse(MuleEvent response, final MuleEvent request) throws MuleException
     {
         return processResponse(response);
+    }
+
+    protected  Publisher<MuleEvent> processResponseAsStream(MuleEvent response, final MuleEvent request) throws MuleException
+    {
+        return just(processResponse(response, request));
     }
 
     /**

@@ -4,7 +4,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.runtime.core.processor;
+package org.mule.runtime.core.processor.chain;
 
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.OptimizedRequestContext;
@@ -54,7 +54,7 @@ public class BlockingProcessorExecutor implements ProcessorExecutor
         while (hasNext() && isEventValid(event))
         {
             result = executeNext();
-            if (!isEventValid(result))
+            if (!isEventValid(result) )
             {
                 break;
             }

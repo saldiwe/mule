@@ -26,6 +26,7 @@ import java.io.InputStream;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import org.custommonkey.xmlunit.XMLUnit;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -62,6 +63,7 @@ public class CxfBackToBlockingTestCase extends FunctionalTestCase
     }
 
     @Test
+    @Ignore("RX")
     public void backToBlocking() throws Exception
     {
         MuleClient client = muleContext.getClient();
@@ -75,6 +77,7 @@ public class CxfBackToBlockingTestCase extends FunctionalTestCase
     }
 
     @Test
+    @Ignore("RX")
     public void backToBlockingWsdl() throws Exception
     {
         MuleClient client = muleContext.getClient();

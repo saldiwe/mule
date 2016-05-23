@@ -123,6 +123,7 @@ public class QueueManagerLifecycleOrderTestCase extends AbstractMuleTestCase
         @Override
         protected void doConfigure(MuleContext muleContext) throws Exception
         {
+            super.doConfigure(muleContext);
             muleContext.getRegistry().registerObject(MuleProperties.OBJECT_QUEUE_MANAGER, rtqm);
             muleContext.getRegistry().registerObject(MuleProperties.OBJECT_SECURITY_MANAGER,
                 new MuleSecurityManager());

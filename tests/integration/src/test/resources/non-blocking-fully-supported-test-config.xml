@@ -46,7 +46,6 @@
     </flow>
 
     <flow name="childDefaultFlow">
-        <test:assert-intercepting responseSameThread="false" responseExpression="#[assertPayload()]" message="1"/>
         <expression-component>flowVars['requestThread'] = Thread.currentThread()</expression-component>
         <flow-ref name="childDefaultFlowChild"/>
         <test:assert expression="#[assertPayload()]"/>
@@ -56,7 +55,6 @@
     <flow name="childDefaultFlowChild" processingStrategy="default">
         <test:assert-intercepting responseSameThread="false" responseExpression="#[assertPayload()]" message="2"/>
         <test:non-blocking-processor/>
-        <logger level="ERROR" message="#[Thread.currentThread()]"/>
         <test:assert expression="#[assertPayload()]"/>
     </flow>
 
@@ -248,6 +246,36 @@
             <test:non-blocking-processor/>
             <test:assert count="1" expression="#[Thread.currentThread()!=beforeThread  and assertPayload()]"/>
         </catch-exception-strategy>
+    </flow>
+
+    <flow name="firstSuccessful">
+        <test:assert-intercepting responseSameThread="false"/>
+        <first-successful>
+            <test:non-blocking-processor/>
+            <test:non-blocking-processor/>
+        </first-successful>
+        <test:assert-intercepting responseSameThread="false"/>
+        <test:non-blocking-processor/>
+    </flow>
+
+    <flow name="roundRobin">
+        <test:assert-intercepting responseSameThread="false"/>
+        <round-robin>
+            <test:non-blocking-processor/>
+            <test:non-blocking-processor/>
+        </round-robin>
+        <test:assert-intercepting responseSameThread="false"/>
+        <test:non-blocking-processor/>
+    </flow>
+
+    <flow name="all">
+        <test:assert-intercepting responseSameThread="false"/>
+        <all>
+            <test:non-blocking-processor/>
+            <test:non-blocking-processor/>
+        </all>
+        <test:assert-intercepting responseSameThread="false"/>
+        <test:non-blocking-processor/>
     </flow>
 
 </mule>

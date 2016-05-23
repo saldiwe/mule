@@ -205,6 +205,7 @@
         <mysqlDriverVersion>5.1.33</mysqlDriverVersion>
         <ognlVersion>2.7.3</ognlVersion>
         <oroVersion>2.0.8</oroVersion>
+        <projectreactorVersion>2.5.0.BUILD-SNAPSHOT</projectreactorVersion>
         <reflectionsVersion>0.9.10</reflectionsVersion>
         <quartzVersion>2.2.1</quartzVersion>
         <rhinoVersion>1.7R4</rhinoVersion>
@@ -1354,6 +1355,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>${projectreactorVersion}</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>
@@ -1378,6 +1384,11 @@
             <id>mule</id>
             <name>Mule Repository</name>
             <url>https://repository.mulesoft.org/nexus/content/repositories/public/</url>
+        </repository>
+        <repository>
+            <id>spring</id>
+            <name>Spring Repository</name>
+            <url>http://repo.spring.io/snapshot</url>
         </repository>
     </repositories>
 

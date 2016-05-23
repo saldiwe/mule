@@ -9,7 +9,6 @@ package org.mule.tck;
 import org.mule.runtime.api.execution.CompletionHandler;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.VoidMuleEvent;
-import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 import org.mule.runtime.core.api.MuleMessage;
@@ -57,12 +56,12 @@ public class SensingNullMessageProcessor extends AbstractNonBlockingMessageProce
                 {
                     eventToProcess = append(eventToProcess);
                 }
-                event.getReplyToHandler().processReplyTo(eventToProcess, null, null);
                 latch.countDown();
             }
             catch (MuleException e)
             {
-                event.getReplyToHandler().processExceptionReplyTo(new MessagingException(event, e), null);
+                completionHandler.onCompletion(eventToProcess, null);
+                latch.countDown();
             }
         });
     }
@@ -157,5 +156,11 @@ public class SensingNullMessageProcessor extends AbstractNonBlockingMessageProce
         {
             return ObjectUtils.toString(this);
         }
+    }
+
+    @Override
+    public boolean isBlocking()
+    {
+        return enableNonBlocking;
     }
 }

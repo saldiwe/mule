@@ -6,27 +6,20 @@
  */
 package org.mule.runtime.core.execution;
 
-import org.mule.runtime.core.DefaultMuleEvent;
-import org.mule.runtime.core.NonBlockingVoidMuleEvent;
 import org.mule.runtime.core.OptimizedRequestContext;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
-import org.mule.runtime.core.api.MuleMessage;
-import org.mule.runtime.core.api.connector.NonBlockingReplyToHandler;
-import org.mule.runtime.core.api.connector.ReplyToHandler;
 import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.construct.MessageProcessorPathResolver;
-import org.mule.runtime.core.api.processor.InterceptingMessageProcessor;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.context.notification.MessageProcessorNotification;
 import org.mule.runtime.core.context.notification.ServerNotificationManager;
-import org.mule.runtime.core.processor.NonBlockingMessageProcessor;
 
 /**
  * Intercepts MessageProcessor execution to fire before and after notifications
  */
-class MessageProcessorNotificationExecutionInterceptor implements MessageProcessorExecutionInterceptor
+public class MessageProcessorNotificationExecutionInterceptor implements MessageProcessorExecutionInterceptor
 {
 
     private MessageProcessorExecutionInterceptor next;
@@ -40,7 +33,6 @@ class MessageProcessorNotificationExecutionInterceptor implements MessageProcess
     {
 
     }
-
 
     @Override
     public MuleEvent execute(final MessageProcessor messageProcessor, final MuleEvent event) throws MessagingException
@@ -58,42 +50,7 @@ class MessageProcessorNotificationExecutionInterceptor implements MessageProcess
         MessagingException exceptionThrown = null;
 
         boolean nonBlocking = event.isAllowNonBlocking() && event.getReplyToHandler() != null;
-        boolean responseProcessing = messageProcessor instanceof InterceptingMessageProcessor ||
-                                     messageProcessor instanceof NonBlockingMessageProcessor;
 
-        if (nonBlocking && responseProcessing)
-        {
-            final ReplyToHandler originalReplyToHandler = event.getReplyToHandler();
-            eventToProcess = new DefaultMuleEvent(event, new NonBlockingReplyToHandler()
-            {
-                @Override
-                public void processReplyTo(MuleEvent result, MuleMessage returnMessage, Object replyTo) throws
-                                                                                                        MuleException
-                {
-
-                    if (fireNotification)
-                    {
-                        fireNotification(notificationManager, event.getFlowConstruct(), result != null ? result : event,
-                                         messageProcessor,
-                                         null, MessageProcessorNotification.MESSAGE_PROCESSOR_POST_INVOKE);
-                    }
-                    originalReplyToHandler.processReplyTo(result, returnMessage, replyTo);
-                }
-
-                @Override
-                public void processExceptionReplyTo(MessagingException exception, Object replyTo)
-                {
-                    if (fireNotification)
-                    {
-                        MuleEvent result = exception.getEvent();
-                        fireNotification(notificationManager, event.getFlowConstruct(), result != null ? result : event,
-                                         messageProcessor,
-                                         null, MessageProcessorNotification.MESSAGE_PROCESSOR_POST_INVOKE);
-                    }
-                    originalReplyToHandler.processExceptionReplyTo(exception, replyTo);
-                }
-            });
-        }
         // Update RequestContext ThreadLocal in case if previous processor modified it
         // also for backwards compatibility
         OptimizedRequestContext.unsafeSetEvent(eventToProcess);
@@ -121,9 +78,9 @@ class MessageProcessorNotificationExecutionInterceptor implements MessageProcess
         }
         finally
         {
-            if (!NonBlockingVoidMuleEvent.getInstance().equals(result) && fireNotification)
+            if (fireNotification)
             {
-                fireNotification(notificationManager, event.getFlowConstruct(), result != null ? result : event,
+                fireNotification(event.getMuleContext().getNotificationManager(), event.getFlowConstruct(), result != null ? result : event,
                                  messageProcessor,
                                  exceptionThrown, MessageProcessorNotification.MESSAGE_PROCESSOR_POST_INVOKE);
             }
@@ -131,7 +88,7 @@ class MessageProcessorNotificationExecutionInterceptor implements MessageProcess
         return result;
     }
 
-    protected void fireNotification(ServerNotificationManager serverNotificationManager, FlowConstruct flowConstruct, MuleEvent event, MessageProcessor processor, MessagingException exceptionThrown, int action)
+    public static void fireNotification(ServerNotificationManager serverNotificationManager, FlowConstruct flowConstruct, MuleEvent event, MessageProcessor processor, MessagingException exceptionThrown, int action)
     {
         if (serverNotificationManager != null
             && serverNotificationManager.isNotificationEnabled(MessageProcessorNotification.class))

@@ -6,9 +6,10 @@
  */
 package org.mule.runtime.core.construct;
 
-import org.mule.runtime.core.api.NonBlockingSupported;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
+import org.mule.runtime.core.api.construct.FlowConstruct;
+import org.mule.runtime.core.api.construct.FlowConstructAware;
 import org.mule.runtime.core.api.lifecycle.Lifecycle;
 import org.mule.runtime.core.api.processor.DynamicPipeline;
 import org.mule.runtime.core.api.processor.DynamicPipelineBuilder;
@@ -35,7 +36,7 @@ import java.util.List;
  * If more than one client tries to use the functionality the 2nd one will fail due to
  * pipeline ID verification.
  */
-public class DynamicPipelineMessageProcessor extends AbstractInterceptingMessageProcessor implements DynamicPipeline, NonBlockingSupported
+public class DynamicPipelineMessageProcessor extends AbstractInterceptingMessageProcessor implements DynamicPipeline, FlowConstructAware
 {
 
     private String pipelineId;
@@ -154,6 +155,15 @@ public class DynamicPipelineMessageProcessor extends AbstractInterceptingMessage
     {
         checkPipelineId(id);
         return new Builder();
+    }
+
+    @Override
+    public void setFlowConstruct(FlowConstruct flowConstruct)
+    {
+        if (staticChain instanceof FlowConstructAware)
+        {
+            ((FlowConstructAware) staticChain).setFlowConstruct(flowConstruct);
+        }
     }
 
     private class Builder implements DynamicPipelineBuilder

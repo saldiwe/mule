@@ -143,6 +143,7 @@ public class MessageFilter extends AbstractFilteringMessageProcessor implements 
     @Override
     public void setFlowConstruct(FlowConstruct flowConstruct)
     {
+        super.setFlowConstruct(flowConstruct);
         if (!onUnacceptedFlowConstruct && unacceptedMessageProcessor instanceof FlowConstructAware)
         {
             ((FlowConstructAware) unacceptedMessageProcessor).setFlowConstruct(flowConstruct);

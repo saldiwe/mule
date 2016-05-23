@@ -9,6 +9,8 @@ package org.mule.runtime.module.http.internal.listener;
 import static org.mule.runtime.module.http.api.HttpConstants.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.mule.runtime.module.http.api.HttpConstants.Protocols.HTTP;
 import static org.slf4j.LoggerFactory.getLogger;
+import static reactor.core.publisher.Mono.from;
+import static reactor.core.publisher.Mono.just;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
@@ -26,6 +28,7 @@ import org.mule.runtime.module.http.internal.listener.async.ResponseStatusCallba
 import java.io.ByteArrayInputStream;
 import java.util.Map;
 
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 
 public class HttpMessageProcessorTemplate implements AsyncResponseFlowProcessingPhaseTemplate, ThrottlingPhaseTemplate
@@ -71,6 +74,12 @@ public class HttpMessageProcessorTemplate implements AsyncResponseFlowProcessing
     public MuleEvent routeEvent(MuleEvent muleEvent) throws MuleException
     {
         return messageProcessor.process(muleEvent);
+    }
+
+    @Override
+    public Publisher<MuleEvent> routeEventAsStream(MuleEvent muleEvent)
+    {
+        return from(just(muleEvent).as(messageProcessor));
     }
 
     @Override

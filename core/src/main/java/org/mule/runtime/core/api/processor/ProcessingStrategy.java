@@ -6,9 +6,15 @@
  */
 package org.mule.runtime.core.api.processor;
 
+import static reactor.core.publisher.Flux.from;
 import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.MuleEvent;
+import org.mule.runtime.core.api.construct.Pipeline;
 
 import java.util.List;
+import java.util.function.Function;
+
+import org.reactivestreams.Publisher;
 
 /**
  * Determines how a list of message processors should processed.
@@ -17,7 +23,21 @@ public interface ProcessingStrategy
 {
 
     void configureProcessors(List<MessageProcessor> processors,
-                             org.mule.runtime.core.api.processor.StageNameSource nameSource,
+                             StageNameSource nameSource,
                              MessageProcessorChainBuilder chainBuilder,
                              MuleContext muleContext);
+
+    default Function<Publisher<MuleEvent>, Publisher<MuleEvent>> onFlow(Pipeline pipeline, Function<Publisher<MuleEvent>,
+                                                                        Publisher<MuleEvent>> publisherFunction)
+    {
+        return publisher -> from(publisher).as(publisherFunction);
+    }
+
+    default Function<Publisher<MuleEvent>, Publisher<MuleEvent>> onProcessor(MessageProcessor messageProcessor,
+                                                                             Function<Publisher<MuleEvent>,
+                                                                             Publisher<MuleEvent>> publisherFunction)
+    {
+        return publisher -> from(publisher).as(publisherFunction);
+    }
+
 }

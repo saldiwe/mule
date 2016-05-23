@@ -22,7 +22,6 @@ import org.mule.runtime.core.api.processor.MessageProcessorChain;
 import org.mule.runtime.core.api.processor.MessageProcessorContainer;
 import org.mule.runtime.core.api.processor.MessageProcessorPathElement;
 import org.mule.runtime.core.api.security.SecurityFilter;
-import org.mule.runtime.core.processor.NonBlockingMessageProcessor;
 import org.mule.runtime.core.processor.SecurityFilterMessageProcessor;
 import org.mule.runtime.core.processor.chain.AbstractMessageProcessorChain;
 import org.mule.runtime.core.processor.chain.SimpleMessageProcessorChainBuilder;
@@ -68,7 +67,7 @@ public class EndpointMessageProcessorChainBuilder extends SimpleMessageProcessor
         return super.initializeMessageProcessor(processor);
     }
 
-    private class EndpointAwareMessageProcessorChain implements NonBlockingMessageProcessor, MessageProcessorChain, Lifecycle, FlowConstructAware,
+    private class EndpointAwareMessageProcessorChain implements MessageProcessorChain, Lifecycle, FlowConstructAware,
         MuleContextAware, EndpointAware, MessageProcessorContainer, MessagingExceptionHandlerAware
     {
         private AbstractMessageProcessorChain chain;

@@ -8,11 +8,16 @@ package org.mule.runtime.core.processor.chain;
 
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
+import org.mule.runtime.core.api.construct.FlowConstruct;
+import org.mule.runtime.core.api.construct.FlowConstructAware;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.processor.MessageProcessorChain;
 import org.mule.runtime.core.execution.MessageProcessorExecutionTemplate;
 
 import java.util.List;
+
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 /**
  * Builder needs to return a composite rather than the first MessageProcessor in the chain. This is so that if
@@ -68,4 +73,19 @@ public class InterceptingChainLifecycleWrapper extends AbstractMessageProcessorC
         }, event);
     }
 
+    @Override
+    public void setFlowConstruct(FlowConstruct flowConstruct)
+    {
+        super.setFlowConstruct(flowConstruct);
+        if (chain instanceof FlowConstructAware)
+        {
+            ((FlowConstructAware) chain).setFlowConstruct(flowConstruct);
+        }
+    }
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        return Flux.from(publisher).as(chain);
+    }
 }

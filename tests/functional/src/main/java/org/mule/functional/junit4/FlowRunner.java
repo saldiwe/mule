@@ -8,24 +8,21 @@ package org.mule.functional.junit4;
 
 import static org.junit.Assert.fail;
 import static org.mule.runtime.core.execution.TransactionalExecutionTemplate.createTransactionalExecutionTemplate;
-import static org.mule.tck.junit4.AbstractMuleContextTestCase.RECEIVE_TIMEOUT;
+import static reactor.core.publisher.Mono.from;
+import static reactor.core.publisher.Mono.just;
 import org.mule.functional.functional.FlowAssert;
-import org.mule.runtime.core.NonBlockingVoidMuleEvent;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
-import org.mule.runtime.core.api.MuleRuntimeException;
 import org.mule.runtime.core.api.connector.ReplyToHandler;
 import org.mule.runtime.core.api.execution.ExecutionTemplate;
 import org.mule.runtime.core.api.transaction.TransactionConfig;
 import org.mule.runtime.core.api.transaction.TransactionFactory;
 import org.mule.runtime.core.construct.Flow;
 import org.mule.runtime.core.transaction.MuleTransactionConfig;
-import org.mule.tck.SensingNullReplyToHandler;
-
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections.Transformer;
+import reactor.core.util.Exceptions;
 
 /**
  * Provides a fluent API for running events through flows.
@@ -36,6 +33,7 @@ public class FlowRunner extends FlowConstructRunner<FlowRunner>
 {
 
     private String flowName;
+    private boolean nonBlocking;
 
     private ExecutionTemplate<MuleEvent> txExecutionTemplate = callback -> callback.process();
 
@@ -80,43 +78,9 @@ public class FlowRunner extends FlowConstructRunner<FlowRunner>
      */
     public FlowRunner nonBlocking()
     {
-        replyToHandler = new SensingNullReplyToHandler();
-        eventBuilder.withReplyToHandler(replyToHandler);
 
-        responseEventTransformer = input -> {
-            MuleEvent responseEvent = (MuleEvent) input;
-            SensingNullReplyToHandler nullSensingReplyToHandler = (SensingNullReplyToHandler) replyToHandler;
-            try
-            {
-                return getNonBlockingResponse(nullSensingReplyToHandler, responseEvent);
-            }
-            catch (Exception e)
-            {
-                throw new MuleRuntimeException(e);
-            }
-        };
-
+        nonBlocking = true;
         return this;
-    }
-
-    protected MuleEvent getNonBlockingResponse(SensingNullReplyToHandler replyToHandler, MuleEvent result) throws Exception
-    {
-        if (NonBlockingVoidMuleEvent.getInstance() == result)
-        {
-            if (!replyToHandler.latch.await(RECEIVE_TIMEOUT, TimeUnit.MILLISECONDS))
-            {
-                throw new RuntimeException("No Non-Blocking Response");
-            }
-            if (replyToHandler.exception != null)
-            {
-                throw replyToHandler.exception;
-            }
-            return replyToHandler.event;
-        }
-        else
-        {
-            return result;
-        }
     }
 
     /**
@@ -162,7 +126,23 @@ public class FlowRunner extends FlowConstructRunner<FlowRunner>
     public MuleEvent runAndVerify(String... flowNamesToVerify) throws Exception
     {
         Flow flow = (Flow) getFlowConstruct();
-        MuleEvent responseEvent = txExecutionTemplate.execute(() -> flow.process(getOrBuildEvent()));
+        MuleEvent responseEvent;
+        if (nonBlocking)
+        {
+            try
+            {
+                responseEvent = from(just(getOrBuildEvent()).as(flow)).block();
+            }
+            catch (Exceptions.ReactiveException re)
+            {
+                throw (Exception) Exceptions.unwrap(re);
+            }
+        }
+        else
+        {
+            responseEvent = txExecutionTemplate.execute(() -> flow.process(getOrBuildEvent()));
+        }
+
         for (String flowNameToVerify : flowNamesToVerify)
         {
             FlowAssert.verify(flowNameToVerify);

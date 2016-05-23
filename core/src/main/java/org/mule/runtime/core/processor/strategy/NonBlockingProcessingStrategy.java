@@ -7,13 +7,12 @@
 package org.mule.runtime.core.processor.strategy;
 
 import org.mule.runtime.core.api.MuleContext;
-import org.mule.runtime.core.api.construct.FlowConstruct;
-import org.mule.runtime.core.api.context.WorkManager;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.processor.MessageProcessorChainBuilder;
-import org.mule.runtime.core.work.MuleWorkManager;
+import org.mule.runtime.core.api.processor.StageNameSource;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Allows Mule to use non-blocking execution model where possible and free up threads when performing IO
@@ -28,26 +27,23 @@ public class NonBlockingProcessingStrategy extends AbstractThreadingProfileProce
 
     public NonBlockingProcessingStrategy()
     {
+        super();
+    }
+
+    public NonBlockingProcessingStrategy(ExecutorService executorService)
+    {
+        super(executorService);
         maxThreads = DEFAULT_MAX_THREADS;
     }
 
     @Override
-    public void configureProcessors(List<MessageProcessor> processors, org.mule.runtime.core.api.processor.StageNameSource
+    public void configureProcessors(List<MessageProcessor> processors, StageNameSource
             nameSource, MessageProcessorChainBuilder chainBuilder, MuleContext muleContext)
     {
         for (MessageProcessor processor : processors)
         {
             chainBuilder.chain((MessageProcessor) processor);
         }
-    }
-
-    public WorkManager createWorkManager(FlowConstruct flowConstruct)
-    {
-        MuleContext muleContext = flowConstruct.getMuleContext();
-        MuleWorkManager workManager = (MuleWorkManager) createThreadingProfile(muleContext).createWorkManager
-                (getThreadPoolName(flowConstruct.getName(), muleContext), muleContext.getConfiguration()
-                        .getShutdownTimeout());
-        return workManager;
     }
 
 }

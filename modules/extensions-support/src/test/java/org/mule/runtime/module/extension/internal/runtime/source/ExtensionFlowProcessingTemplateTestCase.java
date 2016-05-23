@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.reactivestreams.Publisher;
 
 @SmallTest
 @RunWith(MockitoJUnitRunner.class)
@@ -74,6 +75,13 @@ public class ExtensionFlowProcessingTemplateTestCase extends AbstractMuleTestCas
     {
         template.routeEvent(event);
         verify(messageProcessor).process(event);
+    }
+
+    @Test
+    public void routeEventAsStream()
+    {
+        template.routeEventAsStream(event);
+        verify(messageProcessor).apply(any(Publisher.class));
     }
 
     @Test

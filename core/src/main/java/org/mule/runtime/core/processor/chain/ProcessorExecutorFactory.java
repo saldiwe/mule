@@ -10,13 +10,11 @@ import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.processor.ProcessorExecutor;
 import org.mule.runtime.core.execution.MessageProcessorExecutionTemplate;
-import org.mule.runtime.core.processor.BlockingProcessorExecutor;
-import org.mule.runtime.core.processor.NonBlockingProcessorExecutor;
 
 import java.util.List;
 
 /**
- * Creates an appropriate instance of {@link org.mule.runtime.core.processor.BlockingProcessorExecutor} based on the current
+ * Creates an appropriate instance of {@link BlockingProcessorExecutor} based on the current
  * {@link org.mule.runtime.core.api.MuleEvent} and {@link org.mule.runtime.core.api.construct.FlowConstruct}.
  */
 public class ProcessorExecutorFactory
@@ -27,14 +25,7 @@ public class ProcessorExecutorFactory
                                                      MessageProcessorExecutionTemplate executionTemplate,
                                                      boolean copyOnVoidEvent)
     {
-        if (event.isAllowNonBlocking())
-        {
-            return new NonBlockingProcessorExecutor(event, processors, executionTemplate, copyOnVoidEvent);
-        }
-        else
-        {
-            return new BlockingProcessorExecutor(event, processors, executionTemplate, copyOnVoidEvent);
-        }
+        return new BlockingProcessorExecutor(event, processors, executionTemplate, copyOnVoidEvent);
     }
 
 }

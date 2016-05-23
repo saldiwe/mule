@@ -7,7 +7,7 @@
 package org.mule.runtime.config.spring.factories;
 
 import static org.mule.runtime.core.util.NotificationUtils.buildPathResolver;
-
+import static reactor.core.publisher.Flux.from;
 import org.mule.runtime.core.AbstractAnnotatedObject;
 import org.mule.runtime.api.meta.AnnotatedObject;
 import org.mule.runtime.core.api.MuleContext;
@@ -26,7 +26,6 @@ import org.mule.runtime.core.api.processor.MessageProcessorChain;
 import org.mule.runtime.core.api.processor.MessageProcessorContainer;
 import org.mule.runtime.core.api.processor.MessageProcessorPathElement;
 import org.mule.runtime.core.config.i18n.CoreMessages;
-import org.mule.runtime.core.processor.NonBlockingMessageProcessor;
 import org.mule.runtime.core.processor.chain.DynamicMessageProcessorContainer;
 import org.mule.runtime.core.util.NotificationUtils.FlowMap;
 
@@ -36,6 +35,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.namespace.QName;
 
+import org.reactivestreams.Publisher;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationContext;
@@ -46,7 +46,7 @@ public class FlowRefFactoryBean extends AbstractAnnotatedObject
     Disposable
 {
 
-    private abstract class FlowRefMessageProcessor implements NonBlockingMessageProcessor, AnnotatedObject
+    private abstract class FlowRefMessageProcessor implements MessageProcessor, AnnotatedObject
     {
         @Override
         public Object getAnnotation(QName name)
@@ -177,7 +177,7 @@ public class FlowRefFactoryBean extends AbstractAnnotatedObject
 
                     // Because this is created dynamically annotations cannot be injected by Spring and so
                     // FlowRefMessageProcessor is not used here.
-                    return new NonBlockingMessageProcessor()
+                    return new MessageProcessor()
                     {
                         @Override
                         public MuleEvent process(MuleEvent event) throws MuleException
@@ -258,6 +258,12 @@ public class FlowRefFactoryBean extends AbstractAnnotatedObject
         {
             return new FlowRefMessageProcessor()
             {
+                @Override
+                public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+                {
+                    return from(publisher).compose(referencedFlow);
+                }
+
                 @Override
                 public MuleEvent process(MuleEvent event) throws MuleException
                 {

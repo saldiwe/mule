@@ -11,12 +11,12 @@ import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.execution.MessageProcessorExecutionTemplate;
-import org.mule.runtime.core.processor.BlockingProcessorExecutor;
+import org.mule.runtime.core.processor.chain.BlockingProcessorExecutor;
 
 import java.util.List;
 
 /**
- * {@link org.mule.runtime.core.processor.BlockingProcessorExecutor} specifically for use with instances of {@link org.mule.runtime.core.api.service.Service}
+ * {@link BlockingProcessorExecutor} specifically for use with instances of {@link org.mule.runtime.core.api.service.Service}
  */
 public class ServiceProcessorExecutor extends BlockingProcessorExecutor
 {

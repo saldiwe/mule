@@ -6,14 +6,14 @@
  */
 package org.mule.tck;
 
-import org.mule.runtime.core.api.connector.NonBlockingReplyToHandler;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 import org.mule.runtime.core.api.MuleMessage;
+import org.mule.runtime.core.api.connector.ReplyToHandler;
 import org.mule.runtime.core.util.concurrent.Latch;
 
-public class SensingNullReplyToHandler implements NonBlockingReplyToHandler
+public class SensingNullReplyToHandler implements ReplyToHandler
 {
 
     public MuleEvent event;
@@ -37,5 +37,6 @@ public class SensingNullReplyToHandler implements NonBlockingReplyToHandler
     public void clear()
     {
         event = null;
+        latch = new Latch();
     }
 }
