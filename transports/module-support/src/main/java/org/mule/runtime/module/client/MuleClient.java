@@ -121,7 +121,7 @@ public class MuleClient implements Disposable
 
     /**
      * Configures a Mule client instance using the the default
-     * {@link SpringXmlConfigurationBuilder} to parse <code>configResources</code>.
+     * {@link SpringXmlConfigurationBuilder} to parse <code>artifcatConfigResources</code>.
      *
      * @param configResources a config resource location to configure this client
      *            with

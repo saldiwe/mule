@@ -83,7 +83,7 @@ public class XmlApplicationParser
     {
         try
         {
-            return namespaceCache.get(namespaceUri, () -> {
+                return namespaceCache.get(namespaceUri, () -> {
                 String namespace = loadNamespaceFromProviders(namespaceUri);
                 if (namespace == null)
                 {

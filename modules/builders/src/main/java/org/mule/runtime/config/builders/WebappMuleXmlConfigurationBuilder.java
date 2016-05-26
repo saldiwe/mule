@@ -83,12 +83,12 @@ public class WebappMuleXmlConfigurationBuilder extends SpringXmlConfigurationBui
     {
         try
         {
-            configResources = new ConfigResource[configs.length];
+            artifcatConfigResources = new ConfigResource[configs.length];
             for (int i = 0; i < configs.length; i++)
             {
-                configResources[i] = new ServletContextOrClassPathConfigResource(configs[i]);
+                artifcatConfigResources[i] = new ServletContextOrClassPathConfigResource(configs[i]);
             }
-            return configResources;
+            return artifcatConfigResources;
         }
         catch (IOException e)
         {
@@ -105,7 +105,7 @@ public class WebappMuleXmlConfigurationBuilder extends SpringXmlConfigurationBui
             servletContextResources[i] = new ServletContextOrClassPathResource(context, configResources[i].getResourceName());
         }
 
-        return new MuleArtifactContext(muleContext, servletContextResources);
+        return new MuleArtifactContext(muleContext, new Resource[0], servletContextResources);
     }
 
     /**

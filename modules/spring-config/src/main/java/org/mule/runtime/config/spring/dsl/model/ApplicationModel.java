@@ -301,7 +301,7 @@ public class ApplicationModel
         return !componentModel.getIdentifier().getNamespace().equals(ApplicationModel.SPRING_NAMESPACE);
     }
 
-    private void executeOnEveryComponentTree(final ComponentConsumer task)
+    public void executeOnEveryComponentTree(final ComponentConsumer task)
     {
         for (ComponentModel componentModel : componentModels)
         {
@@ -383,7 +383,7 @@ public class ApplicationModel
      * Functional interface to process a component.
      */
     @FunctionalInterface
-    interface ComponentConsumer
+    public interface ComponentConsumer
     {
 
         void consume(ComponentModel componentModel) throws MuleRuntimeException;
