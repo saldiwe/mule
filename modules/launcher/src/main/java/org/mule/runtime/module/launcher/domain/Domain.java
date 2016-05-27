@@ -9,7 +9,7 @@ package org.mule.runtime.module.launcher.domain;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.config.ConfigurationBuilder;
 import org.mule.runtime.module.launcher.application.Application;
-import org.mule.runtime.module.launcher.artifact.DeployableArtifact;
+import org.mule.runtime.module.launcher.artifact.ConfigurableArtifact;
 import org.mule.runtime.module.launcher.descriptor.DomainDescriptor;
 
 /**
@@ -18,7 +18,7 @@ import org.mule.runtime.module.launcher.descriptor.DomainDescriptor;
  * A domain can just consist of a set of jar libraries to share between the domain applications or it can also contain shared
  * resources such as connectors or other mule components.
  */
-public interface Domain extends DeployableArtifact<DomainDescriptor>
+public interface Domain extends ConfigurableArtifact<DomainDescriptor>
 {
     /**
      * Domain configuration file name

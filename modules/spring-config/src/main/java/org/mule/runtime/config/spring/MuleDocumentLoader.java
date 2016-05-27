@@ -113,7 +113,7 @@ final class MuleDocumentLoader implements DocumentLoader
     /**
      * SAX filter that builds the metadata that will annotate the built nodes.
      */
-    private final static class XmlMetadataAnnotator extends DefaultHandler
+    public final static class XmlMetadataAnnotator extends DefaultHandler
     {
         private Locator locator;
         private DomWalkerElement walker;

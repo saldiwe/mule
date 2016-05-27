@@ -97,15 +97,21 @@ public class WebappMuleXmlConfigurationBuilder extends SpringXmlConfigurationBui
     }
 
     @Override
-    protected ApplicationContext doCreateApplicationContext(MuleContext muleContext, ConfigResource[] configResources, OptionalObjectsController optionalObjectsController)
+    protected ApplicationContext doCreateApplicationContext(MuleContext muleContext, ConfigResource[] artifactConfigResources, ConfigResource[] springResources, OptionalObjectsController optionalObjectsController)
     {
-        Resource[] servletContextResources = new Resource[configResources.length];
+        Resource[] springServletContextResources = preProcessResources(springResources);
+        Resource[] artifactConfigServletContextResources = preProcessResources(artifactConfigResources);
+        return new MuleArtifactContext(muleContext, artifactConfigServletContextResources, springServletContextResources);
+    }
+
+    private Resource[] preProcessResources(ConfigResource[] configResources)
+    {
+        Resource[] configServletContextResources = new Resource[configResources.length];
         for (int i = 0; i < configResources.length; i++)
         {
-            servletContextResources[i] = new ServletContextOrClassPathResource(context, configResources[i].getResourceName());
+            configServletContextResources[i] = new ServletContextOrClassPathResource(context, configResources[i].getResourceName());
         }
-
-        return new MuleArtifactContext(muleContext, new Resource[0], servletContextResources);
+        return configServletContextResources;
     }
 
     /**

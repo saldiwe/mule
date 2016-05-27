@@ -148,12 +148,12 @@ public class SpringXmlConfigurationBuilder extends AbstractResourceConfiguration
             applicationObjectcontroller = new CompositeOptionalObjectsController(applicationObjectcontroller, parentObjectController);
         }
 
-        return doCreateApplicationContext(muleContext, configResources, applicationObjectcontroller);
+        return doCreateApplicationContext(muleContext, artifcatConfigResources, configResources, applicationObjectcontroller);
     }
 
-    protected ApplicationContext doCreateApplicationContext(MuleContext muleContext, ConfigResource[] springResources, OptionalObjectsController optionalObjectsController)
+    protected ApplicationContext doCreateApplicationContext(MuleContext muleContext, ConfigResource[] artifactConfigResources, ConfigResource[] springResources, OptionalObjectsController optionalObjectsController)
     {
-        return new MuleArtifactContext(muleContext, artifcatConfigResources, springResources, optionalObjectsController);
+        return new MuleArtifactContext(muleContext, artifactConfigResources, springResources, optionalObjectsController);
     }
 
 

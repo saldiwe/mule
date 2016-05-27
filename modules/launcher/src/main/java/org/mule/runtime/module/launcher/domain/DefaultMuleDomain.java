@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.module.launcher.domain;
 
+import static java.util.Optional.ofNullable;
 import static org.mule.runtime.core.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.core.util.SplashScreen.miniSplash;
 import org.mule.runtime.core.api.MuleContext;
@@ -38,6 +39,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 import org.apache.commons.logging.Log;
@@ -327,5 +329,11 @@ public class DefaultMuleDomain implements Domain
     public boolean containsSharedResources()
     {
         return this.muleContext != null;
+    }
+
+    @Override
+    public Optional<Object> lookupComponent(String componentName)
+    {
+        return ofNullable(muleContext.getRegistry().get(componentName));
     }
 }

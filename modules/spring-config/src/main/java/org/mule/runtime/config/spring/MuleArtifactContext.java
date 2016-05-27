@@ -8,6 +8,8 @@ package org.mule.runtime.config.spring;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.ArrayUtils.addAll;
+import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.CONFIGURATION_IDENTIFIER;
+import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_MULE_CONFIGURATION;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_MULE_CONTEXT;
 import static org.mule.runtime.core.util.Preconditions.checkArgument;
 import static org.springframework.context.annotation.AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME;
@@ -37,9 +39,6 @@ import org.mule.runtime.core.util.IOUtils;
 import java.io.IOException;
 import java.util.ServiceLoader;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -57,6 +56,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * <code>MuleArtifactContext</code> is a simple extension application context
@@ -65,6 +66,11 @@ import org.w3c.dom.Document;
  */
 public class MuleArtifactContext extends AbstractXmlApplicationContext
 {
+
+    /**
+     * Indicates that XSD validation should be used (found no "DOCTYPE" declaration).
+     */
+    private static final int VALIDATION_XSD = 3;
     private static final ThreadLocal<MuleContext> currentMuleContext = new ThreadLocal<>();
 
     private final ComponentBuildingDefinitionRegistry componentBuildingDefinitionRegistry = new ComponentBuildingDefinitionRegistry();
@@ -168,14 +174,13 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext
         }
     }
 
-    private Document getXmlDocument(Resource springResource)
+    private Document getXmlDocument(Resource artifactResource)
     {
         try
         {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setNamespaceAware(true);
-            DocumentBuilder docBuilder = documentBuilderFactory.newDocumentBuilder();
-            return docBuilder.parse(springResource.getFile());
+            Document document = new MuleDocumentLoader()
+                    .loadDocument(new InputSource(artifactResource.getInputStream()), new DefaultHandler(), new DefaultHandler(), VALIDATION_XSD, true);
+            return document;
         }
         catch (Exception e)
         {
@@ -197,6 +202,29 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext
                               new DiscardedOptionalBeanPostProcessor(optionalObjectsController, (DefaultListableBeanFactory) beanFactory),
                               new LifecycleStatePostProcessor(muleContext.getLifecycleManager().getState())
         );
+
+        if (useNewParsingMechanism)
+        {
+            addBeanFactoryPostProcessor(new MuleObjectCreationBeanDefinitionRegistryPostProcessor(beanDefinitionRegistry -> {
+                applicationModel.executeOnEveryComponentTree(componentModel -> {
+                    if (componentModel.isRoot())
+                    {
+                        beanDefinitionFactory.resolveComponentRecursively(applicationModel.getRootComponentModel(), componentModel, beanDefinitionRegistry,
+                                                                          (resolvedComponentModel, registry) -> {
+                            if (resolvedComponentModel.isRoot())
+                            {
+                                String nameAttribute = resolvedComponentModel.getNameAttribute();
+                                if (resolvedComponentModel.getIdentifier().equals(CONFIGURATION_IDENTIFIER))
+                                {
+                                    nameAttribute = OBJECT_MULE_CONFIGURATION;
+                                }
+                                registry.registerBeanDefinition(nameAttribute, resolvedComponentModel.getBeanDefinition());
+                            }
+                        }, null);
+                    }
+                });
+            }));
+        }
 
         beanFactory.registerSingleton(OBJECT_MULE_CONTEXT, muleContext);
     }
@@ -259,7 +287,7 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext
         try
         {
             currentMuleContext.set(muleContext);
-            beanDefinitionReader.loadBeanDefinitions(springResources);
+            beanDefinitionReader.loadBeanDefinitions(getConfigResources());
         }
         finally
         {

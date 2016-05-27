@@ -24,11 +24,21 @@ public class ConfigurationProcessingTestCase extends FunctionalTestCase
     }
 
     @Test
-    public void test() throws Exception
+    public void simpleFlowConfiguration() throws Exception
     {
-        Flow flow = (Flow) getFlowConstruct("flow");
+        Flow flow = (Flow) getFlowConstruct("simpleFlow");
         assertThat(flow, notNullValue());
         assertThat(flow.getMessageProcessors(), notNullValue());
         assertThat(flow.getMessageProcessors().size(), is(1));
+    }
+
+    @Test
+    public void complexFlowConfiguration() throws Exception
+    {
+        Flow flow = (Flow) getFlowConstruct("complexFlow");
+        assertThat(flow, notNullValue());
+        assertThat(flow.getMessageSource(), notNullValue());
+        assertThat(flow.getMessageProcessors(), notNullValue());
+        assertThat(flow.getMessageProcessors().size(), is(3));
     }
 }

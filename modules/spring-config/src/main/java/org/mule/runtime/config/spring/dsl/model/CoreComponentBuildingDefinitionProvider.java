@@ -44,6 +44,7 @@ import org.mule.runtime.core.api.routing.filter.Filter;
 import org.mule.runtime.core.api.schedule.SchedulerFactory;
 import org.mule.runtime.core.api.source.MessageSource;
 import org.mule.runtime.core.api.transformer.Transformer;
+import org.mule.runtime.core.config.DefaultMuleConfiguration;
 import org.mule.runtime.core.construct.Flow;
 import org.mule.runtime.core.enricher.MessageEnricher;
 import org.mule.runtime.core.exception.CatchMessagingExceptionStrategy;
@@ -406,7 +407,7 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
                                                  .withTypeDefinition(fromType(PollingMessageSource.class))
                                                  .withObjectFactoryType(PollingMessageSourceFactoryBean.class)
                                                  .withSetterParameterDefinition("messageProcessor", fromChildConfiguration(MessageProcessor.class).build())
-                                                 .withSetterParameterDefinition("frequency", fromSimpleParameter("frequency").build())
+                                                 .withSetterParameterDefinition("frequency", fromSimpleParameter("frequency").withDefaultValue(1000).build())
                                                  .withSetterParameterDefinition("override", fromChildConfiguration(MessageProcessorPollingOverride.class).build())
                                                  .withSetterParameterDefinition("schedulerFactory", fromChildConfiguration(SchedulerFactory.class).build())
                                                  .build());
@@ -468,6 +469,20 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
                                                  .withTypeDefinition(fromType(StartableCompositeMessageSource.class))
                                                  .withSetterParameterDefinition("messageSources", fromChildListConfiguration(MessageSource.class).build())
                                                  .withSetterParameterDefinition("muleContext", fromReferenceObject(MuleContext.class).build())
+                                                 .build());
+        componentBuildingDefinitions.add(baseDefinition.copy()
+                                                 .withIdentifier("configuration")
+                                                 .withTypeDefinition(fromType(DefaultMuleConfiguration.class))
+                                                 .withSetterParameterDefinition("defaultExceptionStrategyName", fromSimpleParameter("defaultExceptionStrategy-ref").build())
+                                                 .withSetterParameterDefinition("defaultResponseTimeout", fromSimpleParameter("defaultResponseTimeout").build())
+                                                 .withSetterParameterDefinition("defaultTransactionTimeout", fromSimpleParameter("defaultTransactionTimeout").build())
+                                                 .withSetterParameterDefinition("shutdownTimeout", fromSimpleParameter("shutdownTimeout").build())
+                                                 .withSetterParameterDefinition("defaultTransactionTimeout", fromSimpleParameter("defaultTransactionTimeout").build())
+                                                 .withSetterParameterDefinition("useExtendedTransformations", fromSimpleParameter("useExtendedTransformations").build())
+                                                 .withSetterParameterDefinition("flowEndingWithOneWayEndpointReturnsNull", fromSimpleParameter("flowEndingWithOneWayEndpointReturnsNull").build())
+                                                 .withSetterParameterDefinition("enricherPropagatesSessionVariableChanges", fromSimpleParameter("enricherPropagatesSessionVariableChanges").build())
+                                                 .withSetterParameterDefinition("extensions", fromChildListConfiguration(Object.class).build())
+                                                 .withSetterParameterDefinition("defaultObjectSerializer", fromSimpleReferenceParameter("defaultObjectSerializer-ref").build())
                                                  .build());
         return componentBuildingDefinitions;
     }

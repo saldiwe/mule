@@ -6,8 +6,21 @@
        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
        http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd">
 
-    <flow name="flow">
+    <flow name="simpleFlow">
         <test:component/>
+    </flow>
+
+    <flow name="complexFlow">
+        <poll>
+            <set-payload value="someValue"/>
+        </poll>
+        <set-payload value="someValue"/>
+        <scatter-gather>
+            <set-payload value="someValue"/>
+            <set-payload value="someValue"/>
+            <set-payload value="someValue"/>
+        </scatter-gather>
+        <set-payload value="someValue"/>
     </flow>
 
 </mule>

@@ -10,7 +10,6 @@ import static org.mule.runtime.config.spring.dsl.processor.xml.CoreXmlNamespaceI
 import static org.mule.runtime.config.spring.dsl.processor.xml.XmlCustomAttributeHandler.from;
 import static org.mule.runtime.config.spring.dsl.processor.xml.XmlCustomAttributeHandler.to;
 import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessage;
-
 import org.mule.runtime.config.spring.dsl.processor.ApplicationConfig;
 import org.mule.runtime.config.spring.dsl.processor.ConfigFile;
 import org.mule.runtime.config.spring.dsl.processor.ConfigLine;
@@ -32,10 +31,10 @@ import org.w3c.dom.Node;
 /**
  * An {@code ApplicationModel} holds a representation of all the artifact configuration using an abstract model
  * to represent any configuration option.
- *
+ * <p/>
  * This model is represented by a set of {@link org.mule.runtime.config.spring.dsl.model.ComponentModel}. Each {@code ComponentModel}
  * holds a piece of configuration and may have children {@code ComponentModel}s as defined in the artifact configuration.
- *
+ * <p/>
  * Once the set of {@code ComponentModel} gets created from the application {@link org.mule.runtime.config.spring.dsl.processor.ConfigFile}s
  * the {@code ApplicationModel} executes a set of common validations dictated by the configuration semantics.
  *
@@ -66,6 +65,7 @@ public class ApplicationModel
     public static final String FILTER_ELEMENT_SUFFIX = "-filter";
     public static final String PROCESSING_STRATEGY_ATTRIBUTE = "processingStrategy";
     public static final String QUEUE_STORE = "queue-store";
+    public static final String CONFIGURATION_ELEMENT = "configuration";
 
     //TODO MULE-9638 Remove once all bean definitions parsers where migrated
     public static final String TEST_NAMESPACE = "test";
@@ -93,6 +93,7 @@ public class ApplicationModel
     public static final ComponentIdentifier PROCESSOR_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(PROCESSOR_REFERENCE_ELEMENT).build();
     public static final ComponentIdentifier TRANSFORMER_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(TRANSFORMER_REFERENCE_ELEMENT).build();
     public static final ComponentIdentifier QUEUE_STORE_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(QUEUE_STORE).build();
+    public static final ComponentIdentifier CONFIGURATION_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(CONFIGURATION_ELEMENT).build();
 
     private static ImmutableSet<ComponentIdentifier> ignoredNameValidationComponentList = ImmutableSet.<ComponentIdentifier>builder()
             .add(new ComponentIdentifier.Builder().withNamespace(MULE_ROOT_ELEMENT).withName("flow-ref").build())
@@ -146,7 +147,7 @@ public class ApplicationModel
 
     /**
      * Creates an {code ApplicationModel} from a {@link ApplicationConfig}.
-     *
+     * <p/>
      * A set of validations are applied that may make creation fail.
      *
      * @param applicationConfig the mule artifact configuration content.
@@ -377,6 +378,15 @@ public class ApplicationModel
             }
         }
         return null;
+    }
+
+    /**
+     * TODO MULE-9688: When the model it's made immutable we will also provide the parent component for navigation and this will not be needed anymore.
+     * @return the root component model
+     */
+    public ComponentModel getRootComponentModel()
+    {
+        return componentModels.get(0);
     }
 
     /**

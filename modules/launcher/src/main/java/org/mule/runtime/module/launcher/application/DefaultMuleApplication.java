@@ -7,6 +7,7 @@
 package org.mule.runtime.module.launcher.application;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessage;
 import static org.mule.runtime.core.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.core.util.SplashScreen.miniSplash;
@@ -41,6 +42,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -307,6 +309,12 @@ public class DefaultMuleApplication implements Application
     public ArtifactClassLoader getArtifactClassLoader()
     {
         return deploymentClassLoader;
+    }
+
+    @Override
+    public Optional<Object> lookupComponent(String componentName)
+    {
+        return ofNullable(muleContext.getRegistry().get(componentName));
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.mule.runtime.module.launcher.descriptor.ApplicationDescriptor;
 import org.mule.runtime.module.launcher.domain.Domain;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Decorates the target deployer to properly switch out context classloader for deployment
@@ -52,5 +53,11 @@ public class ApplicationWrapper extends DeployableArtifactWrapper<Application, A
     public Application getDelegate()
     {
         return super.getDelegate();
+    }
+
+    @Override
+    public Optional<Object> lookupComponent(String globalComponentName)
+    {
+        return getDelegate().lookupComponent(globalComponentName);
     }
 }

@@ -2622,6 +2622,16 @@ public class DeploymentServiceTestCase extends AbstractMuleContextTestCase
         assertDeploymentFailure(applicationDeploymentListener, dummyDomainApp2FileBuilder.getId());
     }
 
+    @Test
+    public void lookupComponent() throws Exception
+    {
+        addPackedAppFromBuilder(dummyAppDescriptorFileBuilder);
+        deploymentService.start();
+        Application application = deploymentService.findApplication(dummyAppDescriptorFileBuilder.getId());
+        assertThat(application.lookupComponent("listenerConfig").isPresent(), is(true));
+        assertThat(application.lookupComponent("echo-service").isPresent(), is(true));
+    }
+
     private void doRedeployAppByChangingConfigFileWithGoodOne(String applicationPath) throws Exception
     {
         changeConfigFile(applicationPath, EMPTY_APP_CONFIG_XML);

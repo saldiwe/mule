@@ -13,6 +13,7 @@ import org.mule.runtime.module.launcher.artifact.DeployableArtifactWrapper;
 import org.mule.runtime.module.launcher.descriptor.DomainDescriptor;
 
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Domain wrapper used to notify domain factory that a domain has been disposed or started.
@@ -57,5 +58,11 @@ public class DomainWrapper extends DeployableArtifactWrapper<Domain, DomainDescr
         {
             domainFactory.dispose(this);
         }
+    }
+
+    @Override
+    public Optional<Object> lookupComponent(String globalComponentName)
+    {
+        return getDelegate().lookupComponent(globalComponentName);
     }
 }
