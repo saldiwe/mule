@@ -15,6 +15,7 @@ import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.launcher.descriptor.DomainDescriptor;
 
 import java.io.File;
+import java.util.Optional;
 
 public class TestDomainWrapper implements Domain
 {
@@ -121,5 +122,11 @@ public class TestDomainWrapper implements Domain
     public void setFailOnDispose()
     {
         this.failOnDispose = true;
+    }
+
+    @Override
+    public Optional<Object> lookupComponent(String globalComponentName)
+    {
+        return delegate.lookupComponent(globalComponentName);
     }
 }
