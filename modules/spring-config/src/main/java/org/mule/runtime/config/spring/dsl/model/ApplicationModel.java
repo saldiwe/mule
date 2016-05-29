@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.PropertyPlaceholderHelper;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -144,6 +145,8 @@ public class ApplicationModel
             .build();
 
     private List<ComponentModel> componentModels = new ArrayList<>();
+    private PropertyPlaceholderHelper propertyPlaceholderHelper = new PropertyPlaceholderHelper("${", "}");
+    private SystemPropertyPlaceholderResolver systemPropertyPlaceholderResolver = new SystemPropertyPlaceholderResolver("mule config property resolver");
 
     /**
      * Creates an {code ApplicationModel} from a {@link ApplicationConfig}.
@@ -338,13 +341,13 @@ public class ApplicationModel
             to(builder).addNode(from(configLine).getNode()).addConfigFileName(configFileName);
             for (SimpleConfigAttribute simpleConfigAttribute : configLine.getConfigAttributes().values())
             {
-                builder.addParameter(simpleConfigAttribute.getName(), simpleConfigAttribute.getValue());
+                builder.addParameter(simpleConfigAttribute.getName(), resolveValueIfIsPlaceHolder(simpleConfigAttribute.getValue()));
             }
             List<ComponentModel> componentModels = extractComponentDefinitionModel(configLine.getChildren(), configFileName);
             componentModels.stream().forEach(componentDefinitionModel -> {
                 if (SPRING_PROPERTY_IDENTIFIER.equals(componentDefinitionModel.getIdentifier()))
                 {
-                    builder.addParameter(componentDefinitionModel.getNameAttribute(), componentDefinitionModel.getParameters().get("value"));
+                    builder.addParameter(componentDefinitionModel.getNameAttribute(), resolveValueIfIsPlaceHolder(componentDefinitionModel.getParameters().get("value")));
                 }
                 builder.addChildComponentModel(componentDefinitionModel);
             });
@@ -356,6 +359,15 @@ public class ApplicationModel
             models.add(builder.build());
         }
         return models;
+    }
+
+    private String resolveValueIfIsPlaceHolder(String value)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+        return propertyPlaceholderHelper.replacePlaceholders(value, systemPropertyPlaceholderResolver);
     }
 
     private boolean isConfigurationTopComponent(ConfigLine parent)
@@ -397,5 +409,36 @@ public class ApplicationModel
     {
 
         void consume(ComponentModel componentModel) throws MuleRuntimeException;
+    }
+
+    /**
+     * PlaceholderResolver implementation that resolves against system properties
+     * and system environment variables.
+     * //TODO remove somewhere else
+     */
+    private static class SystemPropertyPlaceholderResolver implements PropertyPlaceholderHelper.PlaceholderResolver {
+
+        private final String text;
+
+        public SystemPropertyPlaceholderResolver(String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String resolvePlaceholder(String placeholderName) {
+            try {
+                String propVal = System.getProperty(placeholderName);
+                if (propVal == null) {
+                    // Fall back to searching the system environment.
+                    propVal = System.getenv(placeholderName);
+                }
+                return propVal;
+            }
+            catch (Throwable ex) {
+                System.err.println("Could not resolve placeholder '" + placeholderName + "' in [" +
+                                   this.text + "] as system property: " + ex);
+                return null;
+            }
+        }
     }
 }

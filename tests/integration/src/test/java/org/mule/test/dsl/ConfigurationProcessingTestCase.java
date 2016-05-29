@@ -11,16 +11,21 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import org.mule.functional.junit4.FunctionalTestCase;
 import org.mule.runtime.core.construct.Flow;
+import org.mule.tck.junit4.rule.SystemProperty;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 public class ConfigurationProcessingTestCase extends FunctionalTestCase
 {
 
+    @Rule
+    public SystemProperty frequency = new SystemProperty("frequency", "1000");
+
     @Override
     protected String getConfigFile()
     {
-        return "org/mule/test/dsl/simple-config.xml";
+        return "org/mule/test/dsl/parsing-test-config.xml";
     }
 
     @Test
