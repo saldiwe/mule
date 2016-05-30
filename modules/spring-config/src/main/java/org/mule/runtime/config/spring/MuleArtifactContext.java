@@ -49,6 +49,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.CglibSubclassingInstantiationStrategy;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.AbstractXmlApplicationContext;
@@ -163,7 +164,7 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext
             {
                 Document document = getXmlDocument(springResource);
                 ConfigLine mainConfigLine = new XmlApplicationParser().parse(document.getDocumentElement()).get();
-                applicationConfigBuilder.addConfigFile(new ConfigFile(springResource.getFilename(), asList(mainConfigLine)));
+                applicationConfigBuilder.addConfigFile(new ConfigFile(getFilename(springResource), asList(mainConfigLine)));
             }
             applicationConfigBuilder.setApplicationName(muleContext.getConfiguration().getId());
             applicationModel = new ApplicationModel(applicationConfigBuilder.build());
@@ -174,12 +175,21 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext
         }
     }
 
+    private String getFilename(Resource resource)
+    {
+        if (resource instanceof ByteArrayResource)
+        {
+            return resource.getDescription();
+        }
+        return resource.getFilename();
+    }
+
     private Document getXmlDocument(Resource artifactResource)
     {
         try
         {
             Document document = new MuleDocumentLoader()
-                    .loadDocument(new InputSource(artifactResource.getInputStream()), new DefaultHandler(), new DefaultHandler(), VALIDATION_XSD, true);
+                    .loadDocument(new InputSource(artifactResource.getInputStream()), new DelegatingEntityResolver(Thread.currentThread().getContextClassLoader()), new DefaultHandler(), VALIDATION_XSD, true);
             return document;
         }
         catch (Exception e)

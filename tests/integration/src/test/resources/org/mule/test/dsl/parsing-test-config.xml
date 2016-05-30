@@ -11,7 +11,7 @@
     </flow>
 
     <flow name="complexFlow">
-        <poll frequency="${frequency}">
+        <poll>
             <set-payload value="someValue"/>
         </poll>
         <set-payload value="someValue"/>

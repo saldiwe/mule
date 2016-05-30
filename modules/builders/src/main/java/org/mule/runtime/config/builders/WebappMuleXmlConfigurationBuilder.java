@@ -175,6 +175,12 @@ public class WebappMuleXmlConfigurationBuilder extends SpringXmlConfigurationBui
             this.path = StringUtils.cleanPath(path);
         }
 
+        @Override
+        public String getFilename()
+        {
+            return this.path;
+        }
+
         public InputStream getInputStream() throws IOException
         {
             InputStream is = getServletContextInputStream();

@@ -47,11 +47,11 @@ public abstract class AbstractResourceConfigurationBuilder extends AbstractConfi
     }
 
     /**
-     * @param artifcatConfigResources an array Reader oject that provides acces to a configuration either locally or remotely
+     * @param artifactConfigResources an array Reader oject that provides acces to a configuration either locally or remotely
      */
-    public AbstractResourceConfigurationBuilder(ConfigResource[] artifcatConfigResources)
+    public AbstractResourceConfigurationBuilder(ConfigResource[] artifactConfigResources)
     {
-        this.artifcatConfigResources = artifcatConfigResources;
+        this.artifcatConfigResources = artifactConfigResources;
     }
 
     /**

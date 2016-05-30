@@ -407,7 +407,7 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
                                                  .withTypeDefinition(fromType(PollingMessageSource.class))
                                                  .withObjectFactoryType(PollingMessageSourceFactoryBean.class)
                                                  .withSetterParameterDefinition("messageProcessor", fromChildConfiguration(MessageProcessor.class).build())
-                                                 .withSetterParameterDefinition("frequency", fromSimpleParameter("frequency").withDefaultValue(1000).build())
+                                                 .withSetterParameterDefinition("frequency", fromSimpleParameter("frequency").build())
                                                  .withSetterParameterDefinition("override", fromChildConfiguration(MessageProcessorPollingOverride.class).build())
                                                  .withSetterParameterDefinition("schedulerFactory", fromChildConfiguration(SchedulerFactory.class).build())
                                                  .build());
