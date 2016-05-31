@@ -216,21 +216,21 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext
         if (useNewParsingMechanism)
         {
             addBeanFactoryPostProcessor(new MuleObjectCreationBeanDefinitionRegistryPostProcessor(beanDefinitionRegistry -> {
-                applicationModel.executeOnEveryComponentTree(componentModel -> {
+                applicationModel.executeOnEveryMuleComponentTree(componentModel -> {
                     if (componentModel.isRoot())
                     {
                         beanDefinitionFactory.resolveComponentRecursively(applicationModel.getRootComponentModel(), componentModel, beanDefinitionRegistry,
                                                                           (resolvedComponentModel, registry) -> {
-                            if (resolvedComponentModel.isRoot())
-                            {
-                                String nameAttribute = resolvedComponentModel.getNameAttribute();
-                                if (resolvedComponentModel.getIdentifier().equals(CONFIGURATION_IDENTIFIER))
-                                {
-                                    nameAttribute = OBJECT_MULE_CONFIGURATION;
-                                }
-                                registry.registerBeanDefinition(nameAttribute, resolvedComponentModel.getBeanDefinition());
-                            }
-                        }, null);
+                                                                              if (resolvedComponentModel.isRoot())
+                                                                              {
+                                                                                  String nameAttribute = resolvedComponentModel.getNameAttribute();
+                                                                                  if (resolvedComponentModel.getIdentifier().equals(CONFIGURATION_IDENTIFIER))
+                                                                                  {
+                                                                                      nameAttribute = OBJECT_MULE_CONFIGURATION;
+                                                                                  }
+                                                                                  registry.registerBeanDefinition(nameAttribute, resolvedComponentModel.getBeanDefinition());
+                                                                              }
+                                                                          }, null);
                     }
                 });
             }));

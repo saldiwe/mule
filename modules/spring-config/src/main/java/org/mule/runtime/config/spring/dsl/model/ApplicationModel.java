@@ -208,7 +208,7 @@ public class ApplicationModel
     private void validateNameIsNotRepeated()
     {
         Map<String, ComponentModel> existingObjectsWithName = new HashMap<>();
-        executeOnEveryComponentTree(componentModel -> {
+        executeOnEveryMuleComponentTree(componentModel -> {
             String nameAttributeValue = componentModel.getNameAttribute();
             if (nameAttributeValue != null && !ignoredNameValidationComponentList.contains(componentModel.getIdentifier()))
             {
@@ -230,7 +230,7 @@ public class ApplicationModel
 
     private void validateChoiceExceptionStrategyStructure()
     {
-        executeOnEveryComponentTree(component -> {
+        executeOnEveryMuleComponentTree(component -> {
             if (component.getIdentifier().equals(CHOICE_EXCEPTION_STRATEGY_IDENTIFIER))
             {
                 validateExceptionStrategiesHaveWhenAttribute(component);
@@ -263,7 +263,7 @@ public class ApplicationModel
 
     private void validateExceptionStrategyWhenAttributeIsOnlyPresentInsideChoice()
     {
-        executeOnEveryComponentTree(component -> {
+        executeOnEveryMuleComponentTree(component -> {
             if (component.getIdentifier().getName().endsWith(EXCEPTION_STRATEGY_REFERENCE_ELEMENT))
             {
                 Node componentNode = from(component).getNode();
@@ -289,7 +289,7 @@ public class ApplicationModel
                         {
                             throw new MuleRuntimeException(createStaticMessage("Only top level elements can have a name attribute. Component %s has attribute name with value %s", component.getIdentifier(), component.getNameAttribute()));
                         }
-                    });
+                    }, true);
                 }));
 
             });
@@ -309,19 +309,27 @@ public class ApplicationModel
     {
         for (ComponentModel componentModel : componentModels)
         {
-            executeOnComponentTree(componentModel, task);
+            executeOnComponentTree(componentModel, task, false);
         }
     }
 
-    private void executeOnComponentTree(final ComponentModel component, final ComponentConsumer task) throws MuleRuntimeException
+    public void executeOnEveryMuleComponentTree(final ComponentConsumer task)
     {
-        if (component.getIdentifier().getNamespace().equals(SPRING_NAMESPACE))
+        for (ComponentModel componentModel : componentModels)
+        {
+            executeOnComponentTree(componentModel, task, true);
+        }
+    }
+
+    private void executeOnComponentTree(final ComponentModel component, final ComponentConsumer task, boolean avoidSpringElements) throws MuleRuntimeException
+    {
+        if (component.getIdentifier().getNamespace().equals(SPRING_NAMESPACE) && avoidSpringElements)
         {
             //TODO MULE-9648: for now do no process beans inside spring
             return;
         }
         component.getInnerComponents().forEach((innerComponent) -> {
-            executeOnComponentTree(innerComponent, task);
+            executeOnComponentTree(innerComponent, task, avoidSpringElements);
         });
         task.consume(component);
     }
