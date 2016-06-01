@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.config.spring.dsl.model;
 
+import static java.lang.String.format;
 import static org.mule.runtime.config.spring.dsl.processor.xml.CoreXmlNamespaceInfoProvider.CORE_NAMESPACE_NAME;
 import static org.mule.runtime.config.spring.dsl.processor.xml.XmlCustomAttributeHandler.from;
 import static org.mule.runtime.config.spring.dsl.processor.xml.XmlCustomAttributeHandler.to;
@@ -203,6 +204,20 @@ public class ApplicationModel
         validateNameIsOnlyOnTopLevelElements();
         validateExceptionStrategyWhenAttributeIsOnlyPresentInsideChoice();
         validateChoiceExceptionStrategyStructure();
+        validateNoDefaultExceptionStrategyAsGlobal();
+    }
+
+    private void validateNoDefaultExceptionStrategyAsGlobal()
+    {
+        executeOnEveryMuleComponentTree(componentModel -> {
+            if (componentModel.isRoot() && DEFAULT_ES_ELEMENT_IDENTIFIER.equals(componentModel.getIdentifier()))
+            {
+                if (componentModel.getNameAttribute() != null)
+                {
+                    throw new MuleRuntimeException(createStaticMessage(format("Component %s is not supported as global", DEFAULT_ES_ELEMENT_IDENTIFIER.getName())));
+                }
+            }
+        });
     }
 
     private void validateNameIsNotRepeated()

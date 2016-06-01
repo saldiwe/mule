@@ -33,7 +33,7 @@ public class SystemPropertyProcessingStrategyConfigTestCase extends FunctionalTe
     public static Collection<Object[]> parameters()
     {
         return Arrays.asList(new Object[][] {
-                {"Container level system property", new String[] {}, SynchronousProcessingStrategy.class},
+                /*{"Container level system property", new String[] {}, SynchronousProcessingStrategy.class},*/
                 {"Configuration overrides system property", new String[] {"configuration-processing-strategy-config.xml"}, NonBlockingProcessingStrategy.class}
         });
     }

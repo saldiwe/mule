@@ -306,6 +306,7 @@ public class DefaultMuleContext implements MuleContext
     @Override
     public synchronized void start() throws MuleException
     {
+        resetConfiguration();
         getLifecycleManager().checkPhase(Startable.PHASE_NAME);
 
         if (getQueueManager() == null)
@@ -330,6 +331,11 @@ public class DefaultMuleContext implements MuleContext
             SplashScreen startupScreen = buildStartupSplash();
             logger.info(startupScreen.toString());
         }
+    }
+
+    private void resetConfiguration()
+    {
+        this.config = getRegistry().lookupObject(MuleProperties.OBJECT_MULE_CONFIGURATION);
     }
 
     /**
