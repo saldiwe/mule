@@ -7,15 +7,18 @@
 
 package org.mule.runtime.module.artifact.classloader;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.mule.runtime.core.util.Preconditions.checkArgument;
+
+import org.mule.runtime.module.artifact.classloader.exception.NotExportedClassException;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines a {@link ClassLoader} that filter which classes and resources can
@@ -24,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 public class FilteringArtifactClassLoader extends ClassLoader implements ArtifactClassLoader
 {
 
-    protected static final Log logger = LogFactory.getLog(FilteringArtifactClassLoader.class);
+    protected static final Logger logger = LoggerFactory.getLogger(FilteringArtifactClassLoader.class);
 
     private final ArtifactClassLoader artifactClassLoader;
     private final ClassLoaderFilter filter;
@@ -53,7 +56,7 @@ public class FilteringArtifactClassLoader extends ClassLoader implements Artifac
         }
         else
         {
-            throw new ClassNotFoundException(name);
+            throw new NotExportedClassException(name, getArtifactName(), filter);
         }
     }
 
@@ -66,6 +69,11 @@ public class FilteringArtifactClassLoader extends ClassLoader implements Artifac
         }
         else
         {
+            if (logger.isDebugEnabled())
+            {
+                logger.debug(format("Resource '%s' not found in classloader for '%s'.", name, getArtifactName()));
+                logger.debug(format("Filter applied for resource '%s': %s", name, filter.toString()));
+            }
             return null;
         }
     }
@@ -84,6 +92,11 @@ public class FilteringArtifactClassLoader extends ClassLoader implements Artifac
         }
         else
         {
+            if (logger.isDebugEnabled())
+            {
+                logger.debug(format("Resources '%s' not found in classloader for '%s'.", name, getArtifactName()));
+                logger.debug(format("Filter applied for resources '%s': %s", name, filter.toString()));
+            }
             return new EnumerationAdapter<>(emptyList());
         }
     }

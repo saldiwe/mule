@@ -80,6 +80,7 @@ public class ContainerClassLoaderFactory
             "org.dom4j", "org.w3c.dom",
             "com.sun", "sun",
             "org.springframework",
+            "org.tanukisoftware.wrapper",
             "org.mule.mvel2"
     );
 

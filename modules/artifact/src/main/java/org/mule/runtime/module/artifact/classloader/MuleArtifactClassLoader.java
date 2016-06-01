@@ -7,6 +7,7 @@
 package org.mule.runtime.module.artifact.classloader;
 
 import static org.mule.runtime.core.util.Preconditions.checkArgument;
+
 import org.mule.runtime.core.util.IOUtils;
 import org.mule.runtime.core.util.StringUtils;
 
@@ -130,5 +131,13 @@ public class MuleArtifactClassLoader extends FineGrainedControlClassLoader imple
             localResourceLocator = new DirectoryResourceLocator(getLocalResourceLocations());
         }
         return localResourceLocator;
+    }
+
+    @Override
+    public String toString()
+    {
+        return String.format("%s[%s]@%s", getClass().getName(),
+                getArtifactName(),
+                Integer.toHexString(System.identityHashCode(this)));
     }
 }
