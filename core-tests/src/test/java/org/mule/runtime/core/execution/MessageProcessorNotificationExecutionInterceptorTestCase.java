@@ -165,47 +165,6 @@ public class MessageProcessorNotificationExecutionInterceptorTestCase extends Ab
         assertThat(RequestContext.getEvent(), not(mockMuleEventPreviousExecution));
     }
 
-    /**
-     * Validates that event to be processed is copied and set to RequestContext for those cases whenever a
-     * messageProcessor modifies the RC during its execution.
-     */
-    @Test
-    public void requestContextSetBeforeProcessingEventNonBlockingPrcocessor() throws MuleException
-    {
-        final List<ServerNotification> serverNotifications = new ArrayList<ServerNotification>();
-
-        Mockito.when(mockMessageProcessor.process(mockMuleEvent)).thenReturn(mockResultMuleEvent);
-        Mockito.when(mockMuleEvent.getMuleContext().getNotificationManager()).thenReturn(mockNotificationManager);
-        Mockito.when(mockNextInterceptor.execute(Mockito.eq(mockMessageProcessor), Mockito.any(MuleEvent.class))).thenReturn(mockResultMuleEvent);
-
-        String muleEventIdToProcess = UUID.getUUID();
-        Mockito.when(mockMuleEvent.isAllowNonBlocking()).thenReturn(true);
-        Mockito.when(mockMuleEvent.getReplyToHandler()).thenReturn(mockReplyToHandler);
-        Mockito.when(mockMuleEvent.getId()).thenReturn(muleEventIdToProcess);
-
-        Mockito.when(mockNotificationManager.isNotificationEnabled(MessageProcessorNotification.class)).thenReturn(true);
-        Mockito.doAnswer(new Answer<Object>()
-        {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable
-            {
-                serverNotifications.add((ServerNotification) invocationOnMock.getArguments()[0]);
-                return null;
-            }
-        }).when(mockNotificationManager).fireNotification(Mockito.any(ServerNotification.class));
-
-        OptimizedRequestContext.unsafeSetEvent(mockMuleEventPreviousExecution);
-
-        MuleEvent result = messageProcessorNotificationExecutionInterceptor.execute(mockMessageProcessor, mockMuleEvent);
-
-        assertThat(result, is(mockResultMuleEvent));
-        assertThat(serverNotifications.size(), Is.is(0));
-
-        assertThat(RequestContext.getEvent().getId(), equalTo(muleEventIdToProcess));
-        assertThat(RequestContext.getEvent(), not(mockMuleEvent));
-        assertThat(RequestContext.getEvent(), not(mockMuleEventPreviousExecution));
-    }
-
     @Test
     public void testExecutionFailure() throws MuleException
     {

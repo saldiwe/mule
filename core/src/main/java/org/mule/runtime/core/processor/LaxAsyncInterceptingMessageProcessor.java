@@ -6,10 +6,15 @@
  */
 package org.mule.runtime.core.processor;
 
+import static reactor.core.Exceptions.propagate;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.config.ThreadingProfile;
 import org.mule.runtime.core.api.context.WorkManagerSource;
+import org.mule.runtime.core.config.i18n.CoreMessages;
+
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 public class LaxAsyncInterceptingMessageProcessor extends AsyncInterceptingMessageProcessor
 {
@@ -30,5 +35,27 @@ public class LaxAsyncInterceptingMessageProcessor extends AsyncInterceptingMessa
     {
         return doThreading && canProcessAsync(event);
     }
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        return Flux.from(publisher).map(event -> {
+            try
+            {
+                if (!canProcessAsync(event))
+                {
+                    throw propagate(new MessagingException(
+                            CoreMessages.createStaticMessage(SYNCHRONOUS_NONBLOCKING_EVENT_ERROR_MESSAGE),
+                            event, this));
+                }
+            }
+            catch (MessagingException e)
+            {
+                throw propagate(e);
+            }
+            return event;
+        }).as(next);
+    }
+
 
 }

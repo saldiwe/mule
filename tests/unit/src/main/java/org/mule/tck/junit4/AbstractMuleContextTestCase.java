@@ -7,9 +7,7 @@
 package org.mule.tck.junit4;
 
 import static org.mule.tck.junit4.TestsLogConfigurationHelper.configureLoggingForTest;
-
 import org.mule.runtime.api.metadata.DataType;
-import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.TransformationService;
 import org.mule.runtime.core.api.MuleContext;
@@ -20,7 +18,6 @@ import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.MuleSession;
 import org.mule.runtime.core.api.config.ConfigurationBuilder;
 import org.mule.runtime.core.api.config.MuleConfiguration;
-import org.mule.runtime.core.api.connector.ReplyToHandler;
 import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.context.MuleContextBuilder;
 import org.mule.runtime.core.api.context.MuleContextFactory;
@@ -35,7 +32,6 @@ import org.mule.runtime.core.construct.Flow;
 import org.mule.runtime.core.context.DefaultMuleContextBuilder;
 import org.mule.runtime.core.context.DefaultMuleContextFactory;
 import org.mule.runtime.core.context.notification.MuleContextNotification;
-import org.mule.runtime.core.processor.strategy.NonBlockingProcessingStrategy;
 import org.mule.runtime.core.util.ClassUtils;
 import org.mule.runtime.core.util.FileUtils;
 import org.mule.runtime.core.util.StringUtils;
@@ -609,11 +605,4 @@ public abstract class AbstractMuleContextTestCase extends AbstractMuleTestCase
         return (T) getPayload(message, DataType.fromType(clazz));
     }
 
-    protected MuleEvent getNonBlockingTestEventUsingFlow(Object payload, ReplyToHandler replyToHandler) throws Exception
-    {
-        final Flow flow = new Flow("", muleContext);
-        flow.setProcessingStrategy(new NonBlockingProcessingStrategy());
-        muleContext.getRegistry().registerFlowConstruct(flow);
-        return new DefaultMuleEvent(getTestMuleMessage(payload), MessageExchangePattern.REQUEST_RESPONSE, replyToHandler, flow);
-    }
 }

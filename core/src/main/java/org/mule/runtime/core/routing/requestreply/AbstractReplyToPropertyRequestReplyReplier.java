@@ -17,6 +17,7 @@ import org.mule.runtime.core.api.connector.ReplyToHandler;
 import org.mule.runtime.core.processor.AbstractInterceptingMessageProcessor;
 
 import org.apache.commons.lang.BooleanUtils;
+import org.reactivestreams.Publisher;
 
 public abstract class AbstractReplyToPropertyRequestReplyReplier extends AbstractInterceptingMessageProcessor
         implements RequestReplyReplierMessageProcessor, InternalMessageProcessor
@@ -47,6 +48,13 @@ public abstract class AbstractReplyToPropertyRequestReplyReplier extends Abstrac
             resultEvent = processNext(event);
         }
         return resultEvent;
+    }
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        // No-op when using reactive streams
+        return publisher;
     }
 
     protected abstract boolean shouldProcessEvent(MuleEvent event);

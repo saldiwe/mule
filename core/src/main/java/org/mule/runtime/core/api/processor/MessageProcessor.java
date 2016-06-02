@@ -6,7 +6,7 @@
  */
 package org.mule.runtime.core.api.processor;
 
-import static reactor.core.util.Exceptions.propagate;
+import static reactor.core.Exceptions.propagate;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;

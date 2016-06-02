@@ -9,6 +9,7 @@ package org.mule.runtime.core.execution;
 import static org.mule.runtime.core.context.notification.ConnectorMessageNotification.MESSAGE_ERROR_RESPONSE;
 import static org.mule.runtime.core.context.notification.ConnectorMessageNotification.MESSAGE_RECEIVED;
 import static org.mule.runtime.core.context.notification.ConnectorMessageNotification.MESSAGE_RESPONSE;
+import static reactor.core.Exceptions.propagate;
 import static reactor.core.publisher.Flux.from;
 import static reactor.core.publisher.Mono.just;
 import org.mule.runtime.core.api.MessagingException;
@@ -29,7 +30,6 @@ import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
-import reactor.core.util.Exceptions;
 
 /**
  * This phase routes the message through the flow.
@@ -178,7 +178,7 @@ public class AsyncResponseFlowProcessingPhase extends NotificationFiringProcessi
             }
             catch (MuleException e)
             {
-                throw Exceptions.propagate(e);
+                throw propagate(e);
             }
         };
     }

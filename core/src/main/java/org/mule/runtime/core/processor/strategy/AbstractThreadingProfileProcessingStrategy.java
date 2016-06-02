@@ -7,6 +7,7 @@
 package org.mule.runtime.core.processor.strategy;
 
 import static reactor.core.publisher.Flux.from;
+import static reactor.core.scheduler.Schedulers.fromExecutorService;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.config.ThreadingProfile;
@@ -162,11 +163,11 @@ public abstract class AbstractThreadingProfileProcessingStrategy implements Proc
     {
         if (messageProcessor.isBlocking())
         {
-            return publisher -> from(publisher).publishOn(executorService).compose(publisherFunction);
+            return publisher -> from(publisher).publishOn(fromExecutorService(executorService)).as(publisherFunction);
         }
         else
         {
-            return publisher -> from(publisher).compose(publisherFunction);
+            return publisher -> from(publisher).as(publisherFunction);
         }
     }
 }

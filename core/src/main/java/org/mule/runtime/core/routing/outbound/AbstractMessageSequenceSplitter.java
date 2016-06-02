@@ -7,7 +7,7 @@
 package org.mule.runtime.core.routing.outbound;
 
 import static org.mule.runtime.core.routing.CorrelationMode.NEVER;
-import static reactor.core.util.Exceptions.propagate;
+import static reactor.core.Exceptions.propagate;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.RequestContext;
 import org.mule.runtime.core.VoidMuleEvent;

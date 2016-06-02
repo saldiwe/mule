@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.core.processor;
 
+import static reactor.core.Exceptions.propagate;
 import org.mule.runtime.core.VoidMuleEvent;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
@@ -33,7 +34,6 @@ import org.mule.runtime.core.work.MuleWorkManager;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.util.Exceptions;
 
 /**
  * Processes {@link MuleEvent}'s asynchronously using a {@link MuleWorkManager} to
@@ -273,21 +273,11 @@ public class AsyncInterceptingMessageProcessor extends AbstractInterceptingMessa
     @Override
     public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
     {
-        return Flux.from(publisher).map(event -> {
-            try
-            {
-                if (!canProcessAsync(event))
-                {
-                    throw Exceptions.propagate(new MessagingException(
-                            CoreMessages.createStaticMessage(SYNCHRONOUS_NONBLOCKING_EVENT_ERROR_MESSAGE),
-                            event, this));
-                }
-            }
-            catch (MessagingException e)
-            {
-                throw Exceptions.propagate(e);
-            }
-            return event;
-        }).as(pub -> super.apply(pub));
+        return Flux.from(publisher).map(event ->
+                                        {
+                                            throw propagate(new MessagingException(
+                                                    CoreMessages.createStaticMessage(SYNCHRONOUS_NONBLOCKING_EVENT_ERROR_MESSAGE),
+                                                    event, this));
+                                        });
     }
 }

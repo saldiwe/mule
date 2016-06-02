@@ -49,8 +49,6 @@ public class MessageProcessorNotificationExecutionInterceptor implements Message
         MuleEvent result = null;
         MessagingException exceptionThrown = null;
 
-        boolean nonBlocking = event.isAllowNonBlocking() && event.getReplyToHandler() != null;
-
         // Update RequestContext ThreadLocal in case if previous processor modified it
         // also for backwards compatibility
         OptimizedRequestContext.unsafeSetEvent(eventToProcess);

@@ -258,7 +258,6 @@ public class AsyncResponseFlowProcessingPhaseNonBlockingTestCase extends Abstrac
         }).when(mockTemplate).sendResponseToClient(any(MuleEvent.class), any(ResponseCompletionCallback.class));
         phase.runPhase(mockTemplate, mockContext, mockNotifier);
         verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(Exception.class), any(MuleEvent.class));
-        verify(mockMuleEvent).resetAccessControl();
         verifyOnlySuccessfulWasCalled();
     }
 
@@ -290,7 +289,6 @@ public class AsyncResponseFlowProcessingPhaseNonBlockingTestCase extends Abstrac
 
         sensingMessageProcessor.latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
         verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(Exception.class), any(MuleEvent.class));
-        verify(mockMuleEvent).resetAccessControl();
         verifyOnlySuccessfulWasCalled();
     }
 
@@ -343,7 +341,6 @@ public class AsyncResponseFlowProcessingPhaseNonBlockingTestCase extends Abstrac
         when(mockTemplate.routeEventAsStream(any(MuleEvent.class))).thenReturn(empty());
         phase.runPhase(mockTemplate, mockContext, mockNotifier);
 
-        when(mockMuleEvent.newThreadCopy()).thenReturn(mockMuleEvent);
         RequestContext.setEvent(mockMuleEvent);
         phase.runPhase(mockTemplate, mockContext, mockNotifier);
     }

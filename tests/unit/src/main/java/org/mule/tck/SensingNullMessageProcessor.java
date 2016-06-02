@@ -48,21 +48,14 @@ public class SensingNullMessageProcessor extends AbstractNonBlockingMessageProce
     {
         Executors.newSingleThreadExecutor().execute(() ->
         {
-            try
+            sense(event);
+            MuleEvent eventToProcess = event;
+            if (StringUtils.isNotEmpty(appendString))
             {
-                sense(event);
-                MuleEvent eventToProcess = event;
-                if (StringUtils.isNotEmpty(appendString))
-                {
-                    eventToProcess = append(eventToProcess);
-                }
-                latch.countDown();
+                eventToProcess = append(eventToProcess);
             }
-            catch (MuleException e)
-            {
-                completionHandler.onCompletion(eventToProcess, null);
-                latch.countDown();
-            }
+            completionHandler.onCompletion(event, null);
+            latch.countDown();
         });
     }
 

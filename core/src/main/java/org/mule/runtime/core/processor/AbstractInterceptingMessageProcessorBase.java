@@ -133,8 +133,7 @@ public abstract class AbstractInterceptingMessageProcessorBase extends AbstractA
         }
     }
 
-    @Override
-    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    protected Publisher<MuleEvent> applyNext(Publisher<MuleEvent> publisher)
     {
         if (next == null)
         {

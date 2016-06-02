@@ -7,7 +7,6 @@
 package org.mule.compatibility.core.endpoint;
 
 import static org.mule.runtime.core.api.config.MuleProperties.MULE_SESSION_PROPERTY;
-
 import org.mule.compatibility.core.api.endpoint.EndpointMessageProcessorChainFactory;
 import org.mule.compatibility.core.api.endpoint.EndpointURI;
 import org.mule.compatibility.core.api.endpoint.OutboundEndpoint;
@@ -37,11 +36,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultOutboundEndpoint extends AbstractEndpoint implements OutboundEndpoint
+public class DefaultOutboundEndpoint extends AbstractEndpoint implements OutboundEndpoint, FlowConstructAware
 {
     private static final long serialVersionUID = 8860985949279708638L;
     private List<String> responseProperties;
     private MessagingExceptionHandler exceptionHandler;
+    private FlowConstruct flowConstruct;
 
     public DefaultOutboundEndpoint(Connector connector,
                                    EndpointURI endpointUri,
@@ -147,5 +147,10 @@ public class DefaultOutboundEndpoint extends AbstractEndpoint implements Outboun
     public void setMessagingExceptionHandler(MessagingExceptionHandler messagingExceptionHandler)
     {
        this.exceptionHandler = messagingExceptionHandler;
+    }
+
+    public void setFlowConstruct(FlowConstruct flowConstruct)
+    {
+        this.flowConstruct = flowConstruct;
     }
 }

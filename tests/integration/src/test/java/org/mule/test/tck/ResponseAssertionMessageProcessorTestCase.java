@@ -8,14 +8,12 @@ package org.mule.test.tck;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.when;
-
 import org.mule.functional.functional.ResponseAssertionMessageProcessor;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.api.lifecycle.InitialisationException;
 import org.mule.tck.SensingNullMessageProcessor;
 import org.mule.tck.processor.TestNonBlockingProcessor;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,13 +26,6 @@ public class ResponseAssertionMessageProcessorTestCase extends AssertionMessageP
     public void before() throws InitialisationException
     {
         testNonBlockingProcessor = new TestNonBlockingProcessor();
-        testNonBlockingProcessor.initialise();
-    }
-
-    @After
-    public void after()
-    {
-        testNonBlockingProcessor.dispose();
     }
 
     @Override

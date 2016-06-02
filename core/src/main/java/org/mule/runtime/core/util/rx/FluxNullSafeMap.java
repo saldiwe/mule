@@ -6,13 +6,15 @@
  */
 package org.mule.runtime.core.util.rx;
 
+import static reactor.core.Exceptions.throwIfFatal;
+import static reactor.core.Exceptions.unwrap;
+
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import reactor.core.publisher.FluxSource;
-import reactor.core.subscriber.SubscriberBarrier;
-import reactor.core.util.Exceptions;
+import reactor.core.publisher.OperatorAdapter;
 
 public class FluxNullSafeMap<T, R> extends FluxSource<T, R>
 {
@@ -28,10 +30,10 @@ public class FluxNullSafeMap<T, R> extends FluxSource<T, R>
     @Override
     public void subscribe(Subscriber<? super R> s)
     {
-        source.subscribe(new SubscriberBarrier<T, R>(s)
+        source.subscribe(new OperatorAdapter<T, R>(s)
         {
             @Override
-            public void doNext(T event)
+            protected void doNext(T event)
             {
                 R result;
 
@@ -41,9 +43,9 @@ public class FluxNullSafeMap<T, R> extends FluxSource<T, R>
                 }
                 catch (Throwable e)
                 {
-                    Exceptions.throwIfFatal(e);
+                    throwIfFatal(e);
                     subscription.cancel();
-                    onError(Exceptions.unwrap(e));
+                    onError(unwrap(e));
                     return;
                 }
 

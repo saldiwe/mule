@@ -210,9 +210,8 @@ public abstract class AbstractSelectiveRouter extends AbstractAnnotatedObject
         return from(publisher).flatMap(event -> {
             try
             {
-                return fromIterable(getProcessorsToRoute(event)).flatMap(mp -> just(event).as
-                        (mp)).toList().map(list -> resultsHandler.aggregateResults(list, event, event.getMuleContext
-                        ()));
+                return fromIterable(getProcessorsToRoute(event)).flatMap(mp -> just(event).as(mp)).collectList().map
+                        (list -> resultsHandler.aggregateResults(list, event));
             }
             catch (RoutePathNotFoundException e)
             {

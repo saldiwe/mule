@@ -7,6 +7,7 @@
 package org.mule.runtime.core.processor.strategy;
 
 import static reactor.core.publisher.Flux.from;
+import static reactor.core.scheduler.Schedulers.fromExecutor;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.construct.Pipeline;
 import org.mule.runtime.core.api.processor.MessageProcessor;
@@ -27,7 +28,7 @@ public class ProactorProcessingStrategy extends NonBlockingProcessingStrategy
                                                                        Function<Publisher<MuleEvent>,
                                                                                Publisher<MuleEvent>> publisherFunction)
     {
-        return publisher -> from(publisher).publishOn(eventLoop).as(publisherFunction);
+        return publisher -> from(publisher).publishOn(fromExecutor(executorService)).as(publisherFunction);
     }
 
     public Function<Publisher<MuleEvent>, Publisher<MuleEvent>> onProcessor(MessageProcessor messageProcessor,
@@ -37,8 +38,8 @@ public class ProactorProcessingStrategy extends NonBlockingProcessingStrategy
     {
         if (messageProcessor.isBlocking())
         {
-            return publisher -> from(publisher).publishOn(executorService).compose(publisherFunction).publishOn
-                    (eventLoop);
+            return publisher -> from(publisher).publishOn(fromExecutor(executorService)).compose(publisherFunction).publishOn
+                    (fromExecutor(eventLoop));
         }
         else
         {

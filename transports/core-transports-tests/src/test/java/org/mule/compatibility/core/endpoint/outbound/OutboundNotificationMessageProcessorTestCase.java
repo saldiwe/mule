@@ -13,15 +13,12 @@ import static org.junit.Assert.assertThat;
 import static org.mule.compatibility.core.context.notification.EndpointMessageNotification.MESSAGE_DISPATCH_END;
 import static org.mule.compatibility.core.context.notification.EndpointMessageNotification.MESSAGE_SEND_END;
 import static org.mule.runtime.core.MessageExchangePattern.REQUEST_RESPONSE;
-
 import org.mule.compatibility.core.api.endpoint.OutboundEndpoint;
-import org.mule.compatibility.core.endpoint.outbound.OutboundNotificationMessageProcessor;
 import org.mule.compatibility.core.processor.AbstractMessageProcessorTestCase;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.processor.MessageProcessor;
-import org.mule.tck.SensingNullReplyToHandler;
 
 import java.util.concurrent.TimeUnit;
 
@@ -54,21 +51,6 @@ public class OutboundNotificationMessageProcessorTestCase extends AbstractMessag
         OutboundEndpoint endpoint = createTestOutboundEndpoint(null, null, null, null, REQUEST_RESPONSE, null);
         MessageProcessor mp = new OutboundNotificationMessageProcessor(endpoint);
         MuleEvent event = createTestOutboundEvent();
-        mp.process(event);
-
-        assertMessageNotification(listener, endpoint, event, MESSAGE_SEND_END);
-    }
-
-    @Test
-    public void testSendNonBlocking() throws Exception
-    {
-        TestEndpointMessageNotificationListener listener = new TestEndpointMessageNotificationListener();
-        muleContext.registerListener(listener);
-
-        OutboundEndpoint endpoint = createTestOutboundEndpoint(null, null, null, null, REQUEST_RESPONSE, null);
-        MessageProcessor mp = new OutboundNotificationMessageProcessor(endpoint);
-        SensingNullReplyToHandler nullReplyToHandler = new SensingNullReplyToHandler();
-        MuleEvent event = getNonBlockingTestEventUsingFlow(TEST_MESSAGE, nullReplyToHandler);
         mp.process(event);
 
         assertMessageNotification(listener, endpoint, event, MESSAGE_SEND_END);

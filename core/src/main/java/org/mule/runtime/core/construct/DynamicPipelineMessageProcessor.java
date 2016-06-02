@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.reactivestreams.Publisher;
+
 /**
  * Experimental implementation that supports a single dynamic pipeline due to restrictions
  * imposed by intercepting message processors and their lifecycle.
@@ -54,6 +56,12 @@ public class DynamicPipelineMessageProcessor extends AbstractInterceptingMessage
     public MuleEvent process(MuleEvent event) throws MuleException
     {
         return processNext(event);
+    }
+
+    @Override
+    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
+    {
+        return applyNext(publisher);
     }
 
     @Override

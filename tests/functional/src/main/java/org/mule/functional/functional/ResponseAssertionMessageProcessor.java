@@ -6,6 +6,7 @@
  */
 package org.mule.functional.functional;
 
+import static reactor.core.Exceptions.propagate;
 import static reactor.core.publisher.Flux.from;
 import org.mule.runtime.core.VoidMuleEvent;
 import org.mule.runtime.core.api.MessagingException;
@@ -19,7 +20,6 @@ import org.mule.runtime.core.api.processor.InterceptingMessageProcessor;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.execution.MessageProcessorExecutionTemplate;
 import org.mule.runtime.core.processor.chain.DefaultMessageProcessorChain;
-import org.mule.runtime.core.processor.chain.ProcessorExecutorFactory;
 
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.util.Exceptions;
 
 public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor implements
         InterceptingMessageProcessor, FlowConstructAware, Startable
@@ -56,7 +55,7 @@ public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor
             }
             catch (MuleException e)
             {
-                throw Exceptions.propagate(new MessagingException(event, e));
+                throw propagate(new MessagingException(event, e));
             }
         });
         flux = Flux.from(flux.as(DefaultMessageProcessorChain.from(next)));
@@ -67,7 +66,7 @@ public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor
             }
             catch (MuleException e)
             {
-                throw Exceptions.propagate(new MessagingException(event, e));
+                throw propagate(new MessagingException(event, e));
             }
         });
     }

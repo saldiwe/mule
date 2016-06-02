@@ -7,10 +7,6 @@
 
 package org.mule.runtime.core.routing;
 
-import static reactor.core.publisher.Flux.from;
-import static reactor.core.publisher.Flux.fromIterable;
-import static reactor.core.publisher.Flux.just;
-import static reactor.core.util.Exceptions.propagate;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.OptimizedRequestContext;
 import org.mule.runtime.core.api.DefaultMuleException;
@@ -48,10 +44,8 @@ import java.util.concurrent.TimeUnit;
 import javax.resource.spi.work.WorkException;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
 
 /**
  * <p>

@@ -7,6 +7,7 @@
 package org.mule.compatibility.core.api.endpoint;
 
 import org.mule.runtime.core.api.exception.MessagingExceptionHandlerAware;
+import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.api.transport.LegacyOutboundEndpoint;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
  * @deprecated Transport infrastructure is deprecated.
  */
 @Deprecated
-public interface OutboundEndpoint extends ImmutableEndpoint, MessagingExceptionHandlerAware, LegacyOutboundEndpoint
+public interface OutboundEndpoint extends ImmutableEndpoint, MessagingExceptionHandlerAware, LegacyOutboundEndpoint, MessageProcessor
 {    
     /**
      * @return a list of properties which should be carried over from the request message to the response message

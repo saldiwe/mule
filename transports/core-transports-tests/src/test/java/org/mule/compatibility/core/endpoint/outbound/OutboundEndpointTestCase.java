@@ -7,9 +7,6 @@
 package org.mule.compatibility.core.endpoint.outbound;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -36,28 +33,24 @@ import org.mule.compatibility.core.transformer.simple.ResponseAppendTransformer;
 import org.mule.compatibility.core.transport.AbstractMessageDispatcher;
 import org.mule.runtime.api.execution.CompletionHandler;
 import org.mule.runtime.core.MessageExchangePattern;
-import org.mule.runtime.core.NonBlockingVoidMuleEvent;
 import org.mule.runtime.core.RequestContext;
 import org.mule.runtime.core.VoidMuleEvent;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 import org.mule.runtime.core.api.MuleMessage;
-import org.mule.runtime.core.api.routing.RoutingException;
 import org.mule.runtime.core.api.routing.filter.Filter;
 import org.mule.runtime.core.api.security.SecurityFilter;
 import org.mule.runtime.core.api.transaction.TransactionConfig;
 import org.mule.runtime.core.api.transformer.Transformer;
 import org.mule.runtime.core.context.notification.SecurityNotification;
 import org.mule.runtime.core.util.concurrent.Latch;
-import org.mule.tck.SensingNullReplyToHandler;
 import org.mule.tck.security.TestSecurityFilter;
 import org.mule.tck.testmodels.mule.TestMessageDispatcher;
 import org.mule.tck.testmodels.mule.TestMessageDispatcherFactory;
 
 import java.util.concurrent.TimeUnit;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 /**
@@ -89,73 +82,6 @@ public class OutboundEndpointTestCase extends AbstractMessageProcessorTestCase
         
         assertMessageSentSame(true);
         assertEqualMessages(responseMessage, result.getMessage());
-    }
-
-    @Test
-    public void testDefaultFlowNonBlocking() throws Exception
-    {
-        Transformer reqTransformer = mock(Transformer.class);
-        when(reqTransformer.process(any(MuleEvent.class))).then(echoEventAnswer);
-        Transformer resTransformer = mock(Transformer.class);
-        when(resTransformer.process(any(MuleEvent.class))).then(echoEventAnswer);
-
-        OutboundEndpoint endpoint = createOutboundEndpoint(null, null, reqTransformer, resTransformer,
-                REQUEST_RESPONSE, null);
-
-        SensingNullReplyToHandler nullReplyToHandler = new SensingNullReplyToHandler();
-        MuleEvent event = getNonBlockingTestEventUsingFlow(TEST_MESSAGE, nullReplyToHandler);
-
-        MuleEvent response = endpoint.process(event);
-        assertThat(response, CoreMatchers.<MuleEvent> equalTo(NonBlockingVoidMuleEvent.getInstance()));
-
-        assertThat(getNonBlockingResponse(nullReplyToHandler, response), equalTo(event));
-        verify(reqTransformer, times(1)).process(event);
-        verify(resTransformer, times(1)).process(event);
-    }
-
-    @Test
-    public void testDefaultFlowNonBlockingError() throws Exception
-    {
-        OutboundEndpoint endpoint = createOutboundEndpoint("test://AlwaysFail", null, null, null, null,
-                REQUEST_RESPONSE, null);
-        SensingNullReplyToHandler nullReplyToHandler = new SensingNullReplyToHandler();
-        MuleEvent event = getNonBlockingTestEventUsingFlow(TEST_MESSAGE, nullReplyToHandler);
-
-        MuleEvent response = endpoint.process(event);
-        assertThat(response, CoreMatchers.<MuleEvent> equalTo(NonBlockingVoidMuleEvent.getInstance()));
-
-        try
-        {
-            getNonBlockingResponse(nullReplyToHandler, response);
-            fail("Exception Expected");
-        }
-        catch (Exception e)
-        {
-            assertThat(e, instanceOf(MessagingException.class));
-            assertThat(e.getCause(), instanceOf(RoutingException.class));
-        }
-
-        assertThat(nullReplyToHandler.event, is(nullValue()));
-    }
-
-    protected MuleEvent getNonBlockingResponse(SensingNullReplyToHandler replyToHandler, MuleEvent result) throws Exception
-    {
-        if (NonBlockingVoidMuleEvent.getInstance() == result)
-        {
-            if (!replyToHandler.latch.await(RECEIVE_TIMEOUT, TimeUnit.MILLISECONDS))
-            {
-                throw new RuntimeException("No Non-Blocking Response");
-            }
-            if (replyToHandler.exception != null)
-            {
-                throw replyToHandler.exception;
-            }
-            return replyToHandler.event;
-        }
-        else
-        {
-            return result;
-        }
     }
 
     @Test

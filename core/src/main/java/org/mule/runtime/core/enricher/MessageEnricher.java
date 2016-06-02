@@ -7,6 +7,7 @@
 package org.mule.runtime.core.enricher;
 
 import static org.mule.runtime.core.OptimizedRequestContext.unsafeSetEvent;
+import static reactor.core.Exceptions.propagate;
 import static reactor.core.publisher.Flux.just;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.VoidMuleEvent;
@@ -31,7 +32,6 @@ import java.util.List;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.util.Exceptions;
 
 /**
  * The <code>Message Enricher</code> allows the current message to be augmented using data from a seperate
@@ -83,7 +83,7 @@ public class MessageEnricher extends AbstractMessageProcessorOwner implements Me
                     }
                     catch (MuleException e)
                     {
-                        throw Exceptions.propagate(new MessagingException(event, e));
+                        throw propagate(new MessagingException(event, e));
                     }
                 }));
     }

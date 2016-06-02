@@ -8,6 +8,7 @@ package org.mule.compatibility.core.transport;
 
 import static org.apache.commons.lang.SystemUtils.LINE_SEPARATOR;
 import static org.mule.compatibility.core.registry.MuleRegistryTransportHelper.lookupServiceDescriptor;
+import static reactor.core.publisher.Flux.from;
 
 import org.mule.compatibility.core.api.endpoint.EndpointURI;
 import org.mule.compatibility.core.api.endpoint.ImmutableEndpoint;
@@ -111,8 +112,12 @@ import javax.resource.spi.work.WorkListener;
 
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * <code>AbstractConnector</code> provides base functionality for all connectors

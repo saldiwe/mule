@@ -8,6 +8,7 @@ package org.mule.functional.junit4;
 
 import static org.junit.Assert.fail;
 import static org.mule.runtime.core.execution.TransactionalExecutionTemplate.createTransactionalExecutionTemplate;
+import static reactor.core.Exceptions.unwrap;
 import static reactor.core.publisher.Mono.from;
 import static reactor.core.publisher.Mono.just;
 import org.mule.functional.functional.FlowAssert;
@@ -22,7 +23,6 @@ import org.mule.runtime.core.construct.Flow;
 import org.mule.runtime.core.transaction.MuleTransactionConfig;
 
 import org.apache.commons.collections.Transformer;
-import reactor.core.util.Exceptions;
 
 /**
  * Provides a fluent API for running events through flows.
@@ -133,9 +133,9 @@ public class FlowRunner extends FlowConstructRunner<FlowRunner>
             {
                 responseEvent = from(just(getOrBuildEvent()).as(flow)).block();
             }
-            catch (Exceptions.ReactiveException re)
+            catch (Exception re)
             {
-                throw (Exception) Exceptions.unwrap(re);
+                throw (Exception) unwrap(re);
             }
         }
         else

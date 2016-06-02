@@ -7,6 +7,8 @@
 package org.mule.runtime.core.processor;
 
 import static reactor.core.publisher.Flux.just;
+import org.mule.runtime.core.DefaultMuleEvent;
+import org.mule.runtime.core.VoidMuleEvent;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
@@ -20,12 +22,7 @@ import org.mule.runtime.core.api.lifecycle.Lifecycle;
 import org.mule.runtime.core.api.lifecycle.Startable;
 import org.mule.runtime.core.api.lifecycle.Stoppable;
 import org.mule.runtime.core.api.processor.MessageProcessor;
-import org.mule.runtime.core.execution.MessageProcessorExecutionTemplate;
-import org.mule.runtime.core.processor.chain.BlockingProcessorExecutor;
 import org.mule.runtime.core.processor.chain.DefaultMessageProcessorChain;
-
-import java.util.Collections;
-import java.util.List;
 
 import org.reactivestreams.Publisher;
 
@@ -74,26 +71,20 @@ public class ResponseMessageProcessorAdapter extends AbstractRequestResponseMess
         }
         else
         {
-            return new CopyOnNullNonBlockingProcessorExecutor(response, Collections.singletonList(responseProcessor),
-                                                              MessageProcessorExecutionTemplate
-                                                                      .createExecutionTemplate(), true).execute();
-        }
-    }
-
-    class CopyOnNullNonBlockingProcessorExecutor extends BlockingProcessorExecutor
-    {
-
-        public CopyOnNullNonBlockingProcessorExecutor(MuleEvent event, List<MessageProcessor> processors,
-                                                      MessageProcessorExecutionTemplate executionTemplate, boolean
-                copyOnVoidEvent)
-        {
-            super(event, processors, executionTemplate, copyOnVoidEvent);
-        }
-
-        @Override
-        protected boolean isUseEventCopy(MuleEvent result)
-        {
-            return super.isUseEventCopy(result) || result == null;
+            MuleEvent copy = new DefaultMuleEvent(response.getMessage(), response);
+            MuleEvent result = responseProcessor.process(response);
+            if (result == null || VoidMuleEvent.getInstance().equals(result))
+            {
+                // If <response> returns null then it acts as an implicit branch like in flows, the different
+                // here is that what's next, it's not another message processor that follows this one in the
+                // configuration file but rather the response phase of the inbound endpoint, or optionally
+                // other response processing on the way back to the inbound endpoint.
+                return copy;
+            }
+            else
+            {
+                return result;
+            }
         }
     }
 

@@ -6,17 +6,17 @@
  */
 package org.mule.runtime.core.processor;
 
+import static reactor.core.Exceptions.propagate;
 import static reactor.core.publisher.Flux.from;
 import static reactor.core.publisher.Flux.just;
-import static reactor.core.tuple.Tuple.of;
-import static reactor.core.util.Exceptions.propagate;
+import static reactor.util.function.Tuples.of;
 import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.tuple.Tuple2;
+import reactor.util.function.Tuple2;
 
 /**
  * Base implementation of a {@link org.mule.runtime.core.api.processor.MessageProcessor} that may performs processing during both the
@@ -58,7 +58,7 @@ public abstract class AbstractRequestResponseMessageProcessor extends AbstractIn
         });
         if (next != null)
         {
-            flux = flux.map(tuple -> of(tuple.getT1(), from(from(tuple.getT2()).as(next))));
+            flux = flux.map(tuple -> of(tuple.getT1(), from(applyNext(tuple.getT2()))));
         }
         return flux.flatMap(tuple -> from(tuple.getT2()).flatMap(event -> {
             try

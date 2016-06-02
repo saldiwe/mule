@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.core.processor;
 
+import static reactor.core.Exceptions.propagate;
 import static reactor.core.publisher.Flux.from;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
@@ -15,7 +16,6 @@ import org.mule.runtime.core.api.lifecycle.LifecycleUtils;
 import org.mule.runtime.core.api.security.SecurityFilter;
 
 import org.reactivestreams.Publisher;
-import reactor.core.util.Exceptions;
 
 /**
  * Filters the flow using the specified {@link SecurityFilter}. 
@@ -84,7 +84,7 @@ public class SecurityFilterMessageProcessor extends AbstractInterceptingMessageP
                 }
                 catch (Exception e)
                 {
-                    throw Exceptions.propagate(e);
+                    throw propagate(e);
                 }
             }).doOnNext(muleEvent -> {
                 if (logger.isTraceEnabled())

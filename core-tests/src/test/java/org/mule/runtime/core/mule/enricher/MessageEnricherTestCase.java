@@ -10,6 +10,7 @@ import static java.nio.charset.StandardCharsets.UTF_16;
 import static junit.framework.Assert.assertSame;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -320,7 +321,7 @@ public class MessageEnricherTestCase extends AbstractMuleContextTestCase
         MuleEvent out = enricher.process(in);
 
         assertThat(out, is(sameInstance(in)));
-        assertThat(sensingNullMessageProcessor.event, sameInstance(in));
+        assertThat(sensingNullMessageProcessor.event, not(sameInstance(in)));
     }
 
     @Test
@@ -352,7 +353,7 @@ public class MessageEnricherTestCase extends AbstractMuleContextTestCase
 
         final MuleEvent in = createNonBlockingEvent();
 
-        MuleEvent out = processEnricherNonBlocking(enricher, in);
+        processEnricherNonBlocking(enricher, in);
 
         assertThat(sensingNullMessageProcessor.event.getMessage(), sameInstance(in.getMessage()));
     }

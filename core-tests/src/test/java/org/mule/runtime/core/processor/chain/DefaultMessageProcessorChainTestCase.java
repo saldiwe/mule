@@ -19,6 +19,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static reactor.core.Exceptions.propagate;
+import static reactor.core.Exceptions.unwrap;
 import static reactor.core.publisher.Flux.from;
 import static reactor.core.publisher.Flux.just;
 import static reactor.core.publisher.Mono.justOrEmpty;
@@ -76,7 +78,6 @@ import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.util.Exceptions;
 
 @RunWith(Parameterized.class)
 @SmallTest
@@ -194,9 +195,6 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
         assertNull(mp3.event);
     }
 
-    /*
-     * Any MP returns null: - Processing doesn't proceed - Result of chain is Nnll
-     */
     @Test
     public void testMPChainWithVoidReturn() throws MuleException, Exception
     {
@@ -212,11 +210,11 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
         assertEquals("0123", process(builder.build(), requestEvent).getMessage().getPayload());
 
         // mp1
-        //assertSame(requestEvent, mp1.event);
+        assertSame(requestEvent, mp1.event);
         assertNotSame(mp1.event, mp1.resultEvent);
 
         // mp2
-        //assertSame(mp1.resultEvent, mp2.event);
+        assertSame(mp1.resultEvent, mp2.event);
         assertNotSame(mp2.event, mp2.resultEvent);
 
         // void mp
@@ -521,14 +519,13 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
     }
 
     @Test
-    public void testNestedMPChainWithVoidReturnAtEndOfNestedChainWithNonInterceptingWrapper()
-            throws MuleException, Exception
+    public void testNestedMPChainWithVoidReturnAtEndOfNestedChainWithNonInterceptingWrapper() throws Exception
     {
         DefaultMessageProcessorChainBuilder builder = new DefaultMessageProcessorChainBuilder();
         final MessageProcessor nested = new DefaultMessageProcessorChainBuilder().chain(getAppendingMP("a"),
                                                                                         getAppendingMP("b"), new
-                        ReturnVoidMP()).build();
-
+                                                                                                ReturnVoidMP()).build();
+        builder.chain(getAppendingMP("1"), event -> nested.process(new DefaultMuleEvent(event.getMessage(), MessageExchangePattern.REQUEST_RESPONSE, event.getFlowConstruct())), getAppendingMP("2"));
         assertEquals("01ab2", process(builder.build(), getTestEventUsingFlow("0")).getMessage().getPayload());
     }
 
@@ -855,9 +852,9 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
             {
                 result = Mono.from(Mono.just(event).as(messageProcessor)).block();
             }
-            catch (Exceptions.ReactiveException e)
+            catch (Exception e)
             {
-                throw (MuleException) Exceptions.unwrap(e);
+                throw (MuleException) unwrap(e);
             }
         }
         else
@@ -877,7 +874,7 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
         return new AppendingMP(append);
     }
 
-    static class TestNonIntercepting implements MessageProcessor
+    class TestNonIntercepting implements MessageProcessor
     {
 
         @Override
@@ -888,9 +885,15 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
                                                    .build(),
                     event);
         }
+
+        @Override
+        public boolean isBlocking()
+        {
+            return nonBlocking;
+        }
     }
 
-    static class TestIntercepting extends AbstractInterceptingMessageProcessor
+    class TestIntercepting extends AbstractInterceptingMessageProcessor
     {
         public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
         {
@@ -914,6 +917,12 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
                                                                .payload(event.getMessage().getPayload() + "InterceptingMessageProcessor")
                                                                .build(),
                     event));
+        }
+
+        @Override
+        public boolean isBlocking()
+        {
+            return nonBlocking;
         }
     }
 
@@ -969,8 +978,12 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
         private MuleEvent innerProcess(MuleEvent event)
         {
             this.event = event;
-            return new DefaultMuleEvent(MuleMessage.builder().payload(event.getMessage().getPayload() + appendString).build(),
+            MuleEvent result = new DefaultMuleEvent(MuleMessage.builder()
+                                                               .payload(event.getMessage().getPayload() + appendString)
+                                                               .build(),
                                         event);
+            this.resultEvent = result;
+            return result;
         }
 
         @Override
@@ -1031,7 +1044,7 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
                 }
                 catch (MuleException e1)
                 {
-                    throw Exceptions.propagate(e1);
+                    throw propagate(e1);
                 }
             });
         }
@@ -1078,13 +1091,20 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
                 return response;
             }
             return new DefaultMuleEvent(MuleMessage.builder()
-                                                .payload(event.getMessage().getPayload() + "after" + appendString).build(), response);
+                                                .payload(response.getMessage().getPayload() + "after" + appendString).build(), response);
         }
 
         @Override
         public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
         {
-            return super.apply(publisher);
+            if(stopProcessing)
+            {
+                return publisher;
+            }
+            else
+            {
+                return super.apply(publisher);
+            }
         }
 
         @Override
@@ -1210,7 +1230,7 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
         when(event.getExchangePattern()).thenReturn(exchangePattern);
         when(event.getMuleContext()).thenReturn(muleContext);
         Pipeline mockFlow = mock(Flow.class);
-        when(mockFlow.getProcessingStrategy()).thenReturn(nonBlocking ? new NonBlockingProcessingStrategy() : new
+        when(mockFlow.getProcessingStrategy()).thenReturn(nonBlocking ? new NonBlockingProcessingStrategy(executor) : new
                 DefaultFlowProcessingStrategy());
         when(mockFlow.getMuleContext()).thenReturn(muleContext);
         when(event.getFlowConstruct()).thenReturn(mockFlow);

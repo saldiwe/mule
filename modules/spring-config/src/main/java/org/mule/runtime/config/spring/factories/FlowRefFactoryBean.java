@@ -261,7 +261,7 @@ public class FlowRefFactoryBean extends AbstractAnnotatedObject
                 @Override
                 public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
                 {
-                    return from(publisher).compose(referencedFlow);
+                    return from(publisher).as(referencedFlow);
                 }
 
                 @Override

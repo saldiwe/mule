@@ -8,6 +8,8 @@ package org.mule.runtime.core.processor.chain;
 
 import static org.mule.runtime.core.execution.ExceptionToMessagingExceptionExecutionInterceptor.putContext;
 import static org.mule.runtime.core.execution.MessageProcessorNotificationExecutionInterceptor.fireNotification;
+import org.mule.runtime.core.DefaultMuleEvent;
+import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.OptimizedRequestContext;
 import org.mule.runtime.core.VoidMuleEvent;
 import org.mule.runtime.core.api.MessagingException;
@@ -76,10 +78,48 @@ public class DefaultMessageProcessorChain extends AbstractMessageProcessorChain
         return new DefaultMessageProcessorChainBuilder().chain(messageProcessors).build();
     }
 
-    @Override
     protected MuleEvent doProcess(MuleEvent event) throws MuleException
     {
-        return new ProcessorExecutorFactory().createProcessorExecutor(event, processors, messageProcessorExecutionTemplate, true).execute();
+        MuleEvent copy = null;
+
+        for (int i = 0; i < processors.size(); i++)
+        {
+            MessageProcessor processor = processors.get(i);
+            if (processorMayReturnNull(processor))
+            {
+                copy = new DefaultMuleEvent(event.getMessage(), event);
+            }
+
+            event = messageProcessorExecutionTemplate.execute(processor, event);
+
+            if (VoidMuleEvent.getInstance().equals(event))
+            {
+                OptimizedRequestContext.unsafeSetEvent(copy);
+                event = copy;
+            }
+            else if (event == null)
+            {
+                return null;
+            }
+        }
+        return event;
+    }
+
+    protected boolean processorMayReturnNull(MessageProcessor processor)
+    {
+        if (processor instanceof LegacyOutboundEndpoint)
+        {
+            MessageExchangePattern exchangePattern = ((LegacyOutboundEndpoint) processor).getExchangePattern();
+            return exchangePattern == null ? true : !exchangePattern.hasResponse();
+        }
+        else if (processor instanceof Component || processor instanceof Transformer || processor instanceof MessageFilter)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     @Override
@@ -124,20 +164,19 @@ public class DefaultMessageProcessorChain extends AbstractMessageProcessorChain
 
     private Function<Publisher<MuleEvent>, Publisher<MuleEvent>> invokeProcessor(MessageProcessor processor)
     {
-        if (!(processor instanceof Transformer || processor instanceof MessageFilter || processor instanceof Component
-              || (processor instanceof LegacyOutboundEndpoint && !((LegacyOutboundEndpoint) processor)
-                .mayReturnVoidEvent())))
+        if (processorMayReturnNull(processor))
         {
             return publisher -> Flux.from(publisher)
                     .doOnNext(preNotification(processor))
                     .concatMap(event ->
                                {
                                    OptimizedRequestContext.unsafeSetEvent(event);
+                                   MuleEvent copy = new DefaultMuleEvent(event.getMessage(), event);
                                    return Flux.just(event)
                                            .compose(processor)
                                            .mapError(wrapException(processor, event))
                                            .map(result -> VoidMuleEvent.getInstance().equals(result) ?
-                                                          OptimizedRequestContext.unsafeSetEvent(event) : result)
+                                                          OptimizedRequestContext.unsafeSetEvent(copy) : result)
                                            .doOnNext(postNotification(processor))
                                            .doOnError(MessagingException.class, errorNotification(processor));
                                });
