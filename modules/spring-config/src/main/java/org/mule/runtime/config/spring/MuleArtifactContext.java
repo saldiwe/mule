@@ -12,6 +12,7 @@ import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.CONFIGUR
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_MULE_CONFIGURATION;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_MULE_CONTEXT;
 import static org.mule.runtime.core.util.Preconditions.checkArgument;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import static org.springframework.context.annotation.AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME;
 import static org.springframework.context.annotation.AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME;
 import static org.springframework.context.annotation.AnnotationConfigUtils.REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME;
@@ -32,11 +33,14 @@ import org.mule.runtime.config.spring.processors.PostRegistrationActionsPostProc
 import org.mule.runtime.config.spring.util.LaxInstantiationStrategyWrapper;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleRuntimeException;
+import org.mule.runtime.core.api.config.MuleProperties;
 import org.mule.runtime.core.config.ConfigResource;
+import org.mule.runtime.core.config.DefaultMuleConfiguration;
 import org.mule.runtime.core.registry.MuleRegistryHelper;
 import org.mule.runtime.core.util.IOUtils;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 import org.springframework.beans.BeansException;
@@ -44,6 +48,7 @@ import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostPr
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.CglibSubclassingInstantiationStrategy;
@@ -303,6 +308,18 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext
         {
             currentMuleContext.remove();
         }
+    }
+
+    @Override
+    protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+    {
+        Optional<ComponentModel> configurationOptional = applicationModel.findComponentDefinitionModel(ApplicationModel.CONFIGURATION_IDENTIFIER);
+        if (configurationOptional.isPresent())
+        {
+            return;
+        }
+        BeanDefinitionRegistry beanDefinitionRegistry = (BeanDefinitionRegistry) beanFactory;
+        beanDefinitionRegistry.registerBeanDefinition(OBJECT_MULE_CONFIGURATION, genericBeanDefinition(MuleConfigurationConfigurator.class).getBeanDefinition());
     }
 
     protected BeanDefinitionReader createBeanDefinitionReader(DefaultListableBeanFactory beanFactory)

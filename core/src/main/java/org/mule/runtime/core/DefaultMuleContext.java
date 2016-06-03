@@ -306,7 +306,7 @@ public class DefaultMuleContext implements MuleContext
     @Override
     public synchronized void start() throws MuleException
     {
-        resetConfiguration();
+        //resetConfiguration();
         getLifecycleManager().checkPhase(Startable.PHASE_NAME);
 
         if (getQueueManager() == null)

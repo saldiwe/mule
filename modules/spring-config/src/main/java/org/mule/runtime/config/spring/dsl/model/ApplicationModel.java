@@ -7,6 +7,7 @@
 package org.mule.runtime.config.spring.dsl.model;
 
 import static java.lang.String.format;
+import static java.util.Optional.empty;
 import static org.mule.runtime.config.spring.dsl.processor.xml.CoreXmlNamespaceInfoProvider.CORE_NAMESPACE_NAME;
 import static org.mule.runtime.config.spring.dsl.processor.xml.XmlCustomAttributeHandler.from;
 import static org.mule.runtime.config.spring.dsl.processor.xml.XmlCustomAttributeHandler.to;
@@ -25,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.w3c.dom.Element;
@@ -171,6 +173,19 @@ public class ApplicationModel
     public ComponentModel findComponentDefinitionModel(Element element)
     {
         return innerFindComponentDefinitionModel(element, componentModels);
+    }
+
+    public Optional<ComponentModel> findComponentDefinitionModel(ComponentIdentifier componentIdentifier)
+    {
+        if (componentModels.isEmpty())
+        {
+            return empty();
+        }
+        return componentModels.get(0).getInnerComponents().stream()
+                .filter(ComponentModel::isRoot)
+                .filter( componentModel -> {
+                    return componentModel.getIdentifier().equals(componentIdentifier);
+                }).findFirst();
     }
 
     private void convertConfigFileToComponentModel(ApplicationConfig applicationConfig)
