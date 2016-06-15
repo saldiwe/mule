@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+       http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <!--<http:request-config name="simple-config" host="httpbin.org/basic-auth" port="80" basePath="/">-->
+        <!--<http:basic-authentication username="#[someUserConfig]" password="#[somePassConfig]"/>-->
+    <!--</http:request-config>-->
+
+    <module name="basic-auth">
+        <config name="config">
+            <parameters>
+                <parameter parameterName="someUserConfig" defaultValue="some-username"/>
+                <parameter parameterName="somePassConfig" defaultValue="some-password"/>
+            </parameters>
+            <!-- commented out until make it work -->
+            <http:request-config name="simple-config" host="httpbin.org/basic-auth" port="80" basePath="/">
+                <http:basic-authentication username="#[someUserConfig]" password="#[somePassConfig]"/>
+            </http:request-config>
+        </config>
+
+        <operation name="do-login">
+            <parameters>
+                <parameter parameterName="someUser" defaultValue="usernameX"/>
+                <parameter parameterName="somePass" defaultValue="passwordX"/>
+            </parameters>
+            <body>
+                <set-payload value="hardcoded value from module"/>
+                <!-- commented out until make it work -->
+                <!--<http:request config-ref="simple-config" path="/{aUser}/{aPass}" method="GET">-->
+                    <!--<http:request-builder>-->
+                        <!--<http:query-param paramName="{aPass}" value="#[passwordX]"/>-->
+                        <!--<http:uri-param paramName="{aUser}" value="#[usernameX]"/>-->
+                    <!--</http:request-builder>-->
+                <!--</http:request>-->
+            </body>
+        </operation>
+    </module>
+
+    <!-- Flows definitions and config-ref below -->
+
+    <config-ref module="basic-auth" name="aConfigRunning" >
+        <parameter-ref parameterName="someUserConfig" value="userLP"/>
+        <parameter-ref parameterName="somePassConfig" value="passLP"/>
+    </config-ref>
+
+    <flow name="testHttpDoLogin">
+        <operation-ref module="basic-auth" operation="do-login" config="aConfigRunning">
+            <parameter-ref parameterName="someUser" value="userLP"/>
+            <parameter-ref parameterName="somePass" value="passLP"/>
+        </operation-ref>
+    </flow>
+
+</mule>

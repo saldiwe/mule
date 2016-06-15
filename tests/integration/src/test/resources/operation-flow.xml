@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+    <operation name="set-payload-hardcoded-value">
+        <body>
+            <set-payload value="hardcoded value"/>
+        </body>
+    </operation>
+
+    <operation name="set-payload-param-value">
+        <parameters>
+            <parameter parameterName="value"/>
+        </parameters>
+        <body>
+            <set-payload value="#[value]"/>
+        </body>
+    </operation>
+
+    <operation name="set-payload-param-default-value">
+        <parameters>
+            <parameter parameterName="value" defaultValue="15"/>
+        </parameters>
+        <body>
+            <set-payload value="#[value]"/>
+        </body>
+    </operation>
+
+    <operation name="set-payload-no-side-effect">
+        <body>
+            <set-payload value="10"/>
+            <set-variable variableName="testVar" value="inside the operation value changed"/>
+        </body>
+    </operation>
+
+    <operation name="do-nothing">
+        <body>
+            <logger/>
+        </body>
+    </operation>
+
+    <!-- Flows definitions below -->
+
+    <flow name="testSetPayloadHardcodedFlow">
+        <operation-ref operation="set-payload-hardcoded-value" />
+    </flow>
+
+    <flow name="testSetPayloadParamFlow">
+        <operation-ref operation="set-payload-param-value" >
+            <parameter-ref parameterName="value" value="new payload"/>
+        </operation-ref>
+    </flow>
+
+    <flow name="testSetPayloadParamDefaultFlow">
+        <operation-ref operation="set-payload-param-default-value" />
+    </flow>
+
+    <flow name="testSetPayloadNoSideEffectFlow">
+        <set-variable variableName="testVar" value="unchanged value"/>
+        <operation-ref operation="set-payload-no-side-effect" />
+    </flow>
+
+    <flow name="testDoNothingFlow">
+        <set-variable variableName="variableBeforeCalling" value="value of flowvar before calling"/>
+        <set-payload value="before calling" />
+        <operation-ref operation="do-nothing" />
+    </flow>
+
+    <flow name="testWithoutParametersFlow">
+        <operation-ref operation="set-payload-param-value" />
+        <set-payload value="should have not reach here" />
+    </flow>
+
+    <flow name="testWithMoreThanExpectedParametersFlow">
+        <operation-ref operation="set-payload-param-value">
+            <parameter-ref parameterName="value1" value="value1"/>
+            <parameter-ref parameterName="value2" value="value2"/>
+        </operation-ref>
+        <set-payload value="should have not reach here" />
+    </flow>
+</mule>

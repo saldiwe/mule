@@ -182,6 +182,11 @@ public class ComponentModel
         return beanReference;
     }
 
+    public void setIdentifier(ComponentIdentifier identifier)
+    {
+        this.identifier = identifier;
+    }
+
     /**
      * @param parameterName configuration parameter name
      * @return true if the value provided for the configuration parameter was get from the DSL schema, false if it was explicitly defined in the config

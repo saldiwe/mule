@@ -65,6 +65,13 @@ public class BeanDefinitionFactory
     private final ImmutableSet<ComponentIdentifier> ignoredMuleCoreComponentIdentifiers = ImmutableSet.<ComponentIdentifier>builder()
             .add(new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(MULE_ROOT_ELEMENT).build())
             .add(new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(DESCRIPTION_ELEMENT).build())
+            //TODO remove dead code
+            //.add(ApplicationModel.OPERATION_IDENTIFIER)
+            //.add(ApplicationModel.OPERATION_PARAMETERS_IDENTIFIER)
+            //.add(ApplicationModel.OPERATION_PARAMETER_IDENTIFIER)
+            //.add(ApplicationModel.OPERATION_CONFIG_IDENTIFIER)
+            //.add(ApplicationModel.OPERATION_CONFIG_REF_IDENTIFIER)
+            //.add(ApplicationModel.OPERATION_MODULE_IDENTIFIER)
             .build();
 
     /**

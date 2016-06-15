@@ -31,6 +31,7 @@ import org.mule.runtime.config.spring.factories.AsyncMessageProcessorsFactoryBea
 import org.mule.runtime.config.spring.factories.ChoiceRouterFactoryBean;
 import org.mule.runtime.config.spring.factories.MessageProcessorChainFactoryBean;
 import org.mule.runtime.config.spring.factories.MessageProcessorFilterPairFactoryBean;
+import org.mule.runtime.config.spring.factories.OperationChainObjectFactory;
 import org.mule.runtime.config.spring.factories.PollingMessageSourceFactoryBean;
 import org.mule.runtime.config.spring.factories.ResponseMessageProcessorsFactoryBean;
 import org.mule.runtime.config.spring.factories.ScatterGatherRouterFactoryBean;
@@ -58,6 +59,13 @@ import org.mule.runtime.core.exception.ChoiceMessagingExceptionStrategy;
 import org.mule.runtime.core.exception.DefaultMessagingExceptionStrategy;
 import org.mule.runtime.core.exception.RedeliveryExceeded;
 import org.mule.runtime.core.exception.RollbackMessagingExceptionStrategy;
+import org.mule.runtime.core.extension.define.ConfigOperation;
+import org.mule.runtime.core.extension.define.ModuleOperation;
+import org.mule.runtime.core.extension.define.OperationChain;
+import org.mule.runtime.core.extension.define.OperationParameter;
+import org.mule.runtime.core.extension.execute.ConfigExecutor;
+import org.mule.runtime.core.extension.execute.OperationExecutor;
+import org.mule.runtime.core.extension.execute.ParameterRef;
 import org.mule.runtime.core.processor.AsyncDelegateMessageProcessor;
 import org.mule.runtime.core.processor.IdempotentRedeliveryPolicy;
 import org.mule.runtime.core.processor.ResponseMessageProcessorAdapter;
@@ -88,6 +96,7 @@ import org.mule.runtime.core.transaction.lookup.Resin3TransactionManagerLookupFa
 import org.mule.runtime.core.transaction.lookup.WeblogicTransactionManagerLookupFactory;
 import org.mule.runtime.core.transaction.lookup.WebsphereTransactionManagerLookupFactory;
 import org.mule.runtime.core.transformer.AbstractTransformer;
+import org.mule.runtime.core.transformer.simple.AddFlowVariableTransformer;
 import org.mule.runtime.core.transformer.simple.SetPayloadMessageProcessor;
 
 import java.util.LinkedList;
@@ -530,7 +539,13 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
                                                  .withSetterParameterDefinition("listener", fromSimpleReferenceParameter("ref").build())
                                                  .withSetterParameterDefinition("subscription", fromSimpleParameter("subscription").build())
                                                  .build());
-
+        componentBuildingDefinitions.add(baseDefinition
+                                                 .copy()
+                                                 .withIdentifier("set-variable")
+                                                 .withTypeDefinition(fromType(AddFlowVariableTransformer.class))
+                                                 .withSetterParameterDefinition("identifier", fromSimpleParameter("variableName").build())
+                                                 .withSetterParameterDefinition("value", fromSimpleParameter("value").build())
+                                                 .build());
         return componentBuildingDefinitions;
     }
 

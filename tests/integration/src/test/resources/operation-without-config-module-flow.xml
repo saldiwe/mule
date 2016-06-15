@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+    <module name="mule-utils">
+        <operation name="set-payload-hardcoded-value">
+            <body>
+                <set-payload value="hardcoded value from module"/>
+            </body>
+        </operation>
+
+        <operation name="set-payload-param-value">
+            <parameters>
+                <parameter parameterName="value"/>
+            </parameters>
+            <body>
+                <set-payload value="#[value + ' from module']"/>
+            </body>
+        </operation>
+
+        <operation name="set-payload-hardcoded-value-from-module-that-calls-app">
+            <body>
+                <operation-ref operation="set-payload-hardcoded-value"/>
+            </body>
+        </operation>
+    </module>
+
+    <operation name="set-payload-hardcoded-value">
+        <body>
+            <set-payload value="hardcoded value from app"/>
+        </body>
+    </operation>
+
+    <operation name="set-payload-param-value">
+        <parameters>
+            <parameter parameterName="value"/>
+        </parameters>
+        <body>
+            <set-payload value="#[value + ' from app']"/>
+        </body>
+    </operation>
+
+    <operation name="set-payload-hardcoded-value-from-app-that-calls-module">
+        <body>
+            <operation-ref module="mule-utils" operation="set-payload-hardcoded-value"/>
+        </body>
+    </operation>
+
+    <!-- Flows definitions below -->
+
+    <flow name="testSetPayloadHardcodedFromModuleFlow">
+        <operation-ref module="mule-utils" operation="set-payload-hardcoded-value"/>
+    </flow>
+
+    <flow name="testSetPayloadParamFromModuleFlow">
+        <operation-ref module="mule-utils" operation="set-payload-param-value" >
+            <parameter-ref parameterName="value" value="new payload"/>
+        </operation-ref>
+    </flow>
+
+    <flow name="testSetPayloadHardcodedFromAppFlow">
+        <operation-ref operation="set-payload-hardcoded-value"/>
+    </flow>
+
+    <flow name="testSetPayloadParamFromAppFlow">
+        <operation-ref operation="set-payload-param-value" >
+            <parameter-ref parameterName="value" value="new payload"/>
+        </operation-ref>
+    </flow>
+
+    <flow name="testSetPayloadHardcodedFromAppThatCallsModuleFlow">
+        <operation-ref operation="set-payload-hardcoded-value-from-app-that-calls-module"/>
+    </flow>
+
+    <flow name="testSetPayloadHardcodedFromModuleThatCallsAppFlow">
+        <operation-ref module="mule-utils" operation="set-payload-hardcoded-value-from-module-that-calls-app"/>
+    </flow>
+</mule>

@@ -116,6 +116,15 @@ public class ApplicationModel
     public static final ComponentIdentifier TRANSFORMER_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(TRANSFORMER_REFERENCE_ELEMENT).build();
     public static final ComponentIdentifier QUEUE_STORE_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(QUEUE_STORE).build();
     public static final ComponentIdentifier CONFIGURATION_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(CONFIGURATION_ELEMENT).build();
+    //TODO remove dead code
+    //public static final ComponentIdentifier OPERATION_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName("operation").build();
+    //public static final ComponentIdentifier OPERATION_REF_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName("operation-ref").build();
+    //public static final ComponentIdentifier OPERATION_PARAMETERS_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName("parameters").build();
+    //public static final ComponentIdentifier OPERATION_PARAMETER_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName("parameter").build();
+    //public static final ComponentIdentifier OPERATION_BODY_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName("body").build();
+    //public static final ComponentIdentifier OPERATION_CONFIG_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName("config").build();
+    //public static final ComponentIdentifier OPERATION_CONFIG_REF_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName("config-ref").build();
+    //public static final ComponentIdentifier OPERATION_MODULE_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName("module").build();
     public static final ComponentIdentifier SPRING_PROPERTY_PLACEHOLDER_IDENTIFIER = new ComponentIdentifier.Builder().withNamespace(SPRING_CONTEXT_NAMESPACE).withName(PROPERTY_PLACEHOLDER_ELEMENT).build();
 
     private static ImmutableSet<ComponentIdentifier> ignoredNameValidationComponentList = ImmutableSet.<ComponentIdentifier>builder()
@@ -166,6 +175,11 @@ public class ApplicationModel
             .add(new ComponentIdentifier.Builder().withNamespace(BATCH_NAMESPACE).withName("execute").build())
             .add(new ComponentIdentifier.Builder().withNamespace(PARSER_TEST_NAMESPACE).withName("child").build())
             .add(new ComponentIdentifier.Builder().withNamespace(PARSER_TEST_NAMESPACE).withName("kid").build())
+            .add(new ComponentIdentifier.Builder().withNamespace(MULE_ROOT_ELEMENT).withName("operation").build())
+            .add(new ComponentIdentifier.Builder().withNamespace(MULE_ROOT_ELEMENT).withName("config").build())
+
+            //TODO talk to PLG, this might be an issue, as every global element should be possible to define within the <config> element
+            .add(new ComponentIdentifier.Builder().withNamespace(HTTP_NAMESPACE).withName("request-config").build())
             .add(new ComponentIdentifier.Builder().withNamespace(DATA_WEAVE).withName("reader-property").build())
             .build();
 
@@ -187,7 +201,214 @@ public class ApplicationModel
         configurePropertyPlaceholderResolver(artifactConfig);
         convertConfigFileToComponentModel(artifactConfig);
         validateModel();
+        //createEffectiveModel();        //TODO what would happen if I remove the createEffectiveModel, would that force the CoreComponentBuildingDefinitionParser to read the elements?
     }
+
+    //private void createEffectiveModel()
+    //{
+    //    HashMap<Integer, ComponentModel> componentModelsToReplaceByIndex = new HashMap<>();
+    //    executeOnEveryMuleComponentTree(componentModel -> {
+    //        for (int i = 0; i < componentModel.getInnerComponents().size(); i++)
+    //        {
+    //            ComponentModel operationRefModel = componentModel.getInnerComponents().get(i);
+    //            if (operationRefModel.getIdentifier().equals(OPERATION_REF_IDENTIFIER))
+    //            {
+    //                String operationName = operationRefModel.getParameters().get("operation");
+    //                Optional<String> moduleName = Optional.ofNullable(operationRefModel.getParameters().get("module"));
+    //                ComponentModel operationModel = searchOperation(moduleName, operationName);
+    //                ComponentModel replacementModel = createOperationInstance(operationRefModel, operationModel);
+    //                componentModelsToReplaceByIndex.put(i, replacementModel);
+    //            }
+    //        }
+    //        for (Map.Entry<Integer, ComponentModel> entry : componentModelsToReplaceByIndex.entrySet())
+    //        {
+    //            entry.getValue().setParent(componentModel);
+    //            componentModel.getInnerComponents().add(entry.getKey(), entry.getValue());
+    //            componentModel.getInnerComponents().remove(entry.getKey() + 1);
+    //        }
+    //        componentModelsToReplaceByIndex.clear();
+    //    });
+    //}
+
+    //private ComponentModel createOperationInstance(ComponentModel operationRefModel, ComponentModel operationModel)
+    //{
+    //    Map<String, String> parameterValues = new HashMap<>();
+    //    //work with the operation parameters
+    //    Optional<ComponentModel> operationModelOptional = operationModel.getInnerComponents()
+    //            .stream()
+    //            .filter(operationModelChild -> operationModelChild.getIdentifier().equals(OPERATION_PARAMETERS_IDENTIFIER)).findAny();
+    //    if (operationModelOptional.isPresent())
+    //    {
+    //
+    //        for (ComponentModel operationParameterModel : operationModelOptional.get().getInnerComponents())
+    //        {
+    //            String parameterName = operationParameterModel.getParameters().get("parameterName");
+    //            String value = operationParameterModel.getParameters().get("defaultValue");
+    //            for (ComponentModel parameterOperationRefModel : operationRefModel.getInnerComponents())
+    //            {
+    //                if (parameterOperationRefModel.getParameters().get("parameterName").equals(parameterName))
+    //                {
+    //                    value = parameterOperationRefModel.getParameters().get("value");
+    //                    break;
+    //                }
+    //            }
+    //            parameterValues.put(parameterName, value);
+    //        }
+    //    }
+    //
+    //    //work with the config parameters
+    //    String configParameter = operationRefModel.getParameters().get("config");
+    //    if (configParameter != null)
+    //    {
+    //        ComponentModel configRefComponentModel = this.muleComponentModels.get(0).getInnerComponents().stream().filter(componentModel -> componentModel.getIdentifier().getName().equals("config-ref") && componentModel.getNameAttribute().equals(configParameter)).findAny().get();
+    //
+    //        String moduleName = operationRefModel.getParameters().get("module");
+    //        if (StringUtils.isBlank(moduleName))
+    //        {
+    //            throw new IllegalStateException(String.format("The config [%s] cannot be null neither empty string", configParameter));
+    //        }
+    //        ComponentModel configComponentModel = searchConfig(moduleName);
+    //
+    //        Optional<ComponentModel> configModelOptional = configComponentModel.getInnerComponents()
+    //                .stream()
+    //                .filter(operationModelChild -> operationModelChild.getIdentifier().equals(OPERATION_PARAMETERS_IDENTIFIER)).findAny();
+    //
+    //        for (ComponentModel configParameterModel : configModelOptional.get().getInnerComponents())
+    //        {
+    //            String parameterName = configParameterModel.getParameters().get("parameterName");
+    //            String value = configParameterModel.getParameters().get("defaultValue");
+    //            for (ComponentModel configOperationRefModel : configRefComponentModel.getInnerComponents())
+    //            {
+    //                if (configOperationRefModel.getParameters().get("parameterName").equals(parameterName))
+    //                {
+    //                    value = configOperationRefModel.getParameters().get("value");
+    //                    break;
+    //                }
+    //            }
+    //            parameterValues.put("config:" + parameterName, value);
+    //        }
+    //    }
+    //
+    //    List<ComponentModel> bodyProcessors = operationModel.getInnerComponents()
+    //            .stream()
+    //            .filter(childComponent -> childComponent.getIdentifier().equals(OPERATION_BODY_IDENTIFIER))
+    //            .findAny().get().getInnerComponents();
+    //
+    //    ComponentModel.Builder processorChainBuilder = new ComponentModel.Builder();
+    //    processorChainBuilder.setIdentifier(new ComponentIdentifier.Builder().withNamespace("mule").withName("processor-chain").build());
+    //    for (ComponentModel bodyProcessor : bodyProcessors)
+    //    {
+    //        processorChainBuilder.addChildComponentModel(copyComponentModel(parameterValues, bodyProcessor));
+    //    }
+    //    for (Map.Entry<String, Object> customAttributeEntry : operationRefModel.getCustomAttributes().entrySet())
+    //    {
+    //        processorChainBuilder.addCustomAttribute(customAttributeEntry.getKey(), customAttributeEntry.getValue());
+    //    }
+    //    ComponentModel processorChainModel = processorChainBuilder.build();
+    //    for (ComponentModel processoChainModelChild : processorChainModel.getInnerComponents())
+    //    {
+    //        processoChainModelChild.setParent(processorChainModel);
+    //    }
+    //    return processorChainModel;
+    //}
+    //
+    //private ComponentModel copyComponentModel(Map<String, String> parameterValues, ComponentModel modelToCopy)
+    //{
+    //    ComponentModel.Builder operationReplacementModel = new ComponentModel.Builder();
+    //    operationReplacementModel
+    //            .setIdentifier(modelToCopy.getIdentifier())
+    //            .setTextContent(modelToCopy.getTextContent());
+    //    for (Map.Entry<String, Object> entry : modelToCopy.getCustomAttributes().entrySet())
+    //    {
+    //        operationReplacementModel.addCustomAttribute(entry.getKey(), entry.getValue());
+    //    }
+    //    for (Map.Entry<String, String> entry : modelToCopy.getParameters().entrySet())
+    //    {
+    //        operationReplacementModel.addParameter(entry.getKey(), resolveOperationParameterValue(parameterValues, entry.getValue()));
+    //    }
+    //    for (ComponentModel operationChildModel : modelToCopy.getInnerComponents())
+    //    {
+    //        operationReplacementModel.addChildComponentModel(copyComponentModel(parameterValues, operationChildModel));
+    //    }
+    //    ComponentModel componentModel = operationReplacementModel.build();
+    //    for (ComponentModel child : componentModel.getInnerComponents())
+    //    {
+    //        child.setParent(componentModel);
+    //    }
+    //    return componentModel;
+    //}
+    //
+    //private String resolveOperationParameterValue(Map<String, String> parameterValues, String parameterValue)
+    //{
+    //    String resolvedValue = parameterValue;
+    //    if (parameterValue.startsWith("$["))
+    //    {
+    //        String parameterIdentifier = parameterValue.replace("$[", "").replace("]", "");
+    //        resolvedValue = parameterValues.get(parameterIdentifier);
+    //    }
+    //    return resolvedValue;
+    //}
+    //
+    //private ComponentModel searchOperation(Optional<String> moduleName, String name)
+    //{
+    //    final AtomicReference<ComponentModel> foundOperationModel = new AtomicReference<>();
+    //    Consumer<ComponentModel> operationSeeker = componentModel -> {
+    //        if (componentModel.getIdentifier().equals(OPERATION_IDENTIFIER) && componentModel.getParameters().get("name").equals(name))
+    //        {
+    //            foundOperationModel.set(componentModel);
+    //        }
+    //    };
+    //
+    //    if (moduleName.isPresent())
+    //    {
+    //        executeOnEveryMuleComponentTree(componentModel -> {
+    //            if (componentModel.getIdentifier().equals(OPERATION_MODULE_IDENTIFIER) && componentModel.getParameters().get("namespace").equals(moduleName.get()))
+    //            {
+    //                executeOnComponentTree(componentModel, operationSeeker, true);
+    //            }
+    //        });
+    //    }
+    //    else
+    //    {
+    //        executeOnEveryMuleComponentTree(operationSeeker);
+    //    }
+    //    if (foundOperationModel.get() == null)
+    //    {
+    //        if (moduleName.isPresent())
+    //        {
+    //            throw new IllegalStateException(String.format("There's no <operation> under the name [%s] and namespace [%s]", name, moduleName.get()));
+    //        }
+    //        else
+    //        {
+    //            throw new IllegalStateException(String.format("There's no <operation> under the name [%s]", name));
+    //        }
+    //    }
+    //    return foundOperationModel.get();
+    //}
+    //
+    //private ComponentModel searchConfig(String moduleName)
+    //{
+    //    final AtomicReference<ComponentModel> foundConfigModel = new AtomicReference<>();
+    //    Consumer<ComponentModel> configSeeker = componentModel -> {
+    //        if (componentModel.getIdentifier().equals(OPERATION_CONFIG_IDENTIFIER))
+    //        {
+    //            foundConfigModel.set(componentModel);
+    //        }
+    //    };
+    //
+    //    executeOnEveryMuleComponentTree(componentModel -> {
+    //        if (componentModel.getIdentifier().equals(OPERATION_MODULE_IDENTIFIER) && componentModel.getParameters().get("namespace").equals(moduleName))
+    //        {
+    //            executeOnComponentTree(componentModel, configSeeker, true);
+    //        }
+    //    });
+    //
+    //    if (foundConfigModel.get() == null)
+    //    {
+    //        throw new IllegalStateException(String.format("There's no <config> defined in the module [%s]", moduleName));
+    //    }
+    //    return foundConfigModel.get();
+    //}
 
     private void configurePropertyPlaceholderResolver(ArtifactConfig artifactConfig)
     {

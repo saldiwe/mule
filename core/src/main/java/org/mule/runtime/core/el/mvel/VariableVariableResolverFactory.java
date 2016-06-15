@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.core.el.mvel;
 
+import org.mule.runtime.core.DefaultOperationMuleEvent;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.mvel2.ParserConfiguration;
@@ -34,15 +35,19 @@ public class VariableVariableResolverFactory extends MuleBaseVariableResolverFac
             return false;
         }
         return event.getFlowVariableNames().contains(name)
-               || (event.getSession() != null && event.getSession().getPropertyNamesAsSet().contains(name));
+               || (event.getSession() != null && event.getSession().getPropertyNamesAsSet().contains(name))
+               || (event instanceof DefaultOperationMuleEvent && ((DefaultOperationMuleEvent) event).getParamVariableNames().contains(name));
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public VariableResolver getVariableResolver(String name)
     {
-
-        if (event != null && event.getFlowVariableNames().contains(name))
+        if (event != null && event instanceof DefaultOperationMuleEvent && ((DefaultOperationMuleEvent) event).getParamVariableNames().contains(name))
+        {
+            return new ParamVariableVariableResolver(name);
+        }
+        else if (event != null && event.getFlowVariableNames().contains(name))
         {
             return new FlowVariableVariableResolver(name);
         }
@@ -151,6 +156,55 @@ public class VariableVariableResolverFactory extends MuleBaseVariableResolverFac
         public void setValue(Object value)
         {
             event.getSession().setProperty(name, value);
+        }
+    }
+
+    @SuppressWarnings({"deprecation", "rawtypes"})
+    class ParamVariableVariableResolver implements VariableResolver
+    {
+
+        private static final long serialVersionUID = -2525927507169812194L;
+
+        private String name;
+
+        public ParamVariableVariableResolver(String name)
+        {
+            this.name = name;
+        }
+
+        @Override
+        public String getName()
+        {
+            return name;
+        }
+
+        @Override
+        public Class getType()
+        {
+            return Object.class;
+        }
+
+        @Override
+        public void setStaticType(Class type)
+        {
+        }
+
+        @Override
+        public int getFlags()
+        {
+            return 0;
+        }
+
+        @Override
+        public Object getValue()
+        {
+            return ((DefaultOperationMuleEvent)event).getParamVariable(name);
+        }
+
+        @Override
+        public void setValue(Object value)
+        {
+            ((DefaultOperationMuleEvent)event).setParamVariable(name, value);
         }
     }
 
