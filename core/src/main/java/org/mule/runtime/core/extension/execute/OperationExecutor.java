@@ -45,7 +45,6 @@ public class OperationExecutor implements MessageProcessor, Initialisable, MuleC
         MuleEvent defaultOperationMuleEvent = createOperationMuleEvent(event);
         MuleEvent processResult = getOperationChain().process(defaultOperationMuleEvent);
         MuleMessage messageResult = processResult.getMessage();
-        //event.getMessage().setPayload(messageResult.getPayload(), messageResult.getDataType());
         return event;
     }
 

@@ -17,9 +17,9 @@
                 <parameter parameterName="somePassConfig" defaultValue="some-password"/>
             </parameters>
             <!-- commented out until make it work -->
-            <http:request-config name="simple-config" host="httpbin.org/basic-auth" port="80" basePath="/">
-                <http:basic-authentication username="#[someUserConfig]" password="#[somePassConfig]"/>
-            </http:request-config>
+            <!--<http:request-config name="simple-config" host="httpbin.org/basic-auth" port="80" basePath="/">-->
+                <!--<http:basic-authentication username="#[someUserConfig]" password="#[somePassConfig]"/>-->
+            <!--</http:request-config>-->
         </config>
 
         <operation name="do-login">

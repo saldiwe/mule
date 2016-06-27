@@ -52,7 +52,11 @@ public class DefaultOperationMuleEvent extends DefaultMuleEvent
 
     public void setParamVariable(String key, Object value)
     {
-        setParamVariable(key, value, null);
+//<<<<<<< 0f306de0c72c03f673974969cfd2056c7c0fdf37
+//        setParamVariable(key, value, null);
+//=======
+//        setParamVariable(key, value, DataType.fromObject(value));
+//>>>>>>> updating packages and MuleEvent contract
     }
 
     public void setParamVariable(String key, Object value, DataType dataType)
