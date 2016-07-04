@@ -27,11 +27,14 @@ import org.mule.runtime.core.api.registry.ServiceRegistry;
 import org.mule.runtime.core.registry.SpiServiceRegistry;
 import org.mule.runtime.core.time.Time;
 import org.mule.runtime.core.util.StringUtils;
+import org.mule.runtime.extension.api.exception.NoSuchConnectionProviderException;
 import org.mule.runtime.extension.api.exception.NoSuchExtensionException;
 import org.mule.runtime.extension.api.introspection.ExtensionFactory;
 import org.mule.runtime.extension.api.introspection.ExtensionKey;
 import org.mule.runtime.extension.api.introspection.ExtensionModel;
 import org.mule.runtime.extension.api.introspection.RuntimeExtensionModel;
+import org.mule.runtime.extension.api.introspection.connection.ConnectionProviderModel;
+import org.mule.runtime.extension.api.introspection.connection.RuntimeConnectionProviderModel;
 import org.mule.runtime.extension.api.introspection.declaration.spi.Describer;
 import org.mule.runtime.extension.api.manifest.ExtensionManifest;
 import org.mule.runtime.extension.api.persistence.manifest.ExtensionManifestXmlSerializer;
@@ -42,8 +45,12 @@ import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 import org.mule.runtime.module.extension.internal.DefaultDescribingContext;
 import org.mule.runtime.module.extension.internal.config.ExtensionConfig;
 import org.mule.runtime.module.extension.internal.introspection.DefaultExtensionFactory;
+import org.mule.runtime.module.extension.internal.runtime.config.ConnectionProviderObjectBuilder;
+import org.mule.runtime.module.extension.internal.runtime.config.DefaultConnectionProviderFactory;
 import org.mule.runtime.module.extension.internal.runtime.config.DefaultImplicitConfigurationProviderFactory;
+import org.mule.runtime.module.extension.internal.runtime.config.DefaultImplicitConnectionProviderFactory;
 import org.mule.runtime.module.extension.internal.runtime.config.ImplicitConfigurationProviderFactory;
+import org.mule.runtime.module.extension.internal.runtime.resolver.ResolverSet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -287,7 +294,16 @@ public final class DefaultExtensionManager implements ExtensionManagerAdapter, M
     public <C> ConfigurationProvider<C> createConnectionProvider(ExtensionKey extensionKey, String providerName, Map<String, Object> parameters)
     {
         RuntimeExtensionModel extensionModel = getExtension(extensionKey).orElseThrow(() -> new NoSuchExtensionException(extensionKey));
-        extensionModel.getConnectionProviderModel(providerName)
+        RuntimeConnectionProviderModel<C> connectionProviderModel = (RuntimeConnectionProviderModel<C>) extensionModel.getConnectionProviderModel(providerName).orElseThrow(
+                () -> new NoSuchConnectionProviderException(extensionKey, providerName));
+
+        ResolverSet resolverSet = new ResolverSet();
+
+        ConnectionProviderObjectBuilder objectBuilder = new ConnectionProviderObjectBuilder(connectionProviderModel, null, this);
+        objectBuilder.
+        connectionProviderModel.getConnectionProviderFactory().newInstance();
+
+        new DefaultConnectionProviderFactory<C>().
     }
 
     private void disposeConfiguration(String key, ConfigurationInstance<Object> configuration)
