@@ -14,7 +14,7 @@ import org.mule.runtime.core.config.builders.AbstractConfigurationBuilder;
 import org.mule.runtime.extension.api.ExtensionManager;
 import org.mule.runtime.extension.api.manifest.ExtensionManifest;
 import org.mule.runtime.module.extension.internal.manager.DefaultExtensionManagerAdapterFactory;
-import org.mule.runtime.module.extension.internal.manager.ExtensionManagerAdapter;
+import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 import org.mule.runtime.module.extension.internal.manager.ExtensionManagerAdapterFactory;
 
 import java.net.URL;

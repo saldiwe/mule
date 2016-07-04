@@ -45,6 +45,7 @@ import org.mule.runtime.extension.api.runtime.ConfigurationInstance;
 import org.mule.runtime.extension.api.runtime.ConfigurationProvider;
 import org.mule.runtime.extension.api.runtime.OperationExecutor;
 import org.mule.runtime.extension.api.runtime.OperationExecutorFactory;
+import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 import org.mule.runtime.module.extension.internal.config.ExtensionConfig;
 import org.mule.runtime.module.extension.internal.model.property.ParameterGroupModelProperty;
 import org.mule.runtime.module.extension.internal.runtime.OperationContextAdapter;

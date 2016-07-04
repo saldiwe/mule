@@ -12,6 +12,7 @@ import org.mule.runtime.core.DefaultMuleContext;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleRuntimeException;
 import org.mule.runtime.core.api.lifecycle.InitialisationException;
+import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 
 /**
  * Default implementation of {@link ExtensionManagerAdapterFactory} which

@@ -4,15 +4,17 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.runtime.module.extension.internal.manager;
+package org.mule.runtime.module.extension.api.manager;
 
 import org.mule.runtime.extension.api.ExtensionManager;
+import org.mule.runtime.extension.api.introspection.ExtensionKey;
 import org.mule.runtime.extension.api.introspection.ExtensionModel;
 import org.mule.runtime.extension.api.introspection.RuntimeExtensionModel;
 import org.mule.runtime.extension.api.manifest.ExtensionManifest;
 import org.mule.runtime.extension.api.runtime.ConfigurationProvider;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -74,4 +76,6 @@ public interface ExtensionManagerAdapter extends ExtensionManager
      * @return a {@link ExtensionManifest}
      */
     ExtensionManifest parseExtensionManifestXml(URL manifestUrl);
+
+    <C> ConfigurationProvider<C> createConnectionProvider(ExtensionKey extensionKey, String providerName, Map<String, Object> parameters);
 }

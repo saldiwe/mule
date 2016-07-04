@@ -24,7 +24,7 @@ import org.mule.runtime.extension.api.introspection.source.SourceModel;
 import org.mule.runtime.extension.api.runtime.source.Source;
 import org.mule.runtime.extension.api.runtime.source.SourceFactory;
 import org.mule.runtime.module.extension.internal.config.dsl.AbstractExtensionObjectFactory;
-import org.mule.runtime.module.extension.internal.manager.ExtensionManagerAdapter;
+import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ResolverSet;
 import org.mule.runtime.module.extension.internal.runtime.source.ExtensionMessageSource;
 import org.mule.runtime.module.extension.internal.runtime.source.SourceConfigurer;

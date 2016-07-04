@@ -17,6 +17,7 @@ import org.mule.runtime.core.api.registry.RegistrationException;
 import org.mule.runtime.core.transformer.simple.StringToEnum;
 import org.mule.runtime.core.util.collection.ImmutableListCollector;
 import org.mule.runtime.core.util.collection.ImmutableSetCollector;
+import org.mule.runtime.extension.api.introspection.ExtensionKey;
 import org.mule.runtime.extension.api.introspection.ExtensionModel;
 import org.mule.runtime.extension.api.introspection.RuntimeExtensionModel;
 import org.mule.runtime.extension.api.introspection.config.ConfigurationModel;
@@ -64,7 +65,7 @@ public final class ExtensionRegistry
         }
     });
 
-    private final Map<ExtensionEntityKey, RuntimeExtensionModel> extensions = new ConcurrentHashMap<>();
+    private final Map<ExtensionKey, RuntimeExtensionModel> extensions = new ConcurrentHashMap<>();
     private final Set<Class<? extends Enum>> enumClasses = new HashSet<>();
     private final MuleRegistry registry;
 
@@ -87,7 +88,7 @@ public final class ExtensionRegistry
      */
     void registerExtension(String name, String vendor, RuntimeExtensionModel extensionModel)
     {
-        extensions.put(new ExtensionEntityKey(name, vendor), extensionModel);
+        extensions.put(new ExtensionKey(name, vendor), extensionModel);
         getParameterClasses(extensionModel).stream()
                 .filter(type -> Enum.class.isAssignableFrom(type))
                 .forEach(type -> {
@@ -130,9 +131,9 @@ public final class ExtensionRegistry
      * @return an {@link Optional} with the {@link ExtensionModel} which name and vendor equals
      * {@code extensionName} and {@code vendor}
      */
-    Optional<RuntimeExtensionModel> getExtension(String extensionName, String vendor)
+    Optional<RuntimeExtensionModel> getExtension(ExtensionKey extensionKey)
     {
-        return Optional.ofNullable(extensions.get(new ExtensionEntityKey(extensionName, vendor)));
+        return Optional.ofNullable(extensions.get(extensionKey));
     }
 
     /**
@@ -141,7 +142,7 @@ public final class ExtensionRegistry
      */
     boolean containsExtension(String name, String vendor)
     {
-        return extensions.containsKey(new ExtensionEntityKey(name, vendor));
+        return extensions.containsKey(new ExtensionKey(name, vendor));
 
     }
 

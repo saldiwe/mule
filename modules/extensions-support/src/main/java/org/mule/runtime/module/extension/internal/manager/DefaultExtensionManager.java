@@ -27,7 +27,9 @@ import org.mule.runtime.core.api.registry.ServiceRegistry;
 import org.mule.runtime.core.registry.SpiServiceRegistry;
 import org.mule.runtime.core.time.Time;
 import org.mule.runtime.core.util.StringUtils;
+import org.mule.runtime.extension.api.exception.NoSuchExtensionException;
 import org.mule.runtime.extension.api.introspection.ExtensionFactory;
+import org.mule.runtime.extension.api.introspection.ExtensionKey;
 import org.mule.runtime.extension.api.introspection.ExtensionModel;
 import org.mule.runtime.extension.api.introspection.RuntimeExtensionModel;
 import org.mule.runtime.extension.api.introspection.declaration.spi.Describer;
@@ -35,6 +37,8 @@ import org.mule.runtime.extension.api.manifest.ExtensionManifest;
 import org.mule.runtime.extension.api.persistence.manifest.ExtensionManifestXmlSerializer;
 import org.mule.runtime.extension.api.runtime.ConfigurationInstance;
 import org.mule.runtime.extension.api.runtime.ConfigurationProvider;
+import org.mule.runtime.module.extension.api.ExtensionKey;
+import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 import org.mule.runtime.module.extension.internal.DefaultDescribingContext;
 import org.mule.runtime.module.extension.internal.config.ExtensionConfig;
 import org.mule.runtime.module.extension.internal.introspection.DefaultExtensionFactory;
@@ -45,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -248,9 +253,9 @@ public final class DefaultExtensionManager implements ExtensionManagerAdapter, M
      * {@inheritDoc}
      */
     @Override
-    public Optional<RuntimeExtensionModel> getExtension(String extensionName, String vendor)
+    public Optional<RuntimeExtensionModel> getExtension(ExtensionKey extensionKey)
     {
-        return extensionRegistry.getExtension(extensionName, vendor);
+        return extensionRegistry.getExtension(extensionKey);
     }
 
     private ConfigurationExpirationMonitor newConfigurationExpirationMonitor()
@@ -276,6 +281,13 @@ public final class DefaultExtensionManager implements ExtensionManagerAdapter, M
         {
             throw new MuleRuntimeException(createStaticMessage("Could not read extension manifest on plugin " + manifestUrl.toString()), e);
         }
+    }
+
+    @Override
+    public <C> ConfigurationProvider<C> createConnectionProvider(ExtensionKey extensionKey, String providerName, Map<String, Object> parameters)
+    {
+        RuntimeExtensionModel extensionModel = getExtension(extensionKey).orElseThrow(() -> new NoSuchExtensionException(extensionKey));
+        extensionModel.getConnectionProviderModel(providerName)
     }
 
     private void disposeConfiguration(String key, ConfigurationInstance<Object> configuration)

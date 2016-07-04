@@ -7,6 +7,7 @@
 package org.mule.runtime.module.extension.internal.manager;
 
 import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 
 /**
  * Factory to create instances of {@link ExtensionManagerAdapter}

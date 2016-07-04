@@ -31,7 +31,7 @@ import org.mule.runtime.module.extension.internal.introspection.DefaultExtension
 import org.mule.runtime.module.extension.internal.introspection.describer.AnnotationsBasedDescriber;
 import org.mule.runtime.module.extension.internal.introspection.version.StaticVersionResolver;
 import org.mule.runtime.module.extension.internal.manager.DefaultExtensionManager;
-import org.mule.runtime.module.extension.internal.manager.ExtensionManagerAdapter;
+import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 import org.mule.runtime.module.extension.internal.resources.AbstractResourcesGenerator;
 
 import com.google.common.collect.ImmutableList;

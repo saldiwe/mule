@@ -29,7 +29,7 @@ import org.mule.runtime.extension.api.runtime.ConfigurationInstance;
 import org.mule.runtime.extension.api.runtime.ConfigurationProvider;
 import org.mule.runtime.extension.api.runtime.OperationContext;
 import org.mule.runtime.extension.api.runtime.OperationExecutor;
-import org.mule.runtime.module.extension.internal.manager.ExtensionManagerAdapter;
+import org.mule.runtime.module.extension.api.manager.ExtensionManagerAdapter;
 import org.mule.runtime.module.extension.internal.runtime.DefaultExecutionMediator;
 import org.mule.runtime.module.extension.internal.runtime.DefaultOperationContext;
 import org.mule.runtime.module.extension.internal.runtime.ExecutionMediator;
