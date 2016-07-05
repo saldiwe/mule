@@ -6,6 +6,7 @@
  */
 package org.mule.test.issues;
 
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mule.runtime.module.http.api.HttpConstants.Methods.POST;
 import static org.mule.runtime.module.http.api.client.HttpRequestOptionsBuilder.newOptions;
@@ -42,7 +43,7 @@ public class Mule5415TestCase extends FunctionalTestCase
         MuleClient client = muleContext.getClient();
         Map<String, Serializable> properties = new HashMap<>();
         properties.put("Content-Type","application/x-www-form-urlencoded");
-        MuleMessage message = client.send(String.format("http://localhost:%s?param1=1&param2=3", port1.getNumber()), new DefaultMuleMessage("message", properties), newOptions().method(POST.name()).build());
-        assertThat(message.getExceptionPayload(), IsNull.<Object>nullValue());
+        MuleMessage message = client.send(String.format("http://localhost:%s?param1=1&param2=3", port1.getNumber()), MuleMessage.builder().payload("message").outboundProperties(properties).build(), newOptions().method(POST.name()).build());
+        assertThat(message.getExceptionPayload(), nullValue());
     }
 }

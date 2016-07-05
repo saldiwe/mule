@@ -25,15 +25,6 @@ public class ThreadSafeAccessTestCase extends AbstractThreadSafeAccessTestCase
     }
 
     @Test
-    public void testMessage() throws InterruptedException
-    {
-        Map<String, Serializable> nullMap = null;
-        basicPattern(new DefaultMuleMessage(new Object(), nullMap));
-        newCopy(new DefaultMuleMessage(new Object(), nullMap));
-        resetAccessControl(new DefaultMuleMessage(new Object(), nullMap));
-    }
-
-    @Test
     public void testEvent() throws Exception
     {
         // TODO Broken because we read a message property as part of event constructor (BL-677)

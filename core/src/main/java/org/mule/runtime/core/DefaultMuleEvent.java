@@ -13,6 +13,20 @@ import static org.mule.runtime.core.api.config.MuleProperties.MULE_METHOD_PROPER
 import static org.mule.runtime.core.util.ClassUtils.isConsumable;
 import static org.mule.runtime.core.util.SystemUtils.getDefaultEncoding;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.core.api.DefaultMuleException;
 import org.mule.runtime.core.api.MuleContext;
@@ -41,19 +55,6 @@ import org.mule.runtime.core.session.DefaultMuleSession;
 import org.mule.runtime.core.transaction.TransactionCoordination;
 import org.mule.runtime.core.util.CopyOnWriteCaseInsensitiveMap;
 import org.mule.runtime.core.util.store.DeserializationPostInitialisable;
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,6 +106,11 @@ public class DefaultMuleEvent implements MuleEvent, ThreadSafeAccess, Deserializ
     private FlowCallStack flowCallStack = new DefaultFlowCallStack();
     private ProcessorsTrace processorsTrace = new DefaultProcessorsTrace();
     protected boolean nonBlocking;
+
+    // these are transient because serialization generates a new instance
+    // so we allow mutation again (and we can't serialize threads anyway)
+    private transient AtomicReference<Thread> ownerThread = null;
+    private transient AtomicBoolean mutable = null;
 
     // Constructors
 
@@ -239,6 +245,8 @@ public class DefaultMuleEvent implements MuleEvent, ThreadSafeAccess, Deserializ
         this.transacted = false;
         this.synchronous = resolveEventSynchronicity();
         this.nonBlocking = isFlowConstructNonBlockingProcessingStrategy();
+        
+        resetAccessControl();
     }
 
     /**
@@ -296,6 +304,8 @@ public class DefaultMuleEvent implements MuleEvent, ThreadSafeAccess, Deserializ
         this.transacted = false;
 
         this.synchronous = resolveEventSynchronicity();
+        
+        resetAccessControl();
     }
 
     // Constructors to copy MuleEvent
@@ -452,6 +462,8 @@ public class DefaultMuleEvent implements MuleEvent, ThreadSafeAccess, Deserializ
         this.flowCallStack = rewriteEvent.getFlowCallStack() == null ? new DefaultFlowCallStack() : rewriteEvent.getFlowCallStack().clone();
         // We want parallel paths of the same flows (i.e.: async events) to contribute to this list and be available at the end, so we copy only the reference.
         this.processorsTrace = rewriteEvent.getProcessorsTrace();
+        
+        resetAccessControl();
     }
 
     public DefaultMuleEvent(MuleMessage message,
@@ -484,6 +496,8 @@ public class DefaultMuleEvent implements MuleEvent, ThreadSafeAccess, Deserializ
         this.nonBlocking = isFlowConstructNonBlockingProcessingStrategy();
         this.timeout = timeout;
         this.outputStream = outputStream;
+        
+        resetAccessControl();
     }
 
     // Constructor with everything just in case
@@ -519,6 +533,8 @@ public class DefaultMuleEvent implements MuleEvent, ThreadSafeAccess, Deserializ
         this.nonBlocking = isFlowConstructNonBlockingProcessingStrategy();
         this.timeout = timeout;
         this.outputStream = outputStream;
+        
+        resetAccessControl();
     }
 
     protected boolean resolveEventSynchronicity()
@@ -856,37 +872,123 @@ public class DefaultMuleEvent implements MuleEvent, ThreadSafeAccess, Deserializ
     @Override
     public ThreadSafeAccess newThreadCopy()
     {
-        if (message instanceof ThreadSafeAccess)
-        {
-            DefaultMuleEvent copy = new DefaultMuleEvent(
-                (MuleMessage) ((ThreadSafeAccess) message).newThreadCopy(), this);
-            copy.resetAccessControl();
-            return copy;
-        }
-        else
-        {
-            return this;
-        }
+        DefaultMuleEvent copy = new DefaultMuleEvent(message, this);
+        copy.resetAccessControl();
+        return copy;
     }
 
     @Override
     public void resetAccessControl()
     {
-        if (message instanceof ThreadSafeAccess)
+        // just reset the internal state here as this method is explicitly intended not to
+        // be used from the outside
+        if (ownerThread != null)
         {
-            ((ThreadSafeAccess) message).resetAccessControl();
+            ownerThread.set(null);
+        }
+        if (mutable != null)
+        {
+            mutable.set(true);
         }
     }
 
     @Override
     public void assertAccess(boolean write)
     {
-        if (message instanceof ThreadSafeAccess)
+        if (AccessControl.isAssertMessageAccess())
         {
-            ((ThreadSafeAccess) message).assertAccess(write);
+            initAccessControl();
+            setOwner();
+            checkMutable(write);
         }
     }
 
+    private synchronized void initAccessControl()
+    {
+        if (null == ownerThread)
+        {
+            ownerThread = new AtomicReference<>();
+        }
+        if (null == mutable)
+        {
+            mutable = new AtomicBoolean(true);
+        }
+    }
+
+    private void setOwner()
+    {
+        if (null == ownerThread.get())
+        {
+            ownerThread.compareAndSet(null, Thread.currentThread());
+        }
+    }
+
+    private void checkMutable(boolean write)
+    {
+
+        // IF YOU SEE AN EXCEPTION THAT IS RAISED FROM WITHIN THIS CODE
+        // ============================================================
+        //
+        // First, understand that the exception here is not the "real" problem.  These exceptions
+        // give early warning of a much more serious issue that results in unreliable and unpredictable
+        // code - more than one thread is attempting to change the contents of a message.
+        //
+        // Having said that, you can disable these exceptions by defining
+        // MuleProperties.MULE_THREAD_UNSAFE_MESSAGES_PROPERTY (mule.disable.threadsafemessages)
+        // (i.e., by adding -Dmule.disable.threadsafemessages=true to the java command line).
+        //
+        // To remove the underlying cause, however, you probably need to do one of:
+        //
+        // - make sure that the message you are using correctly implements the ThreadSafeAccess
+        //   interface
+        //
+        // - make sure that dispatcher and receiver classes copy ThreadSafeAccess instances when
+        //   they are passed between threads
+
+        Thread currentThread = Thread.currentThread();
+        if (currentThread.equals(ownerThread.get()))
+        {
+            if (write && !mutable.get())
+            {
+                if (isDisabled())
+                {
+                    logger.warn("Writing to immutable message (exception disabled)");
+                }
+                else
+                {
+                    throw newException("Cannot write to immutable message");
+                }
+            }
+        }
+        else
+        {
+            if (write)
+            {
+                if (isDisabled())
+                {
+                    logger.warn("Non-owner writing to message (exception disabled)");
+                }
+                else
+                {
+                    throw newException("Only owner thread can write to message: "
+                                       + ownerThread.get() + "/" + Thread.currentThread());
+                }
+            }
+        }
+    }
+    
+    private boolean isDisabled()
+    {
+        return !AccessControl.isFailOnMessageScribbling();
+    }
+
+    private IllegalStateException newException(String message)
+    {
+        IllegalStateException exception = new IllegalStateException(message);
+        logger.warn("Message access violation", exception);
+        return exception;
+    }
+    
     @Override
     public ProcessingTime getProcessingTime()
     {
@@ -1026,11 +1128,9 @@ public class DefaultMuleEvent implements MuleEvent, ThreadSafeAccess, Deserializ
      */
     public static MuleEvent copy(MuleEvent event)
     {
-        MuleMessage messageCopy = (MuleMessage) ((ThreadSafeAccess) event.getMessage()).newThreadCopy();
-        DefaultMuleEvent eventCopy = new DefaultMuleEvent(messageCopy, event, new DefaultMuleSession(
+        DefaultMuleEvent eventCopy = new DefaultMuleEvent( event.getMessage(), event, new DefaultMuleSession(
             event.getSession()));
         eventCopy.flowVariables = ((DefaultMuleEvent) event).flowVariables.clone();
-        ((DefaultMuleMessage) messageCopy).resetAccessControl();
         return eventCopy;
     }
 

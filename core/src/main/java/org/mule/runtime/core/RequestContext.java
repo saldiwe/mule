@@ -86,14 +86,9 @@ public final class RequestContext
             MuleEvent event = getEvent();
             if (event != null)
             {
-                MuleMessage copy = newMessage(message, safe);
-                MuleEvent newEvent = new DefaultMuleEvent(copy, event);
-                if (safe)
-                {
-                    resetAccessControl(copy);
-                }
+                MuleEvent newEvent = new DefaultMuleEvent(message, event);
                 internalSetEvent(newEvent);
-                return copy;
+                return message;
             }
         }
         return message;
@@ -124,11 +119,6 @@ public final class RequestContext
         return getEvent().getMessage().getExceptionPayload();
     }
 
-    public static MuleMessage safeMessageCopy(MuleMessage message)
-    {
-        return newMessage(message, SAFE);
-    }
-
     protected static MuleEvent newEvent(MuleEvent event, boolean safe)
     {
         if (safe && event instanceof ThreadSafeAccess)
@@ -138,18 +128,6 @@ public final class RequestContext
         else
         {
             return event;
-        }
-    }
-
-    protected static MuleMessage newMessage(MuleMessage message, boolean safe)
-    {
-        if (safe && message instanceof ThreadSafeAccess)
-        {
-            return (MuleMessage) ((ThreadSafeAccess)message).newThreadCopy();
-        }
-        else
-        {
-            return message;
         }
     }
 

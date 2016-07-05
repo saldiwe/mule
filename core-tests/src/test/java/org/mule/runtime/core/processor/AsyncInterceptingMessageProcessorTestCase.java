@@ -228,7 +228,6 @@ public class AsyncInterceptingMessageProcessorTestCase extends AbstractMuleConte
             thread = Thread.currentThread();
             sensedEvent = event;
             latch.countDown();
-            ((DefaultMuleMessage) sensedEvent.getMessage()).assertAccess(ThreadSafeAccess.WRITE);
             return event;
         }
     }

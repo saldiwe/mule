@@ -8,10 +8,10 @@ package org.mule.runtime.core;
 
 import static org.junit.Assert.assertFalse;
 
+import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.ThreadSafeAccess;
 import org.mule.runtime.core.api.context.MuleContextBuilder;
 import org.mule.runtime.core.config.DefaultMuleConfiguration;
-
 import org.junit.Test;
 
 public class ThreadUnsafeAccessTestCase extends AbstractThreadSafeAccessTestCase
@@ -41,10 +41,10 @@ public class ThreadUnsafeAccessTestCase extends AbstractThreadSafeAccessTestCase
     }
 
     @Test
-    public void testDisable() throws InterruptedException
+    public void testDisable() throws Exception
     {
         assertFalse(ThreadSafeAccess.AccessControl.isFailOnMessageScribbling());
-        ThreadSafeAccess target = new DefaultMuleMessage(new Object());
+        ThreadSafeAccess target = new DefaultMuleEvent(MuleMessage.builder().payload(TEST_PAYLOAD).build(), getTestFlow());
         newThread(target, false, new boolean[]{true, true, false, true});
         newThread(target, false, new boolean[]{false});
         newThread(target, false, new boolean[]{true});

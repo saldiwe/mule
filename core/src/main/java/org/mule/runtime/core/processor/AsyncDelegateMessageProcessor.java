@@ -6,7 +6,9 @@
  */
 package org.mule.runtime.core.processor;
 
+import static org.mule.runtime.core.MessageExchangePattern.ONE_WAY;
 import static org.mule.runtime.core.util.ClassUtils.isConsumable;
+
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.OptimizedRequestContext;
@@ -140,8 +142,7 @@ public class AsyncDelegateMessageProcessor extends AbstractMessageProcessorOwner
         if (target != null)
         {
             // Clone event, make it async and remove ReplyToHandler
-            MuleEvent newEvent = new DefaultMuleEvent((MuleMessage) ((ThreadSafeAccess) message).newThreadCopy(),
-                                                      event, false, false, MessageExchangePattern.ONE_WAY, null);
+            MuleEvent newEvent = new DefaultMuleEvent(message, event, false, false, ONE_WAY, null);
             // Update RequestContext ThreadLocal for backwards compatibility
             OptimizedRequestContext.unsafeSetEvent(newEvent);
             target.process(newEvent);

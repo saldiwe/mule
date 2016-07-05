@@ -200,7 +200,7 @@ public class MuleEventTestCase extends AbstractMuleContextTestCase
         event.setFlowVariable("foo", "bar");
 
         MuleEvent copy = new DefaultMuleEvent(
-            (MuleMessage) ((ThreadSafeAccess) event.getMessage()).newThreadCopy(), event, false, false);
+                event.getMessage(), event, false, false);
 
         copy.setFlowVariable("foo", "bar2");
 
@@ -216,7 +216,7 @@ public class MuleEventTestCase extends AbstractMuleContextTestCase
         event.setFlowVariable("foo", "bar");
 
         MuleEvent copy = new DefaultMuleEvent(
-                (MuleMessage) ((ThreadSafeAccess) event.getMessage()).newThreadCopy(), event, false);
+                event.getMessage(), event, false);
 
         copy.setFlowVariable("foo", "bar2");
 

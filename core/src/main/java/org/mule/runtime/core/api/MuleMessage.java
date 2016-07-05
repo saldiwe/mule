@@ -20,7 +20,7 @@ import javax.activation.DataHandler;
  * MuleMessage
  */
 public interface MuleMessage<PAYLOAD, ATTRIBUTES extends Serializable> extends org.mule.runtime.api.message
-        .MuleMessage<PAYLOAD, ATTRIBUTES>, MessageProperties, MessageAttachments, MessageTransform
+        .MuleMessage<PAYLOAD, ATTRIBUTES>, MessageProperties, MessageAttachments
 {
 
     /**

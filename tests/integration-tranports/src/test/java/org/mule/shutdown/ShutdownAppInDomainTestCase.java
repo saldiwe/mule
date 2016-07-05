@@ -15,6 +15,7 @@ import org.mule.runtime.core.RequestContext;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
+import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.tck.probe.JUnitProbe;
 import org.mule.tck.probe.PollingProber;
@@ -76,7 +77,7 @@ public class ShutdownAppInDomainTestCase extends DomainFunctionalTestCase
     {
         final MuleContext muleContextForApp = getMuleContextForApp("app-with-flows");
 
-        muleContextForApp.getClient().dispatch("jms://in?connector=sharedJmsConnector", new DefaultMuleMessage("payload"));
+        muleContextForApp.getClient().dispatch("jms://in?connector=sharedJmsConnector", MuleMessage.builder().payload("payload").build());
         muleContextForApp.getClient().request("jms://out?connector=sharedJmsConnector", MESSAGE_TIMEOUT);
 
         muleContextForApp.dispose();
