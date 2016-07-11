@@ -31,7 +31,7 @@ public abstract class AbstractSingleResourceTransaction extends AbstractTransact
      *
      * @see javax.transaction.Status
      */
-    protected static Map<Integer, String> txStatusMappings = new HashMap<Integer, String>(10); // populated later
+    protected static Map<Integer, String> txStatusMappings = new HashMap<>(10); // populated later
 
     protected volatile Object key;
     protected volatile Object resource;

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:dbn="http://www.mulesoft.org/schema/mule/dbn"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+            http://www.mulesoft.org/schema/mule/dbn http://www.mulesoft.org/schema/mule/db/current/mule-dbn.xsd">
+
+    <flow name="usesDefaultDatabaseConfig">
+        <dbn:select>
+            <dbn:query-definition>
+                <dbn:parameterized-query sql="select * from PLANET order by ID"/>
+            </dbn:query-definition>
+        </dbn:select>
+    </flow>
+</mule>
