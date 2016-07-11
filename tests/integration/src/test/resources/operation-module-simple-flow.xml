@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+    <module name="utils">
+        <operation name="set-payload-hardcoded-value">
+            <body>
+                <set-payload value="hardcoded value"/>
+            </body>
+        </operation>
+
+        <operation name="set-payload-param-value">
+            <parameters>
+                <parameter parameterName="value"/>
+            </parameters>
+            <body>
+                <set-payload value="#[param.value]"/>
+            </body>
+        </operation>
+
+        <operation name="set-payload-param-default-value">
+            <parameters>
+                <parameter parameterName="value" defaultValue="15"/>
+            </parameters>
+            <body>
+                <set-payload value="#[param.value]"/>
+            </body>
+        </operation>
+
+        <operation name="set-payload-no-side-effect">
+            <body>
+                <set-payload value="10"/>
+                <set-variable variableName="testVar" value="inside the operation value changed"/>
+            </body>
+        </operation>
+
+        <operation name="do-nothing">
+            <body>
+                <!--
+                <logger level="DEBUG"/>
+                TODO talk to PLG, this fails during start up saying
+                Caused by: java.lang.IllegalArgumentException: A component named .:logger.9 already exists.
+                    at org.mule.runtime.config.spring.dsl.spring.BeanDefinitionFactory.checkElementNameUnique(BeanDefinitionFactory.java:213)
+                -->
+                <set-payload value="#[payload]" />
+            </body>
+        </operation>
+
+        <operation name="set-payload-param-value-appender">
+            <parameters>
+                <parameter parameterName="value"/>
+            </parameters>
+            <body>
+                <set-payload value="#[param.value + ' from module']"/>
+            </body>
+        </operation>
+
+        <operation name="set-payload-add-params-values">
+            <parameters>
+                <parameter parameterName="value1"/>
+                <parameter parameterName="value2"/>
+            </parameters>
+            <body>
+                <set-payload value="#[param.value1 + param.value2]"/>
+            </body>
+        </operation>
+    </module>
+
+    <!-- Flows definitions below -->
+
+    <flow name="testSetPayloadHardcodedFlow">
+        <operation-ref operation="set-payload-hardcoded-value" module="utils"/>
+    </flow>
+
+    <flow name="testSetPayloadParamFlow">
+        <operation-ref operation="set-payload-param-value" module="utils">
+            <!-- TODO FIX THIS TEST TO AVOID ESCAPING THE STRING BY HAND-->
+            <parameter-ref parameterName="value" value="'new payload'"/>
+        </operation-ref>
+    </flow>
+
+    <flow name="testSetPayloadParamDefaultFlow">
+        <operation-ref operation="set-payload-param-default-value" module="utils"/>
+    </flow>
+
+    <flow name="testSetPayloadNoSideEffectFlow">
+        <set-variable variableName="testVar" value="unchanged value"/>
+        <operation-ref operation="set-payload-no-side-effect" module="utils"/>
+    </flow>
+
+    <flow name="testDoNothingFlow">
+        <set-variable variableName="variableBeforeCalling" value="value of flowvar before calling"/>
+        <set-payload value="before calling" />
+        <operation-ref operation="do-nothing" module="utils"/>
+    </flow>
+
+    <flow name="testSetPayloadParamValueAppender">
+        <operation-ref operation="set-payload-param-value-appender" module="utils">
+            <parameter-ref parameterName="value" value="'new payload'"/>
+        </operation-ref>
+    </flow>
+
+    <flow name="testSetPayloadAddParamsValues">
+        <operation-ref operation="set-payload-add-params-values" module="utils">
+            <parameter-ref parameterName="value1" value="10"/>
+            <parameter-ref parameterName="value2" value="5"/>
+        </operation-ref>
+    </flow>
+
+    <!-- TODO WIP-OPERATIONS this won't be acceptable in the XML as the XSD will check for it before running the app -->
+    <!--<flow name="testWithoutParametersFlow">-->
+        <!--<operation-ref operation="set-payload-param-value"  module="utils"/>-->
+        <!--<set-payload value="should have not reach here" />-->
+    <!--</flow>-->
+    <!-- TODO WIP-OPERATIONS this won't be acceptable in the XML as the XSD will check for it before running the app -->
+    <!--<flow name="testWithMoreThanExpectedParametersFlow">-->
+        <!--<operation-ref operation="set-payload-param-value"  module="utils">-->
+            <!--<parameter-ref parameterName="value1" value="value1"/>-->
+            <!--<parameter-ref parameterName="value2" value="value2"/>-->
+        <!--</operation-ref>-->
+        <!--<set-payload value="should have not reach here" />-->
+    <!--</flow>-->
+</mule>

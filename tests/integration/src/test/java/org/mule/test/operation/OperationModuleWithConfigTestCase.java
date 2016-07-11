@@ -15,11 +15,6 @@ import org.junit.Test;
 
 public class OperationModuleWithConfigTestCase extends FunctionalTestCase
 {
-    //TODO missing tests:
-    //1) define a config with less parameters than expected
-    //2) define a config with at least one more parameter than expected
-    //4) define a module without operations
-
     @Override
     protected String getConfigFile()
     {
@@ -39,30 +34,6 @@ public class OperationModuleWithConfigTestCase extends FunctionalTestCase
     }
 
     @Test
-    public void testSetPayloadHardcodedFromAppFlow() throws Exception{
-        MuleEvent muleEvent = flowRunner("testSetPayloadHardcodedFromAppFlow").run();
-        assertThat(muleEvent.getMessage().getPayload(), Is.is("hardcoded value from app"));
-    }
-
-    @Test
-    public void testSetPayloadParamFromAppFlow() throws Exception{
-        MuleEvent muleEvent = flowRunner("testSetPayloadParamFromAppFlow").run();
-        assertThat(muleEvent.getMessage().getPayload(), Is.is("new payload from app"));
-    }
-
-    @Test
-    public void testSetPayloadHardcodedFromAppThatCallsModuleFlow() throws Exception{
-        MuleEvent muleEvent = flowRunner("testSetPayloadHardcodedFromAppThatCallsModuleFlow").run();
-        assertThat(muleEvent.getMessage().getPayload(), Is.is("hardcoded value from module"));
-    }
-
-    @Test
-    public void testSetPayloadHardcodedFromModuleThatCallsAppFlow() throws Exception{
-        MuleEvent muleEvent = flowRunner("testSetPayloadHardcodedFromModuleThatCallsAppFlow").run();
-        assertThat(muleEvent.getMessage().getPayload(), Is.is("hardcoded value from app"));
-    }
-
-    @Test
     public void testSetPayloadConfigParamFlow() throws Exception{
         MuleEvent muleEvent = flowRunner("testSetPayloadConfigParamFlow").run();
         assertThat(muleEvent.getMessage().getPayload(), Is.is("some config-value-parameter"));
@@ -72,5 +43,11 @@ public class OperationModuleWithConfigTestCase extends FunctionalTestCase
     public void testSetPayloadConfigDefaultParamFlow() throws Exception{
         MuleEvent muleEvent = flowRunner("testSetPayloadConfigDefaultParamFlow").run();
         assertThat(muleEvent.getMessage().getPayload(), Is.is("some default-config-value-parameter"));
+    }
+
+    @Test
+    public void testSetPayloadAddParamAndPropertyValues() throws Exception{
+        MuleEvent muleEvent = flowRunner("testSetPayloadAddParamAndPropertyValues").run();
+        assertThat(muleEvent.getMessage().getPayload(), Is.is("a parameter value some config-value-parameter"));
     }
 }

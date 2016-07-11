@@ -5,12 +5,8 @@
        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 
     <module name="mule-utils">
-        <config name="some-config">
-            <parameters>
-                <parameter parameterName="configParam"/>
-                <parameter parameterName="defaultConfigParam" defaultValue="some default-config-value-parameter"/>
-            </parameters>
-        </config>
+        <property parameterName="configParam"/>
+        <property parameterName="defaultConfigParam" defaultValue="'some default-config-value-parameter'"/>
 
         <operation name="set-payload-hardcoded-value">
             <body>
@@ -23,54 +19,36 @@
                 <parameter parameterName="value"/>
             </parameters>
             <body>
-                <set-payload value="#[value + ' from module']"/>
-            </body>
-        </operation>
-
-        <operation name="set-payload-hardcoded-value-from-module-that-calls-app">
-            <body>
-                <operation-ref operation="set-payload-hardcoded-value"/>
+                <set-payload value="#[param.value + ' from module']"/>
             </body>
         </operation>
 
         <operation name="set-payload-config-param-value">
             <body>
-                <set-payload value="#[configParam]"/>
+                <set-payload value="#[property.configParam]"/>
             </body>
         </operation>
 
         <operation name="set-payload-config-default-param-value">
             <body>
-                <set-payload value="#[defaultConfigParam]"/>
+                <set-payload value="#[property.defaultConfigParam]"/>
+            </body>
+        </operation>
+
+        <operation name="set-payload-add-param-and-property-values">
+            <parameters>
+                <parameter parameterName="value1"/>
+            </parameters>
+            <body>
+                <set-payload value="#[param.value1 + ' ' + property.configParam]"/>
             </body>
         </operation>
     </module>
 
-    <operation name="set-payload-hardcoded-value">
-        <body>
-            <set-payload value="hardcoded value from app"/>
-        </body>
-    </operation>
-
-    <operation name="set-payload-param-value">
-        <parameters>
-            <parameter parameterName="value"/>
-        </parameters>
-        <body>
-            <set-payload value="#[value + ' from app']"/>
-        </body>
-    </operation>
-
-    <operation name="set-payload-hardcoded-value-from-app-that-calls-module">
-        <body>
-            <operation-ref module="mule-utils" operation="set-payload-hardcoded-value"/>
-        </body>
-    </operation>
-
     <!-- Flows definitions and config-ref below -->
 
     <config-ref module="mule-utils" name="instantiatedConfig" >
-        <parameter-ref parameterName="configParam" value="some config-value-parameter"/>
+        <parameter-ref parameterName="configParam" value="'some config-value-parameter'"/>
     </config-ref>
 
     <flow name="testSetPayloadHardcodedFromModuleFlow">
@@ -79,26 +57,8 @@
 
     <flow name="testSetPayloadParamFromModuleFlow">
         <operation-ref module="mule-utils" operation="set-payload-param-value" config="instantiatedConfig">
-            <parameter-ref parameterName="value" value="new payload"/>
+            <parameter-ref parameterName="value" value="'new payload'"/>
         </operation-ref>
-    </flow>
-
-    <flow name="testSetPayloadHardcodedFromAppFlow">
-        <operation-ref operation="set-payload-hardcoded-value" config="instantiatedConfig"/>
-    </flow>
-
-    <flow name="testSetPayloadParamFromAppFlow">
-        <operation-ref operation="set-payload-param-value" config="instantiatedConfig">
-            <parameter-ref parameterName="value" value="new payload"/>
-        </operation-ref>
-    </flow>
-
-    <flow name="testSetPayloadHardcodedFromAppThatCallsModuleFlow">
-        <operation-ref operation="set-payload-hardcoded-value-from-app-that-calls-module" config="instantiatedConfig"/>
-    </flow>
-
-    <flow name="testSetPayloadHardcodedFromModuleThatCallsAppFlow">
-        <operation-ref module="mule-utils" operation="set-payload-hardcoded-value-from-module-that-calls-app" config="instantiatedConfig"/>
     </flow>
 
     <flow name="testSetPayloadConfigParamFlow">
@@ -107,5 +67,11 @@
 
     <flow name="testSetPayloadConfigDefaultParamFlow">
         <operation-ref module="mule-utils" operation="set-payload-config-default-param-value" config="instantiatedConfig" />
+    </flow>
+
+    <flow name="testSetPayloadAddParamAndPropertyValues">
+        <operation-ref module="mule-utils" operation="set-payload-add-param-and-property-values" config="instantiatedConfig">
+            <parameter-ref parameterName="value1" value="'a parameter value'"/>
+        </operation-ref>
     </flow>
 </mule>

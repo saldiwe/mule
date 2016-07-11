@@ -147,7 +147,6 @@
             <xsd:element ref="abstract-global-intercepting-message-processor"/>
             <xsd:element ref="custom-queue-store" minOccurs="0" maxOccurs="unbounded"/>
             <xsd:element ref="abstract-processing-strategy" minOccurs="0" maxOccurs="unbounded"/>
-            <xsd:element ref="operation"/>
             <xsd:element ref="module"/>
         </xsd:choice>
     </xsd:group>
@@ -190,9 +189,15 @@
         <xsd:complexContent>
             <xsd:extension base="abstractExtensionType">
                 <xsd:sequence maxOccurs="unbounded" minOccurs="1">
-                    <xsd:choice >
-                        <xsd:element ref="config" />
+                    <xsd:choice minOccurs="1" maxOccurs="unbounded">
+                        <xsd:element name="property">
+                            <xsd:complexType>
+                                <xsd:attribute name="parameterName"/>
+                                <xsd:attribute name="defaultValue" use="optional"/>
+                            </xsd:complexType>
+                        </xsd:element>
                         <xsd:element ref="operation" />
+                        <xsd:group ref="muleRootElements"/>
                     </xsd:choice>
                 </xsd:sequence>
                 <xsd:attribute name="name" use="required"/>
@@ -202,38 +207,7 @@
         </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:complexType name="operationConfigType">
-        <xsd:complexContent>
-            <xsd:extension base="abstractExtensionType">
-                <xsd:sequence>
-                    <xsd:element name="parameters" minOccurs="0" maxOccurs="1">
-                        <xsd:complexType>
-                            <xsd:sequence>
-                                <xsd:element name="parameter" minOccurs="1" maxOccurs="unbounded">
-                                    <xsd:complexType>
-                                        <xsd:attribute name="parameterName"/>
-                                        <xsd:attribute name="defaultValue" use="optional"/>
-                                    </xsd:complexType>
-                                </xsd:element>
-                            </xsd:sequence>
-                        </xsd:complexType>
-                    </xsd:element>
-                    <xsd:group ref="muleRootElements" />
-                </xsd:sequence>
-                <xsd:attribute name="name"/>
-            </xsd:extension>
-        </xsd:complexContent>
-    </xsd:complexType>
-
     <xsd:element name="module" type="moduleConfigType" substitutionGroup="abstract-extension">
-        <xsd:annotation>
-            <xsd:documentation>
-                A transformer that sets the paylaod with the provided value
-            </xsd:documentation>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="config" type="operationConfigType">
         <xsd:annotation>
             <xsd:documentation>
                 A transformer that sets the paylaod with the provided value

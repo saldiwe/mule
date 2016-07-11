@@ -91,6 +91,19 @@
 		</dependency>
 
 		<!-- Test jars -->
+		<dependency>
+            <!--added this one due to MULE-10051-->
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-http</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-http-ext</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 		<!-- some tests reference cxf test classes -->
 		<dependency>
 			<groupId>org.mule.modules</groupId>

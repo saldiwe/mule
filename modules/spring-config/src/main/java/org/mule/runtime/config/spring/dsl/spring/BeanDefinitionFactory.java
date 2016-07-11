@@ -25,6 +25,7 @@ import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessa
 import org.mule.runtime.config.spring.dsl.api.AttributeDefinition;
 import org.mule.runtime.config.spring.dsl.api.ComponentBuildingDefinition;
 import org.mule.runtime.config.spring.dsl.api.KeyAttributeDefinitionPair;
+import org.mule.runtime.config.spring.dsl.model.ApplicationModel;
 import org.mule.runtime.config.spring.dsl.model.ComponentBuildingDefinitionRegistry;
 import org.mule.runtime.config.spring.dsl.model.ComponentIdentifier;
 import org.mule.runtime.config.spring.dsl.model.ComponentModel;
@@ -65,13 +66,8 @@ public class BeanDefinitionFactory
     private final ImmutableSet<ComponentIdentifier> ignoredMuleCoreComponentIdentifiers = ImmutableSet.<ComponentIdentifier>builder()
             .add(new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(MULE_ROOT_ELEMENT).build())
             .add(new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(DESCRIPTION_ELEMENT).build())
-            //TODO remove dead code
-            //.add(ApplicationModel.OPERATION_IDENTIFIER)
-            //.add(ApplicationModel.OPERATION_PARAMETERS_IDENTIFIER)
-            //.add(ApplicationModel.OPERATION_PARAMETER_IDENTIFIER)
-            //.add(ApplicationModel.OPERATION_CONFIG_IDENTIFIER)
-            //.add(ApplicationModel.OPERATION_CONFIG_REF_IDENTIFIER)
-            //.add(ApplicationModel.OPERATION_MODULE_IDENTIFIER)
+            .add(ApplicationModel.OPERATION_CONFIG_REF_IDENTIFIER)
+            .add(ApplicationModel.OPERATION_REF_IDENTIFIER)
             .build();
 
     /**
