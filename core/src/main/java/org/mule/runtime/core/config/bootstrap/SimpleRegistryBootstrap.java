@@ -106,10 +106,6 @@ public class SimpleRegistryBootstrap extends AbstractRegistryBootstrap
         {
             value = ((BootstrapObjectFactory) value).create();
         }
-        if (value instanceof MuleContextAware)
-        {
-            ((MuleContextAware) value).setMuleContext(muleContext);
-        }
         muleContext.getRegistry().registerObject(bootstrapProperty.getKey(), value, meta);
     }
 }

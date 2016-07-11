@@ -563,11 +563,6 @@ public class MuleRegistryHelper implements MuleRegistry, RegistryProvider
         {
             notifyTransformerResolvers((Converter) value, ADDED);
         }
-
-        if (value instanceof MuleContextAware)
-        {
-            ((MuleContextAware) value).setMuleContext(muleContext);
-        }
     }
 
     /**
