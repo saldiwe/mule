@@ -8,6 +8,7 @@ package org.mule.extension.db.internal.operation;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mule.extension.db.internal.domain.transaction.TransactionalAction.JOIN_IF_POSSIBLE;
+import org.mule.extension.db.api.param.TemplateQuery;
 import org.mule.extension.db.internal.domain.transaction.TransactionalAction;
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
@@ -39,6 +40,11 @@ public class QuerySettings
     @Optional(defaultValue = "SECONDS")
     private TimeUnit queryTimeoutUnit = SECONDS;
 
+    @Parameter
+    @Optional
+    //@RefOnly
+    private TemplateQuery queryTemplate;
+
     public TransactionalAction getTransactionalAction()
     {
         return transactionalAction;
@@ -52,5 +58,10 @@ public class QuerySettings
     public TimeUnit getQueryTimeoutUnit()
     {
         return queryTimeoutUnit;
+    }
+
+    public TemplateQuery getQueryTemplate()
+    {
+        return queryTemplate;
     }
 }
