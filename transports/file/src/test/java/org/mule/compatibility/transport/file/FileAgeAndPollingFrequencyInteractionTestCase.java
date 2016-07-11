@@ -47,7 +47,7 @@ public class FileAgeAndPollingFrequencyInteractionTestCase extends FunctionalTes
 
         muleContext.start();
 
-        MuleMessage response = muleContext.getClient().request("vm://testOut", RECEIVE_TIMEOUT);
+        MuleMessage response = muleContext.getClient().request("vm://testOut", 1000000);
 
         assertNotNull("File was not processed", response);
         assertEquals(TEST_MESSAGE, getPayloadAsString(response));
