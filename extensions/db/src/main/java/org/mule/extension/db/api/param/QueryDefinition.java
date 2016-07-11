@@ -6,10 +6,7 @@
  */
 package org.mule.extension.db.api.param;
 
-public abstract class QueryDefinition
+public interface QueryDefinition
 {
-
-
-
 
 }

@@ -8,9 +8,9 @@ package org.mule.extension.db.api;
 
 import org.mule.extension.db.api.config.GenericDbConfig;
 import org.mule.extension.db.api.param.DynamicQueryDefinition;
-import org.mule.extension.db.api.param.ParameterizedQueryDefinition;
+import org.mule.extension.db.api.param.ParameterizedQuery;
 import org.mule.extension.db.api.param.QueryDefinition;
-import org.mule.extension.db.api.param.TemplateQueryDefinition;
+import org.mule.extension.db.api.param.Template;
 import org.mule.extension.db.internal.operation.DmlOperations;
 import org.mule.runtime.extension.api.annotation.Configurations;
 import org.mule.runtime.extension.api.annotation.Extension;
@@ -21,7 +21,7 @@ import org.mule.runtime.extension.api.annotation.capability.Xml;
 @Extension(name = "DB Connector", description = "Connector for connecting to relation Databases through the JDBC API")
 @Configurations({GenericDbConfig.class})
 @Operations({DmlOperations.class})
-@SubTypeMapping(baseType = QueryDefinition.class, subTypes = {TemplateQueryDefinition.class, ParameterizedQueryDefinition.class, DynamicQueryDefinition.class})
+@SubTypeMapping(baseType = QueryDefinition.class, subTypes = {Template.class, ParameterizedQuery.class, DynamicQueryDefinition.class})
 @Xml(namespaceLocation = "http://www.mulesoft.org/schema/mule/dbn", namespace = "dbn")
 public class DbConnector
 {

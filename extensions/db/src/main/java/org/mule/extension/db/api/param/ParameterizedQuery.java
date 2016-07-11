@@ -6,19 +6,28 @@
  */
 package org.mule.extension.db.api.param;
 
+import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.display.Text;
 
-public abstract class SqlQueryDefinition extends QueryDefinition
+import java.util.List;
+
+@Alias("parameterized-query")
+public class ParameterizedQuery implements Statement
 {
     @Parameter
     @Optional
     @Text
     private String sql;
 
-    public String getSql()
+    @Parameter
+    @Optional
+    @Alias("inParams")
+    private List<InputParameter> inputParameters;
+
+    public List<InputParameter> getInputParameters()
     {
-        return sql;
+        return inputParameters;
     }
 }

@@ -6,12 +6,7 @@
  */
 package org.mule.extension.db.api.param;
 
-import org.mule.runtime.extension.api.annotation.Alias;
-import org.mule.runtime.extension.api.annotation.Parameter;
-
-@Alias("template-query")
-public class TemplateQueryDefinition extends QueryDefinition
+public interface Statement extends QueryDefinition
 {
-    @Parameter
-    private String ref;
+
 }

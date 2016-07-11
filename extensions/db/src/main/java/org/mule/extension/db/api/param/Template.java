@@ -12,14 +12,24 @@ import org.mule.runtime.extension.api.annotation.param.Optional;
 
 import java.util.List;
 
-@Alias("parameterized-query")
-public class ParameterizedQueryDefinition extends SqlQueryDefinition
+@Alias("template-query-ref")
+public class Template implements Statement, CallableStatement
 {
+
+    @Parameter
+    @Alias("ref")
+    //@RefOnly
+    private Statement statement;
 
     @Parameter
     @Optional
     @Alias("inParams")
     private List<InputParameter> inputParameters;
+
+    public Statement getStatement()
+    {
+        return statement;
+    }
 
     public List<InputParameter> getInputParameters()
     {
