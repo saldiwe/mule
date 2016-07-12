@@ -8,7 +8,7 @@ package org.mule.extension.db.internal.operation;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mule.extension.db.internal.domain.transaction.TransactionalAction.JOIN_IF_POSSIBLE;
-import org.mule.extension.db.api.param.TemplateStatement;
+import org.mule.extension.db.api.param.QueryDefinition;
 import org.mule.extension.db.internal.domain.transaction.TransactionalAction;
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
@@ -43,7 +43,7 @@ public class QuerySettings
     @Parameter
     @Optional
     //@RefOnly
-    private TemplateStatement queryTemplate;
+    private QueryDefinition queryTemplate;
 
     public TransactionalAction getTransactionalAction()
     {

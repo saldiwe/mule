@@ -6,10 +6,8 @@
  */
 package org.mule.extension.db.api.param;
 
-import org.mule.runtime.extension.api.annotation.Alias;
-
-@Alias("dynamic-query")
-public class DynamicQuery extends SqlQuery implements Statement, CallableStatement
+public enum QueryType
 {
-
+    PARAMETERIZED,
+    DYNAMIC
 }

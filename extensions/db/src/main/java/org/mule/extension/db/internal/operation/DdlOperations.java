@@ -6,8 +6,8 @@
  */
 package org.mule.extension.db.internal.operation;
 
-import org.mule.extension.db.api.param.DynamicQuery;
 import org.mule.runtime.extension.api.annotation.ParameterGroup;
+import org.mule.runtime.extension.api.annotation.param.display.Text;
 
 public class DdlOperations
 {
@@ -15,10 +15,10 @@ public class DdlOperations
     /**
      * Enables execution of DDL queries against a database.
      *
-     * @param ddl
+     * @param dynamicQuery
      * @param settings
      */
-    public void executeDdl(DynamicQuery ddl, @ParameterGroup QuerySettings settings)
+    public void executeDdl(@Text String dynamicQuery, @ParameterGroup QuerySettings settings)
     {
 
     }

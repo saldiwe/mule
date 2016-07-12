@@ -6,7 +6,27 @@
  */
 package org.mule.extension.db.api.param;
 
-public interface QueryDefinition
+import org.mule.runtime.extension.api.annotation.Alias;
+import org.mule.runtime.extension.api.annotation.Parameter;
+import org.mule.runtime.extension.api.annotation.param.Optional;
+import org.mule.runtime.extension.api.annotation.param.display.Text;
+
+import java.util.List;
+
+@Alias("query")
+public class QueryDefinition
 {
+
+    @Parameter
+    @Optional
+    @Text
+    private String sql;
+
+    @Parameter
+    private QueryType queryType;
+
+    @Parameter
+    @Optional
+    private List<QueryParameter> parameters;
 
 }
