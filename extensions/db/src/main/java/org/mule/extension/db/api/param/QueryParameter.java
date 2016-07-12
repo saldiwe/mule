@@ -6,28 +6,33 @@
  */
 package org.mule.extension.db.api.param;
 
-import org.mule.runtime.extension.api.annotation.Alias;
+import org.mule.extension.db.internal.domain.type.JdbcType;
 import org.mule.runtime.extension.api.annotation.Parameter;
-import org.mule.runtime.extension.api.annotation.param.NoRef;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
-@Alias("in-param")
-public class InputParameter extends QueryParameter
+public abstract class QueryParameter
 {
 
     /**
-     * The parameter's value
+     * The name of the input parameter.
+     */
+    @Parameter
+    private String key;
+
+    /**
+     * Parameter type name.
      */
     @Parameter
     @Optional
-    @NoRef
-    private Object value;
+    private JdbcType type;
 
-
-    public Object getValue()
+    public String getKey()
     {
-        return value;
+        return key;
     }
 
-
+    public JdbcType getType()
+    {
+        return type;
+    }
 }

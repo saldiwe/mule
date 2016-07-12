@@ -6,7 +6,15 @@
  */
 package org.mule.extension.db.api.param;
 
-public interface CallableStatement
-{
+import org.mule.runtime.extension.api.annotation.Parameter;
 
+public class TemplateQuery
+{
+    @Parameter
+    private Statement statement;
+
+    public Statement getStatement()
+    {
+        return statement;
+    }
 }

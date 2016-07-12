@@ -6,28 +6,19 @@
  */
 package org.mule.extension.db.api.param;
 
-import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
-import org.mule.runtime.extension.api.annotation.param.NoRef;
 import org.mule.runtime.extension.api.annotation.param.Optional;
+import org.mule.runtime.extension.api.annotation.param.display.Text;
 
-@Alias("in-param")
-public class InputParameter extends QueryParameter
+abstract class SqlQuery
 {
-
-    /**
-     * The parameter's value
-     */
     @Parameter
     @Optional
-    @NoRef
-    private Object value;
+    @Text
+    private String sql;
 
-
-    public Object getValue()
+    public String getSql()
     {
-        return value;
+        return sql;
     }
-
-
 }

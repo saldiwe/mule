@@ -7,10 +7,17 @@
 package org.mule.extension.db.api;
 
 import org.mule.extension.db.api.config.GenericDbConfig;
-import org.mule.extension.db.api.param.DynamicQueryDefinition;
+import org.mule.extension.db.api.param.CallableStatement;
+import org.mule.extension.db.api.param.DynamicQuery;
+import org.mule.extension.db.api.param.InOutQueryParameter;
+import org.mule.extension.db.api.param.InputParameter;
+import org.mule.extension.db.api.param.OutputParameter;
 import org.mule.extension.db.api.param.ParameterizedQuery;
-import org.mule.extension.db.api.param.QueryDefinition;
-import org.mule.extension.db.api.param.Template;
+import org.mule.extension.db.api.param.ParameterizedStoredProcedure;
+import org.mule.extension.db.api.param.QueryParameter;
+import org.mule.extension.db.api.param.Statement;
+import org.mule.extension.db.api.param.TemplateStatement;
+import org.mule.extension.db.internal.operation.DdlOperations;
 import org.mule.extension.db.internal.operation.DmlOperations;
 import org.mule.runtime.extension.api.annotation.Configurations;
 import org.mule.runtime.extension.api.annotation.Extension;
@@ -20,8 +27,10 @@ import org.mule.runtime.extension.api.annotation.capability.Xml;
 
 @Extension(name = "DB Connector", description = "Connector for connecting to relation Databases through the JDBC API")
 @Configurations({GenericDbConfig.class})
-@Operations({DmlOperations.class})
-@SubTypeMapping(baseType = QueryDefinition.class, subTypes = {Template.class, ParameterizedQuery.class, DynamicQueryDefinition.class})
+@Operations({DmlOperations.class, DdlOperations.class})
+@SubTypeMapping(baseType = Statement.class, subTypes = {TemplateStatement.class, ParameterizedQuery.class, DynamicQuery.class})
+@SubTypeMapping(baseType = CallableStatement.class, subTypes = {TemplateStatement.class, ParameterizedStoredProcedure.class, DynamicQuery.class})
+@SubTypeMapping(baseType = QueryParameter.class, subTypes = {InputParameter.class, InOutQueryParameter.class, OutputParameter.class})
 @Xml(namespaceLocation = "http://www.mulesoft.org/schema/mule/dbn", namespace = "dbn")
 public class DbConnector
 {

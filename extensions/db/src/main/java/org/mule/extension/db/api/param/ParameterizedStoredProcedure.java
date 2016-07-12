@@ -6,33 +6,20 @@
  */
 package org.mule.extension.db.api.param;
 
-import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
 import java.util.List;
 
-@Alias("template-query-ref")
-public class Template implements Statement, CallableStatement
+public class ParameterizedStoredProcedure extends SqlQuery implements CallableStatement
 {
 
     @Parameter
-    @Alias("ref")
-    //@RefOnly
-    private Statement statement;
-
-    @Parameter
     @Optional
-    @Alias("inParams")
-    private List<InputParameter> inputParameters;
+    private List<QueryParameter> parameters;
 
-    public Statement getStatement()
+    public List<QueryParameter> getParameters()
     {
-        return statement;
-    }
-
-    public List<InputParameter> getInputParameters()
-    {
-        return inputParameters;
+        return parameters;
     }
 }

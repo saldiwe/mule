@@ -8,26 +8,31 @@ package org.mule.extension.db.api.param;
 
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
-import org.mule.runtime.extension.api.annotation.param.NoRef;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
-@Alias("in-param")
-public class InputParameter extends QueryParameter
+import java.util.List;
+
+@Alias("template-query-ref")
+public class TemplateStatement implements Statement, CallableStatement
 {
 
-    /**
-     * The parameter's value
-     */
+    @Parameter
+    @Alias("ref")
+    //@RefOnly
+    private TemplateStatement template;
+
     @Parameter
     @Optional
-    @NoRef
-    private Object value;
+    @Alias("inParams")
+    private List<InputParameter> inputParameters;
 
-
-    public Object getValue()
+    public Statement getTemplate()
     {
-        return value;
+        return template;
     }
 
-
+    public List<InputParameter> getInputParameters()
+    {
+        return inputParameters;
+    }
 }
