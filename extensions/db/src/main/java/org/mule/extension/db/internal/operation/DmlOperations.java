@@ -7,7 +7,9 @@
 package org.mule.extension.db.internal.operation;
 
 import org.mule.extension.db.api.param.QueryDefinition;
+import org.mule.extension.db.internal.metadata.DeletemeMetadataResolver;
 import org.mule.runtime.extension.api.annotation.ParameterGroup;
+import org.mule.runtime.extension.api.annotation.metadata.MetadataScope;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.display.Text;
 
@@ -84,6 +86,7 @@ public class DmlOperations
      * @param settings
      * @return
      */
+    @MetadataScope(outputResolver = DeletemeMetadataResolver.class)
     public Map<String, Object> storedProcedure(QueryDefinition queryDefinition,
                                                @Optional(defaultValue = "false") boolean streaming,
                                                @Optional(defaultValue = "10") int fetchSize,
@@ -103,8 +106,9 @@ public class DmlOperations
      * @param settings
      * @return
      */
-    public int[] bulkUpdate(@Optional @Text String dynamicQuery, @Optional String file, @ParameterGroup QuerySettings settings)
+    public int bulkUpdate(@Optional @Text String dynamicQuery, @Optional String file, @ParameterGroup QuerySettings settings)
     {
-        return new int[] {0};
+        //return new int[] {0};
+        return 0;
     }
 }
