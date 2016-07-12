@@ -6,7 +6,10 @@
  */
 package org.mule.extension.db.api.param;
 
-public interface CallableStatement
+import org.mule.runtime.extension.api.annotation.Alias;
+
+@Alias("inout-param")
+public class InOutQueryParameter extends QueryParameter
 {
 
 }
