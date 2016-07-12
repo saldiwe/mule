@@ -68,6 +68,7 @@ public class BeanDefinitionFactory
             .add(new ComponentIdentifier.Builder().withNamespace(CORE_NAMESPACE_NAME).withName(DESCRIPTION_ELEMENT).build())
             .add(ApplicationModel.OPERATION_CONFIG_REF_IDENTIFIER)
             .add(ApplicationModel.OPERATION_REF_IDENTIFIER)
+            .add(ApplicationModel.OPERATION_MODULE_IDENTIFIER)
             .build();
 
     /**

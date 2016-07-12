@@ -11,7 +11,7 @@
         <property parameterName="someUserConfig" defaultValue="some-username"/>
         <property parameterName="somePassConfig" defaultValue="some-password"/>
 
-        <httpn:request-config name="simple-config" basePath="/basic-auth"> <!-- basePath="/" -->
+        <httpn:request-config name="simple-config" basePath="/basic-auth">
             <httpn:request-connection host="httpbin.org" protocol="HTTP" port="80"/>
             <httpn:authentication>
                 <httpn:basic-authentication username="#[property.someUserConfig]" password="#[property.somePassConfig]"/>
@@ -26,12 +26,10 @@
             <body>
                 <httpn:request path="/{aUser}/{aPass}" key="ANY" config-ref="simple-config" method="GET">
                     <httpn:request-builder>
-                        <httpn:simple-request-builder>
                             <httpn:uri-params>
                                 <httpn:uri-param key="aUser" value="#[param.someUser]"/>
                                 <httpn:uri-param key="aPass" value="#[param.somePass]"/>
                             </httpn:uri-params>
-                        </httpn:simple-request-builder>
                     </httpn:request-builder>
                 </httpn:request>
                 <set-payload value="#['success with basic-authentication for user: ' + param.someUser]"/>
