@@ -9,13 +9,13 @@ package org.mule.test.components;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import org.mule.runtime.core.api.MuleMessage;
-import org.mule.functional.junit4.FunctionalTestCase;
+import org.mule.test.AbstractIntegrationTestCase;
 import org.mule.runtime.api.message.NullPayload;
+import org.mule.runtime.core.api.MuleMessage;
 
 import org.junit.Test;
 
-public class ComponentReturningNullFlowTestCase extends FunctionalTestCase
+public class ComponentReturningNullFlowTestCase extends AbstractIntegrationTestCase
 {
 
     @Override

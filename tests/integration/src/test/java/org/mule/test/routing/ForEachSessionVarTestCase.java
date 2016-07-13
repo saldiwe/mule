@@ -9,17 +9,17 @@ package org.mule.test.routing;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import org.mule.test.AbstractIntegrationTestCase;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 import org.mule.runtime.core.api.processor.MessageProcessor;
-import org.mule.functional.junit4.FunctionalTestCase;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Test;
 
-public class ForEachSessionVarTestCase extends FunctionalTestCase
+public class ForEachSessionVarTestCase extends AbstractIntegrationTestCase
 {
 
     protected static MuleEvent event;

@@ -11,14 +11,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
+import org.mule.functional.exceptions.FunctionalTestException;
+import org.mule.test.AbstractIntegrationTestCase;
 import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.client.MuleClient;
 import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.exception.DefaultMessagingExceptionStrategy;
-import org.mule.functional.exceptions.FunctionalTestException;
-import org.mule.functional.junit4.FunctionalTestCase;
 import org.mule.runtime.core.message.ExceptionMessage;
 import org.mule.runtime.core.routing.outbound.MulticastingRouter;
 import org.mule.tck.probe.PollingProber;
@@ -28,9 +27,11 @@ import org.mule.tck.probe.Prober;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
-public class DefaultServiceExceptionStrategyTestCase extends FunctionalTestCase
+@Ignore
+public class DefaultServiceExceptionStrategyTestCase extends AbstractIntegrationTestCase
 {
 
     @Override

@@ -6,11 +6,11 @@
  */
 package org.mule.properties;
 
-import org.mule.functional.junit4.FunctionalTestCase;
+import org.mule.test.AbstractIntegrationTestCase;
 
 import org.junit.Test;
 
-public class MuleVariablesTransformerTestCase extends FunctionalTestCase
+public class MuleVariablesTransformerTestCase extends AbstractIntegrationTestCase
 {
     @Override
     protected String getConfigFile()

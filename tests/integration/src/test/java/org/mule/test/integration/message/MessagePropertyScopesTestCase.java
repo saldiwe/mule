@@ -9,15 +9,14 @@ package org.mule.test.integration.message;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import org.mule.runtime.core.api.MuleMessage;
-import org.mule.functional.junit4.FunctionalTestCase;
+import org.mule.test.AbstractIntegrationTestCase;
 import org.mule.runtime.api.message.NullPayload;
+import org.mule.runtime.core.api.MuleMessage;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class MessagePropertyScopesTestCase extends FunctionalTestCase
+public class MessagePropertyScopesTestCase extends AbstractIntegrationTestCase
 {
 
     @Override

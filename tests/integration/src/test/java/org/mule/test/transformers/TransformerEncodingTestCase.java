@@ -9,8 +9,7 @@ package org.mule.test.transformers;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mule.runtime.core.api.config.MuleProperties.MULE_ENCODING_PROPERTY;
-
-import org.mule.functional.junit4.FunctionalTestCase;
+import org.mule.test.AbstractIntegrationTestCase;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.util.Base64;
 
@@ -18,7 +17,7 @@ import java.io.Serializable;
 
 import org.junit.Test;
 
-public class TransformerEncodingTestCase extends FunctionalTestCase
+public class TransformerEncodingTestCase extends AbstractIntegrationTestCase
 {
 
     private static final String UTF_16_LE = "UTF-16LE";
