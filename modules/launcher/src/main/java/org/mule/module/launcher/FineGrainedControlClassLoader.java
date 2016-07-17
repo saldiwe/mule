@@ -30,8 +30,8 @@ public class FineGrainedControlClassLoader extends GoodCitizenClassLoader
             "com.mulesource."
     };
 
-    protected Set<String> overrides = new HashSet<String>();
-    protected Set<String> blocked = new HashSet<String>();
+    protected Set<String> overrides = new HashSet<>();
+    protected Set<String> blocked = new HashSet<>();
 
     public FineGrainedControlClassLoader(URL[] urls, ClassLoader parent)
     {
@@ -71,61 +71,64 @@ public class FineGrainedControlClassLoader extends GoodCitizenClassLoader
     }
 
     @Override
-    protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
     {
-        Class<?> result = findLoadedClass(name);
-
-        if (result != null)
+        synchronized (getClassLoadingLock(name))
         {
-            return result;
-        }
-        boolean overrideMatch = isOverridden(name);
+            Class<?> result = findLoadedClass(name);
 
-
-        if (overrideMatch)
-        {
-            boolean blockedMatch = isBlocked(name);
-
-            if (blockedMatch)
+            if (result != null)
             {
-                // load this class from the child ONLY, don't attempt parent, let CNFE exception propagate
-                result = findClass(name);
+                return result;
+            }
+            boolean overrideMatch = isOverridden(name);
+
+
+            if (overrideMatch)
+            {
+                boolean blockedMatch = isBlocked(name);
+
+                if (blockedMatch)
+                {
+                    // load this class from the child ONLY, don't attempt parent, let CNFE exception propagate
+                    result = findClass(name);
+                }
+                else
+                {
+                    // load this class from the child
+                    try
+                    {
+                        result = findClass(name);
+                    }
+                    catch (ClassNotFoundException e)
+                    {
+                        // let it fail with CNFE
+                        result = findParentClass(name);
+                    }
+                }
+
+
             }
             else
             {
-                // load this class from the child
+                // no overrides, regular parent-first lookup
                 try
                 {
-                    result = findClass(name);
+                    result = findParentClass(name);
                 }
                 catch (ClassNotFoundException e)
                 {
-                    // let it fail with CNFE
-                    result = findParentClass(name);
+                    result = findClass(name);
                 }
             }
 
-
-        }
-        else
-        {
-            // no overrides, regular parent-first lookup
-            try
+            if (resolve)
             {
-                result = findParentClass(name);
+                resolveClass(result);
             }
-            catch (ClassNotFoundException e)
-            {
-                result = findClass(name);
-            }
-        }
 
-        if (resolve)
-        {
-            resolveClass(result);
+            return result;
         }
-
-        return result;
     }
 
     public boolean isOverridden(String name)
