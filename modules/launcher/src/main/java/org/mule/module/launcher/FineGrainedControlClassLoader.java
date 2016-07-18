@@ -30,8 +30,8 @@ public class FineGrainedControlClassLoader extends GoodCitizenClassLoader
             "com.mulesource."
     };
 
-    protected Set<String> overrides = new HashSet<>();
-    protected Set<String> blocked = new HashSet<>();
+    protected final Set<String> overrides = new HashSet<>();
+    protected final Set<String> blocked = new HashSet<>();
 
     public FineGrainedControlClassLoader(URL[] urls, ClassLoader parent)
     {
@@ -73,16 +73,22 @@ public class FineGrainedControlClassLoader extends GoodCitizenClassLoader
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
     {
+        Class<?> result = findLoadedClass(name);
+
+        if (result != null)
+        {
+            return result;
+        }
+        boolean overrideMatch = isOverridden(name);
+
         synchronized (getClassLoadingLock(name))
         {
-            Class<?> result = findLoadedClass(name);
+            result = findLoadedClass(name);
 
             if (result != null)
             {
                 return result;
             }
-            boolean overrideMatch = isOverridden(name);
-
 
             if (overrideMatch)
             {
@@ -121,14 +127,14 @@ public class FineGrainedControlClassLoader extends GoodCitizenClassLoader
                     result = findClass(name);
                 }
             }
-
-            if (resolve)
-            {
-                resolveClass(result);
-            }
-
-            return result;
         }
+
+        if (resolve)
+        {
+            resolveClass(result);
+        }
+
+        return result;
     }
 
     public boolean isOverridden(String name)

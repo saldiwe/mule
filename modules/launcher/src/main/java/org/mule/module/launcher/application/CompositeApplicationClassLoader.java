@@ -41,7 +41,7 @@ public class CompositeApplicationClassLoader extends ClassLoader implements Appl
     public CompositeApplicationClassLoader(String appName, List<ClassLoader> classLoaders)
     {
         this.appName = appName;
-        this.classLoaders = new LinkedList<ClassLoader>(classLoaders);
+        this.classLoaders = new LinkedList<>(classLoaders);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class CompositeApplicationClassLoader extends ClassLoader implements Appl
     }
 
     @Override
-    protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
     {
         for (ClassLoader classLoader : classLoaders)
         {
@@ -202,7 +202,7 @@ public class CompositeApplicationClassLoader extends ClassLoader implements Appl
     @Override
     public Enumeration<URL> getResources(String name) throws IOException
     {
-        final Map<String, URL> resources = new HashMap<String, URL>();
+        final Map<String, URL> resources = new HashMap<>();
 
         for (ClassLoader classLoader : classLoaders)
         {
@@ -218,7 +218,7 @@ public class CompositeApplicationClassLoader extends ClassLoader implements Appl
             }
         }
 
-        return new EnumerationAdapter<URL>(resources.values());
+        return new EnumerationAdapter<>(resources.values());
     }
 
     @Override
