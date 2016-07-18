@@ -74,7 +74,7 @@ public class XmlApplicationParser
             Optional<XmlNamespaceInfo> matchingXmlNamespaceInfo = namespaceInfoProvider
                     .getXmlNamespacesInfo()
                     .stream()
-                    .filter(xmlNamespaceInfo -> namespaceUri.startsWith(xmlNamespaceInfo.getNamespaceUriPrefix()))
+                    .filter(xmlNamespaceInfo -> namespaceUri.equals(xmlNamespaceInfo.getNamespaceUriPrefix())) //TODO WIP-OPERATIONS talk to PLG, if not changed it breaks for some modules names
                     .findFirst();
             if (matchingXmlNamespaceInfo.isPresent())
             {

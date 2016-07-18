@@ -7,6 +7,7 @@
 package org.mule.runtime.config.spring.dsl.model.extension;
 
 import org.mule.runtime.config.spring.dsl.model.ComponentModel;
+import org.mule.runtime.config.spring.dsl.model.ModuleModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,5 +42,13 @@ public class OperationExtension
     public ComponentModel getComponentModel()
     {
         return componentModel;
+    }
+
+    public List<ComponentModel> getMessageProcessorsComponentModels()
+    {
+        return this.getComponentModel().getInnerComponents()
+            .stream()
+            .filter(childComponent -> childComponent.getIdentifier().equals(ModuleModel.OPERATION_BODY_IDENTIFIER))
+            .findAny().get().getInnerComponents();
     }
 }

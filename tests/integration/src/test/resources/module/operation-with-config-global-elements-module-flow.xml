@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:module-basic-auth="http://www.mulesoft.org/schema/mule/module-basic-auth"
+      xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+       http://www.mulesoft.org/schema/mule/module-basic-auth schema-module-basic-auth.xsd">
+
+    <module-basic-auth:config name="la-plata-config" someUserConfig="'userLP'" somePassConfig="'passLP'"/>
+    <module-basic-auth:config name="gonnet-config" someUserConfig="'userGonnet'" somePassConfig="'passGonnet'"/>
+
+    <flow name="testHttpDoLogin">
+        <module-basic-auth:do-login config-ref="la-plata-config" someUser="'userLP'" somePass="'passLP'" />
+    </flow>
+
+    <flow name="testHttpDontLogin">
+        <module-basic-auth:do-login config-ref="la-plata-config" someUser="'userGonnet'" somePass="'passGonnet'"/>
+    </flow>
+
+    <flow name="testHttpDoLoginGonnet">
+        <module-basic-auth:do-login config-ref="gonnet-config" someUser="'userGonnet'" somePass="'passGonnet'"/>
+    </flow>
+</mule>

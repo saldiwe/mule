@@ -16,9 +16,11 @@ import org.junit.Test;
 public class OperationModuleWithConfigTestCase extends FunctionalTestCase
 {
     @Override
-    protected String getConfigFile()
+    protected String[] getConfigFiles()
     {
-        return "operation-with-config-module-flow.xml";
+        return new String[]{"module/operation-with-config-module-flow.xml"
+                , "module/module-mule-utils.xml"
+        };
     }
 
     @Test

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:module-mule-utils="http://www.mulesoft.org/schema/mule/module-mule-utils"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+       http://www.mulesoft.org/schema/mule/module-mule-utils schema-module-mule-utils.xsd">
+
+    <module-mule-utils:config name="instantiatedConfig"  configParam="'some config-value-parameter'" />
+
+    <flow name="testSetPayloadHardcodedFromModuleFlow">
+        <module-mule-utils:set-payload-hardcoded-value config-ref="instantiatedConfig" />
+    </flow>
+
+    <flow name="testSetPayloadParamFromModuleFlow">
+        <module-mule-utils:set-payload-param-value config-ref="instantiatedConfig" value="'new payload'"/>
+    </flow>
+
+    <flow name="testSetPayloadConfigParamFlow">
+        <module-mule-utils:set-payload-config-param-value config-ref="instantiatedConfig" />
+    </flow>
+
+    <flow name="testSetPayloadConfigDefaultParamFlow">
+        <module-mule-utils:set-payload-config-default-param-value config-ref="instantiatedConfig" />
+    </flow>
+
+    <flow name="testSetPayloadAddParamAndPropertyValues">
+        <module-mule-utils:set-payload-add-param-and-property-values config-ref="instantiatedConfig" value1="'a parameter value'"/>
+    </flow>
+</mule>

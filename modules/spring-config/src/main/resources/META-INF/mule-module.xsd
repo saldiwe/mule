@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns="http://www.mulesoft.org/schema/mule/module"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:mule="http://www.mulesoft.org/schema/mule/core"
+            targetNamespace="http://www.mulesoft.org/schema/mule/module"
+            attributeFormDefault="unqualified"
+            elementFormDefault="qualified">
+
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:import namespace="http://www.mulesoft.org/schema/mule/core"
+                schemaLocation="http://www.mulesoft.org/schema/mule/core/current/mule.xsd"/>
+
+
+    <xsd:element name="module" type="moduleConfigType">
+        <xsd:annotation>
+            <xsd:documentation>
+                A transformer that sets the paylaod with the provided value
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="operation" type="operationType">
+        <xsd:annotation>
+            <xsd:documentation>
+                A transformer that sets the paylaod with the provided value
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+
+    <xsd:complexType name="operationType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractExtensionType">
+                <xsd:sequence>
+                    <xsd:element name="parameters" minOccurs="0" maxOccurs="1">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="parameter" minOccurs="1" maxOccurs="unbounded">
+                                    <xsd:complexType>
+                                        <xsd:attribute name="parameterName"/>
+                                        <xsd:attribute name="defaultValue" use="optional"/>
+                                        <xsd:attribute name="type" type="simpleType" use="required"/>
+                                    </xsd:complexType>
+                                </xsd:element>
+                            </xsd:sequence>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="body">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:group ref="mule:messageProcessorOrMixedContentMessageProcessor" maxOccurs="unbounded"/>
+                            </xsd:sequence>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="output" minOccurs="0">
+                        <!--<xsd:complexType>-->
+                        <!---->
+                        <!--</xsd:complexType>-->
+                    </xsd:element>
+                </xsd:sequence>
+                <xsd:attribute name="name" use="required"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="moduleConfigType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractExtensionType">
+                <xsd:sequence maxOccurs="unbounded" minOccurs="1">
+                    <xsd:choice minOccurs="1" maxOccurs="unbounded">
+                        <xsd:element name="property">
+                            <xsd:complexType>
+                                <xsd:attribute name="parameterName"/>
+                                <xsd:attribute name="defaultValue" use="optional"/>
+                                <xsd:attribute name="type" type="simpleType" use="required"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                        <xsd:element ref="operation" />
+                        <xsd:group ref="mule:muleRootElements"/>
+                    </xsd:choice>
+                </xsd:sequence>
+                <xsd:attribute name="name" use="required"/>
+                <xsd:attribute name="version" use="optional" default="1.0.0"/>
+                <xsd:attribute name="minMuleVersion" use="optional" default="4.0"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+
+
+
+    <!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// -->
+    <!-- //// --><!-- //// --><!-- //// --><!-- \\\\ --><!-- \\\\ --><!-- //// --><!-- //// --><!-- //// -->
+    <!-- //// --><!-- \\\\ --><!-- Some borrowed types elements --><!-- \\\\ --><!-- //// --><!-- //// -->
+    <!-- //// --><!-- //// --><!-- //// --><!-- \\\\ --><!-- \\\\ --><!-- //// --><!-- //// --><!-- //// -->
+    <!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// -->
+
+    <xsd:simpleType name="simpleType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="string"/>
+            <xsd:enumeration value="boolean"/>
+            <xsd:enumeration value="datetime"/>
+            <xsd:enumeration value="date"/>
+            <xsd:enumeration value="number"/>
+            <xsd:enumeration value="time"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+
+    <!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// -->
+    <!-- //// --><!-- //// --><!-- //// --><!-- \\\\ --><!-- \\\\ --><!-- //// --><!-- //// --><!-- //// -->
+    <!-- //// --><!-- //// --><!-- \\\\ --><!-- METADATA elements --><!-- \\\\ --><!-- //// --><!-- //// -->
+    <!-- //// --><!-- //// --><!-- //// --><!-- \\\\ --><!-- \\\\ --><!-- //// --><!-- //// --><!-- //// -->
+    <!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// --><!-- //// -->
+
+
+    <xsd:complexType name="metadataRootElement">
+        <xsd:choice minOccurs="1" maxOccurs="1">
+            <!--simple elements-->
+            <xsd:element ref="null" />
+            <xsd:element ref="string" />
+            <xsd:element ref="boolean" />
+            <xsd:element ref="datetime" />
+            <xsd:element ref="binary" />
+            <xsd:element ref="date" />
+            <xsd:element ref="number" />
+            <xsd:element ref="time" />
+
+            <!--complex elements-->
+            <xsd:element ref="object" />
+            <xsd:element ref="array" />
+            <!--TODO: tuple?-->
+        </xsd:choice>
+    </xsd:complexType>
+
+    <!--root element-->
+    <xsd:complexType name="metadata" />
+
+    <xsd:element name="field">
+        <xsd:complexType >
+            <xsd:complexContent>
+                <xsd:extension base="metadataRootElement" >
+                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                    <xsd:attribute name="repeated" type="xsd:boolean" default="false"/>
+                    <xsd:attribute name="required" type="xsd:boolean" default="false"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="object">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata" >
+                    <xsd:sequence minOccurs="1" maxOccurs="unbounded">
+                        <xsd:element ref="field" />
+                    </xsd:sequence>
+                    <xsd:attribute name="label" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="array">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadataRootElement" >
+                    <xsd:attribute name="label" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="null">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata" />
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="string">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata" >
+                    <xsd:sequence>
+                        <xsd:element minOccurs="0" maxOccurs="1" name="enums">
+                            <xsd:complexType>
+                                <xsd:sequence minOccurs="0" maxOccurs="unbounded">
+                                    <xsd:element name="enum">
+                                        <xsd:complexType>
+                                            <xsd:attribute name="value" type="xsd:string" use="required"/>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                    <xsd:attribute name="defaultValue" type="xsd:string"/>
+                    <xsd:attribute name="minLenght" type="xsd:positiveInteger"/>
+                    <xsd:attribute name="maxLenght" type="xsd:positiveInteger"/>
+                    <xsd:attribute name="pattern" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:simpleType name="booleanType">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="true" />
+            <xsd:enumeration value="false" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:element name="boolean">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata">
+                    <xsd:attribute name="defaultValue" type="booleanType"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="datetime">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata" >
+                    <xsd:attribute name="defaultValue" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="binary">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata" />
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="date">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata" >
+                    <xsd:attribute name="defaultValue" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="number">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata" >
+                    <xsd:attribute name="defaultValue" type="xsd:string"/>
+                    <xsd:attribute name="from" type="xsd:positiveInteger"/>
+                    <xsd:attribute name="to" type="xsd:positiveInteger"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="time">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="metadata" >
+                    <xsd:attribute name="defaultValue" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

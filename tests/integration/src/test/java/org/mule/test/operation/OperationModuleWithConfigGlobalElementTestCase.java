@@ -20,9 +20,11 @@ import org.junit.Test;
 public class OperationModuleWithConfigGlobalElementTestCase extends ExtensionFunctionalTestCase
 {
     @Override
-    protected String getConfigFile()
+    protected String[] getConfigFiles()
     {
-        return "operation-with-config-global-elements-module-flow.xml";
+        return new String[]{"module/operation-with-config-global-elements-module-flow.xml"
+                , "module/module-basic-auth.xml"
+        };
     }
 
     @Override
@@ -53,5 +55,4 @@ public class OperationModuleWithConfigGlobalElementTestCase extends ExtensionFun
         MuleEvent muleEvent = flowRunner("testHttpDoLoginGonnet").run();
         assertThat(muleEvent.getMessage().getPayload(), Is.is("success with basic-authentication for user: userGonnet"));
     }
-
 }
