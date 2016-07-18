@@ -128,11 +128,11 @@ public class MuleHierarchicalBeanDefinitionParserDelegate extends BeanDefinition
 
                 if (shouldUseNewMechanism(element))
                 {
-                    if (element.getLocalName().equals("config-ref") //TODO WIP-OPERATIONS this must go away once all the tests are green
-                        || element.getLocalName().equals("module"))
-                    {
-                        return null;
-                    }
+                    //if (element.getLocalName().equals("config-ref") //TODO WIP-OPERATIONS this must go away once all the tests are green
+                    //    || element.getLocalName().equals("module"))
+                    //{
+                    //    return null;
+                    //}
                     ComponentModel parentComponentModel = applicationModelSupplier.get().findComponentDefinitionModel((Element) element.getParentNode());
                     beanDefinitionFactory.resolveComponentRecursively(parentComponentModel, componentModel, getReaderContext().getRegistry(), (resolvedComponent, registry) -> {
                         if (resolvedComponent.isRoot())

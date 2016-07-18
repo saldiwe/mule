@@ -13,13 +13,13 @@ import org.mule.runtime.core.api.MuleEvent;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-public class OperationModuleWithConfigTestCase extends FunctionalTestCase
+public class ModuleWithPropertiesTestCase extends FunctionalTestCase
 {
     @Override
     protected String[] getConfigFiles()
     {
-        return new String[]{"module/operation-with-config-module-flow.xml"
-                , "module/module-mule-utils.xml"
+        return new String[]{"module/flows-using-module-properties.xml"
+                , "module/module-properties.xml"
         };
     }
 

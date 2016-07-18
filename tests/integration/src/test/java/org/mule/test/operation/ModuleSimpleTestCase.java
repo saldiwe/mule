@@ -14,13 +14,13 @@ import org.mule.runtime.extension.api.annotation.param.Ignore;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-public class OperationModuleSimpleTestCase extends FunctionalTestCase
+public class ModuleSimpleTestCase extends FunctionalTestCase
 {
     @Override
     protected String[] getConfigFiles()
     {
-        return new String[]{"module/operation-module-simple-flow.xml"
-                , "module/module-mule-utils-no-properties.xml"
+        return new String[]{"module/flows-using-module-simple.xml"
+                , "module/module-simple.xml"
         };
     }
 

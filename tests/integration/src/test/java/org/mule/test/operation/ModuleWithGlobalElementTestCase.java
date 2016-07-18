@@ -17,13 +17,13 @@ import org.mule.runtime.core.api.MuleEvent;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-public class OperationModuleWithConfigGlobalElementTestCase extends ExtensionFunctionalTestCase
+public class ModuleWithGlobalElementTestCase extends ExtensionFunctionalTestCase
 {
     @Override
     protected String[] getConfigFiles()
     {
-        return new String[]{"module/operation-with-config-global-elements-module-flow.xml"
-                , "module/module-basic-auth.xml"
+        return new String[]{"module/flows-using-module-global-elements.xml"
+                , "module/module-global-element.xml"
         };
     }
 

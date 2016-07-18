@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xmlns:module-mule-utils-no-properties="http://www.mulesoft.org/schema/mule/module-mule-utils-no-properties"
+      xmlns:module-simple="http://www.mulesoft.org/schema/mule/module-simple"
       xsi:schemaLocation="
        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-       http://www.mulesoft.org/schema/mule/module-mule-utils-no-properties schema-module-mule-utils-no-properties.xsd">
+       http://www.mulesoft.org/schema/mule/module-simple schema-module-simple.xsd">
 
     <flow name="testSetPayloadHardcodedFlow">
-        <module-mule-utils-no-properties:set-payload-hardcoded-value />
+        <module-simple:set-payload-hardcoded-value />
     </flow>
 
     <flow name="testSetPayloadParamFlow">
-        <module-mule-utils-no-properties:set-payload-param-value value="'new payload'" />
+        <module-simple:set-payload-param-value value="'new payload'" />
     </flow>
 
     <flow name="testSetPayloadParamDefaultFlow">
-        <module-mule-utils-no-properties:set-payload-param-default-value />
+        <module-simple:set-payload-param-default-value />
     </flow>
 
     <flow name="testSetPayloadNoSideEffectFlow">
         <set-variable variableName="testVar" value="unchanged value"/>
-        <module-mule-utils-no-properties:set-payload-no-side-effect />
+        <module-simple:set-payload-no-side-effect />
     </flow>
 
     <flow name="testDoNothingFlow">
         <set-variable variableName="variableBeforeCalling" value="value of flowvar before calling"/>
         <set-payload value="before calling" />
-        <module-mule-utils-no-properties:do-nothing />
+        <module-simple:do-nothing />
     </flow>
 
     <flow name="testSetPayloadParamValueAppender">
-        <module-mule-utils-no-properties:set-payload-param-value-appender value="'new payload'" />
+        <module-simple:set-payload-param-value-appender value="'new payload'" />
     </flow>
 
     <flow name="testSetPayloadAddParamsValues">
-        <module-mule-utils-no-properties:set-payload-add-params-values value1="10" value2="5" />
+        <module-simple:set-payload-add-params-values value1="10" value2="5" />
     </flow>
 
     <!-- TODO WIP-OPERATIONS this won't be acceptable in the XML as the XSD will check for it before running the app -->
     <!--<flow name="testWithoutParametersFlow">-->
-        <!--<module-mule-utils-no-properties:set-payload-param-value /> -->
+        <!--<module-simple:set-payload-param-value /> -->
         <!--<operation-ref operation="set-payload-param-value"  module="utils"/>-->
         <!--<set-payload value="should have not reach here" />-->
     <!--</flow>-->
     <!-- TODO WIP-OPERATIONS this won't be acceptable in the XML as the XSD will check for it before running the app -->
     <!--<flow name="testWithMoreThanExpectedParametersFlow">-->
-        <!--<module-mule-utils-no-properties:set-payload-param-value value1="value1" value2="value2" -->
+        <!--<module-simple:set-payload-param-value value1="value1" value2="value2" -->
         <!--<set-payload value="should have not reach here" />-->
     <!--</flow>-->
 </mule>
