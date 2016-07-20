@@ -7,6 +7,7 @@
 package org.mule.extension.validation.api;
 
 import static org.mule.runtime.core.config.i18n.MessageFactory.createStaticMessage;
+import org.mule.extension.validation.api.el.ValidationElExtension;
 import org.mule.extension.validation.internal.CommonValidationOperations;
 import org.mule.extension.validation.internal.CustomValidatorOperation;
 import org.mule.extension.validation.internal.DefaultExceptionFactory;
@@ -53,7 +54,7 @@ import java.util.Locale;
 @Extension(name = "Validation Module", description = "Allows performing validations and throw an Exception if the validation fails")
 @Operations({CommonValidationOperations.class, CustomValidatorOperation.class, ValidationStrategies.class, NumberValidationOperation.class})
 @Extensible(alias = "validator-message-processor")
-@Export(resources = {"/META-INF/services/org/mule/runtime/core/i18n"})
+@Export(resources = {"/META-INF/services/org/mule/runtime/core/i18n", "/META-INF/services/org/mule/runtime/core/config"}, classes = {ValidationMessages.class, ValidationElExtension.class})
 public class ValidationExtension extends AbstractAnnotatedObject implements Config, NamedObject, Initialisable, MuleContextAware
 {
 
