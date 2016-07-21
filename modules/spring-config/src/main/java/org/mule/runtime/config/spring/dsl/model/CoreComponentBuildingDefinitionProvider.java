@@ -56,6 +56,8 @@ import org.mule.runtime.core.enricher.MessageEnricher;
 import org.mule.runtime.core.exception.CatchMessagingExceptionStrategy;
 import org.mule.runtime.core.exception.ChoiceMessagingExceptionStrategy;
 import org.mule.runtime.core.exception.DefaultMessagingExceptionStrategy;
+import org.mule.runtime.core.exception.ErrorHandler;
+import org.mule.runtime.core.exception.OnErrorStrategy;
 import org.mule.runtime.core.exception.RedeliveryExceeded;
 import org.mule.runtime.core.exception.RollbackMessagingExceptionStrategy;
 import org.mule.runtime.core.processor.AsyncDelegateMessageProcessor;
@@ -162,6 +164,19 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
                                                  .withIdentifier(EXCEPTION_STRATEGY)
                                                  .withTypeDefinition(fromType(Object.class))
                                                  .withConstructorParameterDefinition(fromSimpleReferenceParameter("ref").build())
+                                                 .build());
+        componentBuildingDefinitions.add(baseDefinition.copy()
+                                                 .withIdentifier("error-handler")
+                                                 .withTypeDefinition(fromType(ErrorHandler.class))
+                                                 .withSetterParameterDefinition("errorStrategies", fromChildCollectionConfiguration(OnErrorStrategy.class).build())
+                                                 .asPrototype()
+                                                 .build());
+        componentBuildingDefinitions.add(exceptionStrategyBaseBuilder.copy()
+                                                 .withIdentifier("on-error")
+                                                 .withTypeDefinition(fromType(OnErrorStrategy.class))
+                                                 .withSetterParameterDefinition("errorType", fromSimpleParameter("withType").build())
+                                                 .withSetterParameterDefinition(WHEN, fromSimpleParameter(WHEN).build())
+                                                 .asPrototype()
                                                  .build());
         componentBuildingDefinitions.add(exceptionStrategyBaseBuilder.copy()
                                                  .withIdentifier(CATCH_EXCEPTION_STRATEGY)

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:script="http://www.mulesoft.org/schema/mule/scripting"
+      xmlns:test="http://www.mulesoft.org/schema/mule/test"
+      xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+       http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+       http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd
+       http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+       ">
+
+    <flow name="testException">
+        <test:component throwException="true"/>
+        <error-handler>
+            <on-error withType="CONNECTIVITY">
+                <set-payload value="CON"/>
+            </on-error>
+            <on-error withType="ANY">
+                <set-payload value="ANY"/>
+            </on-error>
+        </error-handler>
+    </flow>
+
+    <flow name="ioException">
+        <script:component>
+            <script:script engine="groovy">
+                throw new java.io.IOException()
+            </script:script>
+        </script:component>
+        <error-handler>
+            <on-error withType="CONNECTIVITY">
+                <set-payload value="CON"/>
+            </on-error>
+            <on-error withType="ANY">
+                <set-payload value="ANY"/>
+            </on-error>
+        </error-handler>
+    </flow>
+
+    <flow name="customException">
+        <custom-processor class="org.mule.test.integration.exceptions.SimpleErrorHandlingTestCase$ThrowExceptionMessageProcessor"/>
+        <error-handler>
+            <on-error withType="CONNECTIVITY">
+                <set-payload value="CON"/>
+            </on-error>
+            <on-error withType="ANY">
+                <set-payload value="ANY"/>
+            </on-error>
+        </error-handler>
+    </flow>
+
+</mule>
