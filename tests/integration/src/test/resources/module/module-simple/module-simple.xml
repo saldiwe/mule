@@ -15,7 +15,7 @@
 
     <operation name="set-payload-param-value">
         <parameters>
-            <parameter parameterName="value"/>
+            <parameter parameterName="value" type="string"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value]"/>
@@ -24,7 +24,7 @@
 
     <operation name="set-payload-param-default-value">
         <parameters>
-            <parameter parameterName="value" defaultValue="15"/>
+            <parameter parameterName="value" type="integer" defaultValue="15"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value]"/>
@@ -40,19 +40,13 @@
 
     <operation name="do-nothing">
         <body>
-            <!--
-            <logger level="DEBUG"/>
-            TODO talk to PLG, this fails during start up saying
-            Caused by: java.lang.IllegalArgumentException: A component named .:logger.9 already exists.
-                at org.mule.runtime.config.spring.dsl.spring.BeanDefinitionFactory.checkElementNameUnique(BeanDefinitionFactory.java:213)
-            -->
             <mule:set-payload value="#[payload]" />
         </body>
     </operation>
 
     <operation name="set-payload-param-value-appender">
         <parameters>
-            <parameter parameterName="value"/>
+            <parameter parameterName="value" type="string"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value + ' from module']"/>
@@ -61,8 +55,8 @@
 
     <operation name="set-payload-add-params-values">
         <parameters>
-            <parameter parameterName="value1"/>
-            <parameter parameterName="value2"/>
+            <parameter parameterName="value1" type="string"/>
+            <parameter parameterName="value2" type="integer"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value1 + param.value2]"/>

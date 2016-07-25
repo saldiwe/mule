@@ -9,19 +9,20 @@ package org.mule.test.operation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.mule.functional.junit4.FunctionalTestCase;
 import org.mule.runtime.core.api.MuleEvent;
-import org.mule.runtime.extension.api.annotation.param.Ignore;
 
 import org.hamcrest.core.Is;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ModuleSimpleTestCase extends FunctionalTestCase
 {
+    //@Rule
+    //public Timeout globalTimeout = new Timeout(3000000);
+
     @Override
-    protected String[] getConfigFiles()
+    protected String getConfigFile()
     {
-        return new String[]{"module/flows-using-module-simple.xml"
-                , "module/module-simple.xml"
-        };
+        return "module/flows-using-module-simple.xml";
     }
 
     @Test

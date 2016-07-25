@@ -10,6 +10,7 @@ import static org.mule.runtime.config.spring.dsl.processor.xml.ModuleXmlNamespac
 import org.mule.runtime.config.spring.dsl.model.extension.ModuleExtension;
 import org.mule.runtime.config.spring.dsl.model.extension.OperationExtension;
 import org.mule.runtime.config.spring.dsl.model.extension.ParameterExtension;
+import org.mule.runtime.config.spring.extension.xml.ModuleXmlParser;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +40,7 @@ public class ModuleModel
 
     private ModuleExtension extractModuleExtension(ComponentModel moduleModel)
     {
-        String namespace = moduleModel.getParameters().get("name");
+        String namespace = moduleModel.getParameters().get(ModuleXmlParser.NAME);
         ModuleExtension moduleExtension = new ModuleExtension(namespace, moduleModel);
         moduleExtension.setProperties(loadPropertiesFrom(moduleModel));
         moduleExtension.setOperations(loadOperationsFrom(moduleModel));
@@ -58,7 +59,7 @@ public class ModuleModel
     {
         return moduleModel.getInnerComponents().stream()
                 .filter(child -> child.getIdentifier().equals(OPERATION_PROPERTY_IDENTIFIER))
-                .map(param -> new ParameterExtension(param.getParameters().get("parameterName"), param.getParameters().get("defaultValue")))
+                .map(param -> new ParameterExtension(param.getParameters().get(ModuleXmlParser.PARAMETER_NAME), param.getParameters().get(ModuleXmlParser.PARAMETER_DEFAULT_VALUE)))
                 .collect(Collectors.toList());
     }
 
@@ -89,7 +90,7 @@ public class ModuleModel
             parameters = optionalParametersComponentModel.get().getInnerComponents()
                     .stream()
                     .filter(child -> child.getIdentifier().equals(OPERATION_PARAMETER_IDENTIFIER))
-                    .map(param -> new ParameterExtension(param.getParameters().get("parameterName"), param.getParameters().get("defaultValue")))
+                    .map(param -> new ParameterExtension(param.getParameters().get(ModuleXmlParser.PARAMETER_NAME), param.getParameters().get(ModuleXmlParser.PARAMETER_DEFAULT_VALUE)))
                     .collect(Collectors.toList());
         }
         return parameters;

@@ -16,11 +16,9 @@ import org.junit.Test;
 public class ModuleWithPropertiesTestCase extends FunctionalTestCase
 {
     @Override
-    protected String[] getConfigFiles()
+    protected String getConfigFile()
     {
-        return new String[]{"module/flows-using-module-properties.xml"
-                , "module/module-properties.xml"
-        };
+        return "module/flows-using-module-properties.xml";
     }
 
     @Test

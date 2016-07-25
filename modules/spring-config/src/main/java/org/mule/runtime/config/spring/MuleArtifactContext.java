@@ -46,6 +46,7 @@ import org.mule.runtime.core.config.bootstrap.ArtifactType;
 import org.mule.runtime.core.registry.MuleRegistryHelper;
 import org.mule.runtime.core.registry.SpiServiceRegistry;
 import org.mule.runtime.core.util.IOUtils;
+import org.mule.runtime.core.util.StringUtils;
 import org.mule.runtime.core.util.collection.ImmutableListCollector;
 import org.mule.runtime.extension.api.ExtensionManager;
 import org.mule.runtime.extension.xml.dsl.api.property.XmlModelProperty;
@@ -69,7 +70,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.CglibSubclassingInstantiationStrategy;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.beans.factory.xml.DelegatingEntityResolver;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.ContextAnnotationAutowireCandidateResolver;
 import org.springframework.context.support.AbstractXmlApplicationContext;
@@ -78,6 +78,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
@@ -198,13 +200,41 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext
     {
         try
         {
+            MuleLoggerErrorHandler errorHandler = new MuleLoggerErrorHandler(artifactResource.getFilename());
             Document document = new MuleDocumentLoader()
-                    .loadDocument(new InputSource(artifactResource.getInputStream()), new DelegatingEntityResolver(Thread.currentThread().getContextClassLoader()), new DefaultHandler(), VALIDATION_XSD, true);
+                    .loadDocument(new InputSource(artifactResource.getInputStream()), new ModuleDelegatingEntityResolver(), errorHandler, VALIDATION_XSD, true);
+            errorHandler.displayErrors();
             return document;
         }
         catch (Exception e)
         {
             throw new MuleRuntimeException(e);
+        }
+    }
+
+    /**
+     * TODO WIP-OPERATIONS talk to PLG and see if we are going to fail or not using the XSD model.
+     */
+    public static class MuleLoggerErrorHandler extends DefaultHandler{
+        StringBuilder sb = new StringBuilder();
+        String filename;
+
+        public MuleLoggerErrorHandler(String filename)
+        {
+            this.filename = filename;
+        }
+
+        @Override
+        public void error(SAXParseException e) throws SAXException
+        {
+            sb.append(String.format("\tMSG:[%s]\n",e.toString()));
+        }
+
+        public void displayErrors(){
+            if (StringUtils.isNotBlank(sb.toString())){
+                String errorOrErrors = StringUtils.countMatches(sb.toString(), "\n") >1 ? "ERRORS": "ERROR";
+                System.out.println(String.format(errorOrErrors + " IN FILE [%s] \n %s", filename, sb.toString()));
+            }
         }
     }
 

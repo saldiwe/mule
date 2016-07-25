@@ -20,11 +20,9 @@ import org.junit.Test;
 public class ModuleWithGlobalElementTestCase extends ExtensionFunctionalTestCase
 {
     @Override
-    protected String[] getConfigFiles()
+    protected String getConfigFile()
     {
-        return new String[]{"module/flows-using-module-global-elements.xml"
-                , "module/module-global-element.xml"
-        };
+        return "module/flows-using-module-global-elements.xml";
     }
 
     @Override

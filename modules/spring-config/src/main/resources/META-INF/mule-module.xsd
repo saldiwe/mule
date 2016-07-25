@@ -70,7 +70,7 @@
                     <xsd:choice minOccurs="1" maxOccurs="unbounded">
                         <xsd:element name="property">
                             <xsd:complexType>
-                                <xsd:attribute name="parameterName"/>
+                                <xsd:attribute name="parameterName" use="required"/>
                                 <xsd:attribute name="defaultValue" use="optional"/>
                                 <xsd:attribute name="type" type="simpleType" use="required"/>
                             </xsd:complexType>
@@ -80,8 +80,6 @@
                     </xsd:choice>
                 </xsd:sequence>
                 <xsd:attribute name="name" use="required"/>
-                <xsd:attribute name="version" use="optional" default="1.0.0"/>
-                <xsd:attribute name="minMuleVersion" use="optional" default="4.0"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -101,7 +99,7 @@
             <xsd:enumeration value="boolean"/>
             <xsd:enumeration value="datetime"/>
             <xsd:enumeration value="date"/>
-            <xsd:enumeration value="number"/>
+            <xsd:enumeration value="integer"/>
             <xsd:enumeration value="time"/>
         </xsd:restriction>
     </xsd:simpleType>
@@ -123,7 +121,7 @@
             <xsd:element ref="datetime" />
             <xsd:element ref="binary" />
             <xsd:element ref="date" />
-            <xsd:element ref="number" />
+            <xsd:element ref="integer" />
             <xsd:element ref="time" />
 
             <!--complex elements-->
@@ -250,7 +248,7 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="number">
+    <xsd:element name="integer">
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="metadata" >
