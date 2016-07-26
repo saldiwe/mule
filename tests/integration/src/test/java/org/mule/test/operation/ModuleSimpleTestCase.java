@@ -16,8 +16,8 @@ import org.junit.Test;
 
 public class ModuleSimpleTestCase extends FunctionalTestCase
 {
-    //@Rule
-    //public Timeout globalTimeout = new Timeout(3000000);
+    @org.junit.Rule
+    public org.junit.rules.Timeout globalTimeout = new org.junit.rules.Timeout(3000000);
 
     @Override
     protected String getConfigFile()

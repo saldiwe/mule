@@ -14,69 +14,74 @@ import org.mule.runtime.config.spring.extension.xml.ModuleXmlParser;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.apache.ws.commons.schema.XmlSchema;
+import org.springframework.core.io.Resource;
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 public class ModuleXsdLoader extends ModuleLoader<XmlSchema, InputSource>
 {
 
+    public Optional<InputSource> loadModule(String publicId, String schemaLocation)
+    {
+        return lookupModuleResource(publicId, schemaLocation);
+    }
+
     @Override
     protected Optional<XmlSchema> doGetValue(String publicId, String schemaLocation)
     {
         Optional<XmlSchema> value = Optional.empty();
-        if (!springXsd(publicId, schemaLocation).isPresent())
+        Function<Resource, Optional<Document>> seeker = getCriteria(schemaLocation);
+        Optional<Document> moduleDocument = findInResources(seeker);
+        if (moduleDocument.isPresent())
         {
-            String moduleFilename = getModuleFileName(schemaLocation);
-            XmlSchema resource = createValue(moduleFilename, schemaLocation);
-            value = Optional.ofNullable(resource);
+            ModuleXml moduleXml = new ModuleXmlParser().parseDSLModuleXML(moduleDocument.get());
+            XmlSchema schema = new ModuleSchemaGenerator().getSchema(moduleXml, schemaLocation);
+            value = Optional.ofNullable(schema);
         }
         return value;
     }
 
+    private Function<Resource, Optional<Document>> getCriteria(String schemaLocation)
+    {
+        return resource -> parseResource(resource, schemaLocation);
+    }
+
     @Override
-    protected Optional<InputSource> getResult(Optional<XmlSchema> value, String publicId, String schemaLocation)
+    protected Optional<InputSource> doProcessValue(Optional<XmlSchema> value, String publicId, String schemaLocation)
     {
         Optional<InputSource> result;
-        if (value.isPresent()){
+        if (value.isPresent())
+        {
             try
             {
-                result = Optional.of(computeValue(value.get(), publicId, schemaLocation));
+                InputSource inputSource = new InputSource();
+                inputSource.setPublicId(publicId);
+                inputSource.setSystemId(schemaLocation);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                try
+                {
+                    value.get().write(out);
+                    inputSource.setByteStream(new ByteArrayInputStream(out.toByteArray()));
+                }
+                finally
+                {
+                    out.close();
+                }
+                result = Optional.of(inputSource);
             }
             catch (IOException e)
             {
                 result = Optional.empty();
             }
-        }else {
+        }
+        else
+        {
             result = springXsd(publicId, schemaLocation);
         }
         return result;
-    }
-
-    private XmlSchema createValue(String moduleFilename, String schemaLocation)
-    {
-        InputStream is = getClass().getResourceAsStream(moduleFilename);
-        ModuleXml moduleXml = new ModuleXmlParser().parseDSLModuleXML(is);
-        return new ModuleSchemaGenerator().getSchema(moduleXml, schemaLocation);
-    }
-
-    private InputSource computeValue(XmlSchema xmlSchema, String publicId, String schemaLocation) throws IOException
-    {
-        InputSource inputSource = new InputSource();
-        inputSource.setPublicId(publicId);
-        inputSource.setSystemId(schemaLocation);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try
-        {
-            xmlSchema.write(out);
-            inputSource.setByteStream(new ByteArrayInputStream(out.toByteArray()));
-        }
-        finally
-        {
-            out.close();
-        }
-        return inputSource;
     }
 }

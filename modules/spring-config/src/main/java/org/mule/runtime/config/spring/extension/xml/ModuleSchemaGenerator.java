@@ -27,7 +27,6 @@ import org.apache.ws.commons.schema.utils.NamespaceMap;
 
 public class ModuleSchemaGenerator
 {
-    private static final String MULE_MODULE_TARGET_NAMESPACE_PREFIX = "http://www.mulesoft.org/schema/mule/";
     private static final String MULE_NAMESPACE_URI = "http://www.mulesoft.org/schema/mule/core";
     private static final String MULE_SCHEMA_LOCATION = "http://www.mulesoft.org/schema/mule/core/current/mule.xsd";
     private static final String MULE_NAMESPACE = "mule";
@@ -45,7 +44,7 @@ public class ModuleSchemaGenerator
     public XmlSchema getSchema(ModuleXml moduleXml, String systemId)
     {
         XmlSchema schema =new XmlSchema(XMLConstants.W3C_XML_SCHEMA_NS_URI, systemId, new XmlSchemaCollection());
-        schema.setTargetNamespace(MULE_MODULE_TARGET_NAMESPACE_PREFIX + moduleXml.getName());
+        schema.setTargetNamespace(moduleXml.getNamespace());
         schema.setElementFormDefault(XmlSchemaForm.QUALIFIED);
 
         //adding mule namespace and import
@@ -65,7 +64,7 @@ public class ModuleSchemaGenerator
         moduleXml.getOperations().stream()
                 .forEach(operationXml -> generateOperation(schema, moduleXml, operationXml));
 
-        //try { schema.write(System.out); } catch (UnsupportedEncodingException e){ e.printStackTrace(); }
+        //try { schema.write(System.out); } catch (java.io.UnsupportedEncodingException e){ e.printStackTrace(); }
         return schema;
     }
 

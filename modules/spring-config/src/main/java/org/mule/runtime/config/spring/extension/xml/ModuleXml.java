@@ -13,6 +13,7 @@ public class ModuleXml
 {
 
     private String name;
+    private String namespace;
     private List<PropertyXml> properties;
     private List<OperationXml> operations = new ArrayList<>();
 
@@ -27,6 +28,16 @@ public class ModuleXml
     public void setProperties(List<PropertyXml> properties)
     {
         this.properties = properties;
+    }
+
+    public String getNamespace()
+    {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace)
+    {
+        this.namespace = namespace;
     }
 
     public String getName()

@@ -7,45 +7,52 @@
 package org.mule.runtime.config.spring.extension.loader;
 
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.function.Function;
+
+import org.springframework.core.io.Resource;
+import org.w3c.dom.Document;
 
 public class ModuleXmlLoader extends ModuleLoader<URL, URL>
 {
+
+    public Optional<URL> loadModule(String schemaLocation)
+    {
+        return lookupModuleResource(null, schemaLocation);
+    }
+
     @Override
     protected Optional<URL> doGetValue(String publicId, String schemaLocation)
     {
-        Optional<URL> value = Optional.empty();
-        if (! springXsd(publicId, schemaLocation).isPresent()){
-            String moduleFile = getModuleFileName(schemaLocation);
-            value = Optional.ofNullable(getClass().getResource(moduleFile));
-        }
-        return value;
+        Function<Resource, Optional<URL>> seeker = getCriteria(schemaLocation);
+        return findInResources(seeker);
     }
+
+    private Function<Resource, Optional<URL>> getCriteria(String schemaLocation)
+    {
+        return resource -> {
+            Optional<URL> result = Optional.empty();
+            Optional<Document> document = parseResource(resource, schemaLocation);
+            if (document.isPresent())
+            {
+                try
+                {
+                    result = Optional.of(resource.getFile().toURI().toURL());
+                }
+                catch (IOException e)
+                {
+                    //do nothing
+                }
+            }
+            return result;
+        };
+    }
+
     @Override
-    protected Optional<URL> getResult(Optional<URL> value, String publicId, String schemaLocation)
+    protected Optional<URL> doProcessValue(Optional<URL> value, String publicId, String schemaLocation)
     {
         return value;
     }
-
-    //TODO WIP-OPERATIONS check if it's better to return the actual stream.. it seems that it is not from its consumption from the ApplicationModel.
-    //@Override
-    //protected Optional<InputStream> getResult(Optional<URL> value, String publicId, String schemaLocation)
-    //{
-    //    Optional<InputStream> result = Optional.empty();
-    //
-    //    if (value.isPresent()){
-    //        try
-    //        {
-    //            result = Optional.of(value.get().openStream());
-    //        }
-    //        catch (IOException e)
-    //        {
-    //            //do nothing
-    //            //throw new IllegalArgumentException(String.format("There was a failure loading the module [%s]", url.getPath()));
-    //        }
-    //    }
-    //
-    //    return result;
-    //}
 }

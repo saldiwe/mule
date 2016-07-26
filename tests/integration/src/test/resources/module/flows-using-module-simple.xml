@@ -4,7 +4,7 @@
       xmlns:module-simple="http://www.mulesoft.org/schema/mule/module-simple"
       xsi:schemaLocation="
        http://www.mulesoft.org/schema/mule/core     http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-      http://www.mulesoft.org/schema/mule/module-simple      http://www.mulesoft.org/schema/mule/modules/module/module-simple/module-simple.xsd">
+      http://www.mulesoft.org/schema/mule/module-simple     http://www.mulesoft.org/schema/mule/module-simple/path-que-no-existe/module-simple/module-simple.xsd">
 
     <flow name="testSetPayloadHardcodedFlow">
         <module-simple:set-payload-hardcoded-value />

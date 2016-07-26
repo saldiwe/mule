@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module name="module-simple"
+        namespace="http://www.mulesoft.org/schema/mule/module-simple"
         xmlns="http://www.mulesoft.org/schema/mule/module"
         xmlns:mule="http://www.mulesoft.org/schema/mule/core"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -15,7 +16,7 @@
 
     <operation name="set-payload-param-value">
         <parameters>
-            <parameter parameterName="value" type="string"/>
+            <parameter name="value" type="string"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value]"/>
@@ -24,7 +25,7 @@
 
     <operation name="set-payload-param-default-value">
         <parameters>
-            <parameter parameterName="value" type="integer" defaultValue="15"/>
+            <parameter name="value" type="integer" defaultValue="15"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value]"/>
@@ -46,7 +47,7 @@
 
     <operation name="set-payload-param-value-appender">
         <parameters>
-            <parameter parameterName="value" type="string"/>
+            <parameter name="value" type="string"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value + ' from module']"/>
@@ -55,8 +56,8 @@
 
     <operation name="set-payload-add-params-values">
         <parameters>
-            <parameter parameterName="value1" type="string"/>
-            <parameter parameterName="value2" type="integer"/>
+            <parameter name="value1" type="string"/>
+            <parameter name="value2" type="integer"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value1 + param.value2]"/>

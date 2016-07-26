@@ -241,7 +241,7 @@ public class ApplicationModel
         Map<String, ModuleExtension> modulesExtension = new HashMap<>();
 
         schemaLocations.forEach((namespace, location) -> {
-            Optional<URL> url = moduleXmlLoader.lookupModuleResource(null, location);
+            Optional<URL> url = moduleXmlLoader.loadModule(location);
             if (url.isPresent())
             {
                 ModuleExtension moduleExtension = getModuleFor(url.get());

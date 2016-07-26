@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module name="module-global-element"
+        namespace="http://www.mulesoft.org/schema/mule/module-global-element"
         xmlns="http://www.mulesoft.org/schema/mule/module"
         xmlns:mule="http://www.mulesoft.org/schema/mule/core"
         xmlns:httpn="http://www.mulesoft.org/schema/mule/httpn"
@@ -9,8 +10,8 @@
            http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
            http://www.mulesoft.org/schema/mule/httpn http://www.mulesoft.org/schema/mule/httpn/current/mule-httpn.xsd">
 
-    <property parameterName="someUserConfig" type="string" defaultValue="some-username"/>
-    <property parameterName="somePassConfig" type="string" defaultValue="some-password"/>
+    <property name="someUserConfig" type="string" defaultValue="some-username"/>
+    <property name="somePassConfig" type="string" defaultValue="some-password"/>
 
     <httpn:request-config name="simple-config" basePath="/basic-auth">
         <httpn:request-connection host="httpbin.org" protocol="HTTP" port="80"/>
@@ -21,8 +22,8 @@
 
     <operation name="do-login">
         <parameters>
-            <parameter parameterName="someUser" type="string" defaultValue="usernameX"/>
-            <parameter parameterName="somePass" type="string" defaultValue="passwordX"/>
+            <parameter name="someUser" type="string" defaultValue="usernameX"/>
+            <parameter name="somePass" type="string" defaultValue="passwordX"/>
         </parameters>
         <body>
             <httpn:request path="/{aUser}/{aPass}" key="ANY" config-ref="simple-config" method="GET">

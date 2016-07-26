@@ -37,7 +37,7 @@
                             <xsd:sequence>
                                 <xsd:element name="parameter" minOccurs="1" maxOccurs="unbounded">
                                     <xsd:complexType>
-                                        <xsd:attribute name="parameterName"/>
+                                        <xsd:attribute name="name"/>
                                         <xsd:attribute name="defaultValue" use="optional"/>
                                         <xsd:attribute name="type" type="simpleType" use="required"/>
                                     </xsd:complexType>
@@ -70,7 +70,7 @@
                     <xsd:choice minOccurs="1" maxOccurs="unbounded">
                         <xsd:element name="property">
                             <xsd:complexType>
-                                <xsd:attribute name="parameterName" use="required"/>
+                                <xsd:attribute name="name" use="required"/>
                                 <xsd:attribute name="defaultValue" use="optional"/>
                                 <xsd:attribute name="type" type="simpleType" use="required"/>
                             </xsd:complexType>
@@ -80,6 +80,7 @@
                     </xsd:choice>
                 </xsd:sequence>
                 <xsd:attribute name="name" use="required"/>
+                <xsd:attribute name="namespace" use="required"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>

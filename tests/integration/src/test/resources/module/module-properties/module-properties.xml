@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module name="module-properties"
+        namespace="http://www.mulesoft.org/schema/mule/module-properties"
+
         xmlns="http://www.mulesoft.org/schema/mule/module"
         xmlns:mule="http://www.mulesoft.org/schema/mule/core"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -7,8 +9,8 @@
            http://www.mulesoft.org/schema/mule/module http://www.mulesoft.org/schema/mule/module/current/mule-module.xsd
            http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 
-    <property parameterName="configParam" type="string"/>
-    <property parameterName="defaultConfigParam" defaultValue="'some default-config-value-parameter'" type="string"/>
+    <property name="configParam" type="string"/>
+    <property name="defaultConfigParam" defaultValue="'some default-config-value-parameter'" type="string"/>
 
     <operation name="set-payload-hardcoded-value">
         <body>
@@ -18,7 +20,7 @@
 
     <operation name="set-payload-param-value">
         <parameters>
-            <parameter parameterName="value" type="string"/>
+            <parameter name="value" type="string"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value + ' from module']"/>
@@ -39,7 +41,7 @@
 
     <operation name="set-payload-add-param-and-property-values">
         <parameters>
-            <parameter parameterName="value1" type="string"/>
+            <parameter name="value1" type="string"/>
         </parameters>
         <body>
             <mule:set-payload value="#[param.value1 + ' ' + property.configParam]"/>

@@ -26,7 +26,7 @@ public class ModuleDelegatingEntityResolver implements EntityResolver
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException
     {
-        InputSource inputSource = moduleXsdLoader.lookupModuleResource(publicId, systemId)
+        InputSource inputSource = moduleXsdLoader.loadModule(publicId, systemId)
                 .orElse(null);
         return inputSource;
     }

@@ -9,41 +9,35 @@ package org.mule.runtime.config.spring.extension.xml;
 import org.mule.metadata.api.builder.BaseTypeBuilder;
 import org.mule.metadata.api.model.MetadataFormat;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 
 public class ModuleXmlParser
 {
 
-    public static final String PARAMETER_NAME = "parameterName";
+    public static final String PARAMETER_NAME = "name";
     public static final String PARAMETER_DEFAULT_VALUE = "defaultValue";
     public static final String PARAMETER_TYPE = "type";
-
 
     public static final String PROPERTY_TAG = "property";
     public static final String OPERATION_TAG = "operation";
     public static final String OPERATION_NAME = "name";
     public static final String PARAMETER_TAG = "parameter";
     public static final String NAME = "name";
+    public static final String MODULE_NAMESPACE_ATTRIBUTE = "namespace";
+    public static final String MODULE_TAG = "module";
 
-    public ModuleXml parseDSLModuleXML(InputStream is) {
-        Document document = parseXML(is);
+    public ModuleXml parseDSLModuleXML(Document document) {
 
         Element moduleElement = document.getDocumentElement();
         ModuleXml moduleXml = new ModuleXml();
         moduleXml.setName(moduleElement.getAttribute(NAME));
+        moduleXml.setNamespace(moduleElement.getAttribute(MODULE_NAMESPACE_ATTRIBUTE));
 
         NodeList propertiesNodeList = moduleElement.getElementsByTagName(PROPERTY_TAG);
         List<PropertyXml> propertyXmls = parseProperties(propertiesNodeList);
@@ -54,20 +48,6 @@ public class ModuleXmlParser
         moduleXml.setOperations(operations);
 
         return moduleXml;
-    }
-
-    private Document parseXML(InputStream is) {
-        try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            return db.parse(is);
-        } catch (SAXException e) {
-            throw new RuntimeException("Issue when parsing file", e);
-        } catch (IOException e) {
-            throw new RuntimeException("Issue when parsing file", e);
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException("Issue when parsing file", e);
-        }
     }
 
     private List<OperationXml> parseOperations(NodeList operationNodeList) {
