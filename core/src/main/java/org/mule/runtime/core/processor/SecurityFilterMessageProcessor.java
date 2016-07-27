@@ -73,7 +73,7 @@ public class SecurityFilterMessageProcessor extends AbstractInterceptingMessageP
     {
         if (filter == null)
         {
-            return super.apply(publisher);
+            return from(publisher).as(next);
         }
         else
         {

@@ -273,11 +273,21 @@ public class AsyncInterceptingMessageProcessor extends AbstractInterceptingMessa
     @Override
     public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
     {
-        return Flux.from(publisher).map(event ->
-                                        {
-                                            throw propagate(new MessagingException(
-                                                    CoreMessages.createStaticMessage(SYNCHRONOUS_NONBLOCKING_EVENT_ERROR_MESSAGE),
-                                                    event, this));
-                                        });
+        return Flux.from(publisher).map(event -> {
+            try
+            {
+                if (!canProcessAsync(event))
+                {
+                    throw propagate(new MessagingException(
+                            CoreMessages.createStaticMessage(SYNCHRONOUS_NONBLOCKING_EVENT_ERROR_MESSAGE),
+                            event, this));
+                }
+            }
+            catch (MessagingException e)
+            {
+                throw propagate(e);
+            }
+            return event;
+        }).as(next);
     }
 }
