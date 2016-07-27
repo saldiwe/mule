@@ -18,10 +18,8 @@ import org.mule.runtime.core.api.lifecycle.InitialisationException;
 import org.mule.runtime.core.api.lifecycle.Startable;
 import org.mule.runtime.core.api.processor.InterceptingMessageProcessor;
 import org.mule.runtime.core.api.processor.MessageProcessor;
-import org.mule.runtime.core.execution.MessageProcessorExecutionTemplate;
 import org.mule.runtime.core.processor.chain.DefaultMessageProcessorChain;
 
-import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -58,7 +56,7 @@ public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor
                 throw propagate(new MessagingException(event, e));
             }
         });
-        flux = Flux.from(flux.as(DefaultMessageProcessorChain.from(next)));
+        flux = from(flux.as(DefaultMessageProcessorChain.from(next)));
         return flux.map(event -> {
             try
             {
@@ -116,9 +114,7 @@ public class ResponseAssertionMessageProcessor extends AssertionMessageProcessor
         {
             try
             {
-                return new ProcessorExecutorFactory().createProcessorExecutor(event, Collections.singletonList(next),
-                                                                              MessageProcessorExecutionTemplate
-                                                                                      .createExceptionTransformerExecutionTemplate(), false).execute();
+                return next.process(event);
             }
             catch (MessagingException e)
             {
