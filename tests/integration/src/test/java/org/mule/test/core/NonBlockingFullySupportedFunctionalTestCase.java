@@ -13,6 +13,7 @@ import static org.junit.Assert.assertThat;
 import static org.mule.functional.functional.FlowAssert.verify;
 import org.mule.functional.junit4.FunctionalTestCase;
 import org.mule.runtime.core.MessageExchangePattern;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.context.MuleContextBuilder;
 import org.mule.runtime.core.api.processor.ProcessingStrategy;
@@ -102,7 +103,7 @@ public class NonBlockingFullySupportedFunctionalTestCase extends FunctionalTestC
         verify("childSyncFlowChild");
     }
 
-    @Test
+    @Test(expected = MessagingException.class)
     public void childAsyncFlow() throws Exception
     {
         flowRunner("childAsyncFlow").withPayload(TEST_MESSAGE).nonBlocking().withExchangePattern
