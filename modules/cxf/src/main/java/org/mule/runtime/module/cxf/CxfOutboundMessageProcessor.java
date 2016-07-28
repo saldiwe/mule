@@ -119,7 +119,7 @@ public class CxfOutboundMessageProcessor extends AbstractInterceptingMessageProc
     @Override
     public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
     {
-        return from(publisher).flatMap(event -> {
+        return from(publisher).concatMap(event -> {
             try
             {
                 return justOrEmpty(process(event));

@@ -152,7 +152,7 @@ public class DefaultMessageProcessorChain extends AbstractMessageProcessorChain
             if (flowConstruct instanceof Pipeline)
             {
                 ProcessingStrategy processingStrategy = ((Pipeline) flowConstruct).getProcessingStrategy();
-                stream = stream.compose(processingStrategy.onProcessor(processor, invokeProcessor(processor)));
+                stream = Flux.from(stream.as(processingStrategy.onProcessor(processor, invokeProcessor(processor))));
             }
             else
             {
@@ -173,7 +173,7 @@ public class DefaultMessageProcessorChain extends AbstractMessageProcessorChain
                                    OptimizedRequestContext.unsafeSetEvent(event);
                                    MuleEvent copy = new DefaultMuleEvent(event.getMessage(), event);
                                    return Flux.just(event)
-                                           .compose(processor)
+                                           .as(flux -> Flux.from(flux.as(processor)))
                                            .mapError(wrapException(processor, event))
                                            .map(result -> VoidMuleEvent.getInstance().equals(result) ?
                                                           OptimizedRequestContext.unsafeSetEvent(copy) : result)
@@ -186,7 +186,7 @@ public class DefaultMessageProcessorChain extends AbstractMessageProcessorChain
             return publisher -> Flux.from(publisher)
                     .doOnNext(preNotification(processor))
                     .doOnNext(event -> OptimizedRequestContext.unsafeSetEvent(event))
-                    .compose(processor)
+                    .as(flux -> Flux.from(flux.as(processor)))
                     .mapError(wrapException(processor, null))
                     .doOnNext(postNotification(processor))
                     .doOnError(MessagingException.class, errorNotification(processor));

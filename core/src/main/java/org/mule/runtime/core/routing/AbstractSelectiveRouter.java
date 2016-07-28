@@ -207,10 +207,10 @@ public abstract class AbstractSelectiveRouter extends AbstractAnnotatedObject
     @Override
     public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
     {
-        return from(publisher).flatMap(event -> {
+        return from(publisher).concatMap(event -> {
             try
             {
-                return fromIterable(getProcessorsToRoute(event)).flatMap(mp -> just(event).as(mp)).collectList().map
+                return fromIterable(getProcessorsToRoute(event)).concatMap(mp -> just(event).as(mp)).collectList().map
                         (list -> resultsHandler.aggregateResults(list, event));
             }
             catch (RoutePathNotFoundException e)

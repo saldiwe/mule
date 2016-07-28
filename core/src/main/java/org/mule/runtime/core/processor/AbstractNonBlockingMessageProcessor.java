@@ -35,7 +35,7 @@ public abstract class AbstractNonBlockingMessageProcessor extends AbstractAnnota
     @Override
     public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
     {
-        return from(publisher).flatMap(event -> create(emmiter -> {
+        return from(publisher).concatMap(event -> create(emmiter -> {
             try
             {
                 processNonBlocking(event, new

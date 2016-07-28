@@ -269,7 +269,7 @@ public class Flow extends AbstractPipeline implements MessageProcessor, StageNam
                                                              .map(request -> createMuleEventForCurrentFlow(request,
                                                                                                            request.getReplyToDestination(),
                                                                                                            request.getReplyToHandler()))
-                                                             .compose(pipeline)
+                                                             .as(flux -> from(flux.as(pipeline)))
                                                              .onErrorResumeWith(getErrorHandler())
                                                              .map(respone -> createReturnEventForParentFlowConstruct(respone, event)));
         }

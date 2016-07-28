@@ -897,7 +897,7 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
     {
         public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
         {
-            Flux<MuleEvent> result = from(publisher).flatMap(event -> just(event).map(event2 -> (MuleEvent) new DefaultMuleEvent(MuleMessage.builder()
+            Flux<MuleEvent> result = from(publisher).concatMap(event -> just(event).map(event2 -> (MuleEvent) new DefaultMuleEvent(MuleMessage.builder()
                                                                   .payload(event.getMessage().getPayload() + "InterceptingMessageProcessor")
                                                                   .build(), event2)));
             if (next == null)
@@ -1183,7 +1183,7 @@ public class DefaultMessageProcessorChainTestCase extends AbstractMuleContextTes
 
         public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
         {
-            return from(publisher).flatMap(event -> justOrEmpty(null));
+            return from(publisher).concatMap(event -> justOrEmpty(null));
         }
 
         @Override

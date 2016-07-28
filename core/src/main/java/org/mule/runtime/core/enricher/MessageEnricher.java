@@ -76,7 +76,7 @@ public class MessageEnricher extends AbstractMessageProcessorOwner implements Me
     public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
     {
         return Flux.from(publisher).flatMap(event -> just(event).map(request -> copyEventForEnrichment(event))
-                .compose(enrichmentProcessor).map(response -> {
+                .as(flux -> Flux.from(flux.as(enrichmentProcessor))).map(response -> {
                     try
                     {
                         return enrich(response, event);

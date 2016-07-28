@@ -31,7 +31,6 @@ import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNee
 import static org.mule.runtime.module.extension.internal.util.ExtensionsTestUtils.mockClassLoaderModelProperty;
 import static org.mule.tck.MuleTestUtils.spyInjector;
 import static org.mule.test.heisenberg.extension.exception.HeisenbergConnectionExceptionEnricher.ENRICHED_MESSAGE;
-import static reactor.core.publisher.Flux.from;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.justOrEmpty;
 import org.mule.runtime.api.connection.ConnectionException;
@@ -88,6 +87,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExtensionMessageSourceTestCase extends AbstractMuleContextTestCase
@@ -187,7 +187,7 @@ public class ExtensionMessageSourceTestCase extends AbstractMuleContextTestCase
 
         doAnswer(invocation -> {
             Publisher<MuleEvent> publisher = (Publisher) invocation.getArguments()[0];
-            return from(publisher).flatMap(event -> {
+            return Mono.from(publisher).map(event -> {
                 try
                 {
                     return justOrEmpty(messageProcessor.process(event));
