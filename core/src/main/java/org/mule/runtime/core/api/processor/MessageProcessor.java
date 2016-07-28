@@ -60,7 +60,7 @@ public interface MessageProcessor extends Function<Publisher<MuleEvent>, Publish
             }
             catch (MessagingException exception)
             {
-                throw propagate(new MessagingException(event, exception.getCause(), this));
+                throw propagate(exception);
             }
             catch (Throwable throwable)
             {

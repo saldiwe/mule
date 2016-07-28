@@ -25,13 +25,28 @@
 
     <spring:bean id="objectStore" class="org.mule.runtime.core.util.store.SimpleMemoryObjectStore"/>
 
+    <flow name="untilSuccessful">
+        <test:assert-intercepting responseSameThread="false"/>
+        <until-successful objectStore-ref="objectStore">
+            <processor-chain>
+                <test:assert-intercepting responseSameThread="true"/>
+                <test:non-blocking-processor/>
+            </processor-chain>
+        </until-successful>
+        <test:assert-intercepting responseSameThread="false"/>
+        <test:non-blocking-processor/>
+    </flow>
+
     <flow name="scatterGather">
-        <test:assert-intercepting responseSameThread="true"/>
+        <test:assert-intercepting responseSameThread="false"/>
         <scatter-gather>
             <test:non-blocking-processor/>
-            <test:non-blocking-processor/>
+            <processor-chain>
+                <test:assert-intercepting responseSameThread="true"/>
+                <test:non-blocking-processor/>
+            </processor-chain>
         </scatter-gather>
-        <test:assert-intercepting responseSameThread="true"/>
+        <test:assert-intercepting responseSameThread="false"/>
         <test:non-blocking-processor/>
     </flow>
 
@@ -71,12 +86,12 @@
     </flow>
 
     <flow name="transactional">
-        <test:assert-intercepting responseSameThread="true" responseExpression="#[assertPayload()]"/>
+        <test:assert-intercepting responseSameThread="false" responseExpression="#[assertPayload()]"/>
         <transactional>
             <test:assert-intercepting responseSameThread="true"/>
             <test:non-blocking-processor/>
         </transactional>
-        <test:assert-intercepting responseSameThread="true"/>
+        <test:assert-intercepting responseSameThread="false"/>
         <test:non-blocking-processor/>
     </flow>
 
@@ -85,7 +100,8 @@
         <flow-ref name="rollbackExceptionStrategyChild"/>
         <catch-exception-strategy>
             <test:assert expression="#[Thread.currentThread()==beforeThread and assertPayload()]"/>
-            <test:assert-intercepting responseSameThread="false" responseExpression="#[assertPayload()]"/>
+            <!--// TODO RX-->
+            <!--<test:assert-intercepting responseSameThread="false" responseExpression="#[assertPayload()]"/>-->
             <test:non-blocking-processor/>
         </catch-exception-strategy>
     </flow>
@@ -94,16 +110,40 @@
         <flow-ref name="rollbackExceptionStrategyChild"/>
         <rollback-exception-strategy>
             <test:assert expression="#[Thread.currentThread()==beforeThread  and assertPayload()]"/>
-            <test:assert-intercepting responseSameThread="true" responseExpression="#[assertPayload()]"/>
+            <!--// TODO RX-->
+            <!--<test:assert-intercepting responseSameThread="false" responseExpression="#[assertPayload()]"/>-->
             <test:non-blocking-processor/>
         </rollback-exception-strategy>
     </flow>
     <flow name="rollbackExceptionStrategyChild">
         <test:component throwException="true"/>
         <rollback-exception-strategy>
-            <test:assert-intercepting responseSameThread="true" responseExpression="#[assertPayload()]"/>
+            <!--// TODO RX-->
+            <!--<test:assert-intercepting responseSameThread="true" responseExpression="#[assertPayload()]"/>-->
             <test:non-blocking-processor/>
         </rollback-exception-strategy>
+    </flow>
+
+    <flow name="foreach">
+        <test:assert-intercepting responseSameThread="false" responseExpression="#[assertPayload()]"/>
+        <foreach collection="#[payload]">
+            <set-variable variableName="beforeThread" value="#[Thread.currentThread()]"/>
+            <test:non-blocking-processor/>
+            <test:assert count="1" expression="#[Thread.currentThread()==beforeThread  and assertPayload()]"/>
+        </foreach>
+        <test:non-blocking-processor/>
+    </flow>
+
+    <flow name="wiretap">
+        <test:assert-intercepting message="before" responseSameThread="false" responseExpression="#[assertPayload()]"/>
+        <wire-tap>
+            <processor-chain>
+                <set-variable variableName="beforeThread" value="#[Thread.currentThread()]"/>
+                <test:non-blocking-processor/>
+                <test:assert count="1" expression="#[Thread.currentThread()==beforeThread  and assertPayload()]"/>
+            </processor-chain>
+        </wire-tap>
+        <test:non-blocking-processor/>
     </flow>
 
 </mule>

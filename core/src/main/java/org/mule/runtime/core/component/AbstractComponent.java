@@ -8,7 +8,6 @@ package org.mule.runtime.core.component;
 
 import static java.util.Collections.singletonList;
 import static org.mule.runtime.core.util.SystemUtils.getDefaultEncoding;
-
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.core.AbstractAnnotatedObject;
 import org.mule.runtime.core.DefaultMuleEvent;

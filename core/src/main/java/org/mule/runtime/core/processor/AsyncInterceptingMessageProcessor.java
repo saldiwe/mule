@@ -151,7 +151,10 @@ public class AsyncInterceptingMessageProcessor extends AbstractInterceptingMessa
 
     protected boolean canProcessAsync(MuleEvent event) throws MessagingException
     {
-        return !(event.isSynchronous() || event.isTransacted());
+        return !(event.isSynchronous()
+                 || event.isTransacted());
+                // || (event.isAllowNonBlocking() && ((Pipeline) event.getFlowConstruct()).getProcessingStrategy()
+                //.getClass().equals(AsynchronousProcessingStrategy.class)));
     }
 
     protected void processNextAsync(MuleEvent event) throws MuleException

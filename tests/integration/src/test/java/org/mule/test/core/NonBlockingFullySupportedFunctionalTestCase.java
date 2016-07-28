@@ -14,11 +14,6 @@ import static org.mule.functional.functional.FlowAssert.verify;
 import org.mule.functional.junit4.FunctionalTestCase;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.api.MuleEvent;
-import org.mule.runtime.core.api.context.MuleContextBuilder;
-import org.mule.runtime.core.api.processor.ProcessingStrategy;
-import org.mule.runtime.core.config.DefaultMuleConfiguration;
-import org.mule.runtime.core.construct.flow.DefaultFlowProcessingStrategy;
-import org.mule.runtime.core.processor.strategy.NonBlockingProcessingStrategy;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,7 +29,7 @@ public class NonBlockingFullySupportedFunctionalTestCase extends FunctionalTestC
 {
 
     public static String FOO = "foo";
-    private ProcessingStrategy processingStrategy;
+    private MessageExchangePattern exchangePattern;
 
     @Override
     protected String getConfigFile()
@@ -42,25 +37,17 @@ public class NonBlockingFullySupportedFunctionalTestCase extends FunctionalTestC
         return "non-blocking-fully-supported-test-config.xml";
     }
 
-    public NonBlockingFullySupportedFunctionalTestCase(ProcessingStrategy processingStrategy)
+    public NonBlockingFullySupportedFunctionalTestCase(MessageExchangePattern exchangePattern)
     {
-        this.processingStrategy = processingStrategy;
+        this.exchangePattern = exchangePattern;
     }
 
     @Parameters
     public static Collection<Object[]> parameters()
     {
         return Arrays.asList(new Object[][] {
-                                             {new DefaultFlowProcessingStrategy()},
-                                             {new NonBlockingProcessingStrategy()}});
-    }
-
-    @Override
-    protected void configureMuleContext(MuleContextBuilder contextBuilder)
-    {
-        DefaultMuleConfiguration configuration = new DefaultMuleConfiguration();
-        configuration.setDefaultProcessingStrategy(processingStrategy);
-        contextBuilder.setMuleConfiguration(configuration);
+                                             {MessageExchangePattern.REQUEST_RESPONSE},
+                                             {MessageExchangePattern.ONE_WAY}});
     }
 
     @Test
@@ -269,9 +256,9 @@ public class NonBlockingFullySupportedFunctionalTestCase extends FunctionalTestC
         flowRunner("all").withPayload(TEST_MESSAGE).nonBlocking().run();
     }
 
-    protected MessageExchangePattern getMessageExchnagePattern()
+    private MessageExchangePattern getMessageExchnagePattern()
     {
-        return MessageExchangePattern.REQUEST_RESPONSE;
+        return exchangePattern;
     }
 }
 
