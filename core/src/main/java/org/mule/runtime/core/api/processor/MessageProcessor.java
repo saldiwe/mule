@@ -6,8 +6,6 @@
  */
 package org.mule.runtime.core.api.processor;
 
-import static reactor.core.Exceptions.propagate;
-import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 import org.mule.runtime.core.util.rx.FluxNullSafeMap;
@@ -53,20 +51,7 @@ public interface MessageProcessor extends Function<Publisher<MuleEvent>, Publish
     @Override
     default Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
     {
-        return new FluxNullSafeMap<>(publisher, event -> {
-            try
-            {
-                return process(event);
-            }
-            catch (MessagingException exception)
-            {
-                throw propagate(exception);
-            }
-            catch (Throwable throwable)
-            {
-                throw propagate(new MessagingException(event, throwable, this));
-            }
-        });
+        return new FluxNullSafeMap(publisher, this, event -> process(event));
     }
 
     /**

@@ -13,9 +13,6 @@ import static org.mule.runtime.api.metadata.MediaType.parse;
 import static org.mule.runtime.module.http.api.HttpConstants.HttpStatus.ACCEPTED;
 import static org.mule.runtime.module.http.api.HttpConstants.RequestProperties.HTTP_METHOD_PROPERTY;
 import static org.mule.runtime.module.http.api.HttpConstants.ResponseProperties.HTTP_STATUS_PROPERTY;
-import static reactor.core.publisher.Flux.error;
-import static reactor.core.publisher.Flux.from;
-import static reactor.core.publisher.Mono.justOrEmpty;
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.api.metadata.MediaType;
 import org.mule.runtime.core.VoidMuleEvent;
@@ -70,7 +67,6 @@ import org.apache.cxf.transport.DestinationFactoryManager;
 import org.apache.cxf.transport.local.LocalConduit;
 import org.apache.cxf.transports.http.QueryHandler;
 import org.apache.cxf.wsdl.http.AddressType;
-import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -146,21 +142,6 @@ public class CxfInboundMessageProcessor extends AbstractInterceptingMessageProce
     public void dispose()
     {
         // nothing to do
-    }
-
-    @Override
-    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
-    {
-        return from(publisher).concatMap(event -> {
-            try
-            {
-                return justOrEmpty(process(event));
-            }
-            catch (MuleException e)
-            {
-                return error(e);
-            }
-        });
     }
 
     @Override

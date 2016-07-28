@@ -41,7 +41,7 @@ public abstract class AbstractFilteringMessageProcessor extends AbstractIntercep
     @Override
     public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
     {
-        return new FluxNullSafeMap<>(publisher, event -> {
+        return new FluxNullSafeMap(publisher, this, event -> {
             try
             {
                 boolean accepted = accept(event);

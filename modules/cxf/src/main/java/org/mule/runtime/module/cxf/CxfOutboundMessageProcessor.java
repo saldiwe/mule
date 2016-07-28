@@ -7,9 +7,6 @@
 package org.mule.runtime.module.cxf;
 
 import static org.mule.runtime.module.http.api.HttpConstants.ResponseProperties.HTTP_STATUS_PROPERTY;
-import static reactor.core.publisher.Flux.error;
-import static reactor.core.publisher.Flux.from;
-import static reactor.core.publisher.Mono.justOrEmpty;
 import org.mule.runtime.api.metadata.MediaType;
 import org.mule.runtime.core.VoidMuleEvent;
 import org.mule.runtime.core.api.MessagingException;
@@ -50,7 +47,6 @@ import org.apache.cxf.interceptor.StaxInEndingInterceptor;
 import org.apache.cxf.message.ExchangeImpl;
 import org.apache.cxf.service.model.BindingOperationInfo;
 import org.apache.cxf.ws.addressing.WSAContextUtils;
-import org.reactivestreams.Publisher;
 
 /**
  * The CxfOutboundMessageProcessor performs outbound CXF processing, sending an event
@@ -114,21 +110,6 @@ public class CxfOutboundMessageProcessor extends AbstractInterceptingMessageProc
             return null;
         }
         return args;
-    }
-
-    @Override
-    public Publisher<MuleEvent> apply(Publisher<MuleEvent> publisher)
-    {
-        return from(publisher).concatMap(event -> {
-            try
-            {
-                return justOrEmpty(process(event));
-            }
-            catch (MuleException e)
-            {
-                return error(e);
-            }
-        });
     }
 
     public MuleEvent process(MuleEvent event) throws MuleException
