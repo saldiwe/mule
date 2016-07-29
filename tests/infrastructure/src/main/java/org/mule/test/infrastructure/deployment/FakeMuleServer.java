@@ -80,6 +80,7 @@ public class FakeMuleServer
     {
         MuleArtifactResourcesRegistry muleArtifactResourcesRegistry = new MuleArtifactResourcesRegistry();
         containerClassLoader = muleArtifactResourcesRegistry.getContainerClassLoader();
+        serviceManager = muleArtifactResourcesRegistry.getServiceManager();
 
         this.coreExtensions = intialCoreExtensions;
         for (MuleCoreExtension extension : coreExtensions)
