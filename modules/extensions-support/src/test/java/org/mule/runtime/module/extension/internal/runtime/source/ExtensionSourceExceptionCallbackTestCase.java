@@ -6,7 +6,9 @@
  */
 package org.mule.runtime.module.extension.internal.runtime.source;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.execution.ResponseCompletionCallback;
 import org.mule.tck.junit4.AbstractMuleTestCase;
@@ -42,6 +44,6 @@ public class ExtensionSourceExceptionCallbackTestCase extends AbstractMuleTestCa
     {
         final Exception exception = new Exception();
         callback.onException(exception);
-        verify(responseCallback).responseSentWithFailure(exception, event);
+        verify(responseCallback).responseSentWithFailure(any(MessagingException.class), event);
     }
 }

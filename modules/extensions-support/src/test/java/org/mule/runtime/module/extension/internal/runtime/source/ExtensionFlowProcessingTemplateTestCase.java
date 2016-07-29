@@ -91,7 +91,7 @@ public class ExtensionFlowProcessingTemplateTestCase extends AbstractMuleTestCas
         template.sendResponseToClient(event, responseCompletionCallback);
 
         verify(completionHandler, never()).onFailure(any(Exception.class));
-        verify(responseCompletionCallback).responseSentWithFailure(runtimeException, event);
+        verify(responseCompletionCallback).responseSentWithFailure(messagingException, event);
     }
 
     @Test
@@ -107,6 +107,6 @@ public class ExtensionFlowProcessingTemplateTestCase extends AbstractMuleTestCas
     {
         doThrow(runtimeException).when(completionHandler).onFailure(messagingException);
         template.sendFailureResponseToClient(messagingException, responseCompletionCallback);
-        verify(responseCompletionCallback).responseSentWithFailure(runtimeException, event);
+        verify(responseCompletionCallback).responseSentWithFailure(messagingException, event);
     }
 }

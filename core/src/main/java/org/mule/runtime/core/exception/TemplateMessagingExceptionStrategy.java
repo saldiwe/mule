@@ -37,7 +37,7 @@ public abstract class TemplateMessagingExceptionStrategy extends AbstractExcepti
     private boolean handleException;
 
     @Override
-    final public MuleEvent handleException(Exception exception, MuleEvent event)
+    final public MuleEvent handleException(MessagingException exception, MuleEvent event)
     {
         try
         {
@@ -51,9 +51,9 @@ public abstract class TemplateMessagingExceptionStrategy extends AbstractExcepti
 
     private class ExceptionMessageProcessor extends AbstractRequestResponseMessageProcessor{
 
-        private Exception exception;
+        private MessagingException exception;
 
-        public ExceptionMessageProcessor(Exception exception, MuleContext muleContext, FlowConstruct flowConstruct)
+        public ExceptionMessageProcessor(MessagingException exception, MuleContext muleContext, FlowConstruct flowConstruct)
         {
             this.exception = exception;
             setMuleContext(muleContext);
@@ -178,7 +178,7 @@ public abstract class TemplateMessagingExceptionStrategy extends AbstractExcepti
         }
     }
 
-    protected MuleEvent route(MuleEvent event, Exception t)
+    protected MuleEvent route(MuleEvent event, MessagingException t)
     {
         if (!getMessageProcessors().isEmpty())
         {
@@ -245,12 +245,12 @@ public abstract class TemplateMessagingExceptionStrategy extends AbstractExcepti
         return when == null;
     }
 
-    protected MuleEvent afterRouting(Exception exception, MuleEvent event)
+    protected MuleEvent afterRouting(MessagingException exception, MuleEvent event)
     {
         return event;
     }
 
-    protected MuleEvent beforeRouting(Exception exception, MuleEvent event)
+    protected MuleEvent beforeRouting(MessagingException exception, MuleEvent event)
     {
         return event;
     }

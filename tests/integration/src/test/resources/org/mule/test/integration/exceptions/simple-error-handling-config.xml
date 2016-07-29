@@ -14,10 +14,10 @@
     <flow name="testException">
         <test:component throwException="true"/>
         <error-handler>
-            <on-error withType="CONNECTIVITY">
+            <on-error errorType="CONNECTIVITY">
                 <set-payload value="CON"/>
             </on-error>
-            <on-error withType="ANY">
+            <on-error errorType="GENERAL">
                 <set-payload value="ANY"/>
             </on-error>
         </error-handler>
@@ -30,10 +30,10 @@
             </script:script>
         </script:component>
         <error-handler>
-            <on-error withType="CONNECTIVITY">
+            <on-error errorType="CONNECTIVITY">
                 <set-payload value="CON"/>
             </on-error>
-            <on-error withType="ANY">
+            <on-error errorType="GENERAL">
                 <set-payload value="ANY"/>
             </on-error>
         </error-handler>
@@ -42,10 +42,10 @@
     <flow name="customException">
         <custom-processor class="org.mule.test.integration.exceptions.SimpleErrorHandlingTestCase$ThrowExceptionMessageProcessor"/>
         <error-handler>
-            <on-error withType="CONNECTIVITY">
+            <on-error errorType="CONNECTIVITY" transactionResolution="COMMIT" nextExecutionAction="CONTINUE">
                 <set-payload value="CON"/>
             </on-error>
-            <on-error withType="ANY">
+            <on-error errorType="GENERAL">
                 <set-payload value="ANY"/>
             </on-error>
         </error-handler>

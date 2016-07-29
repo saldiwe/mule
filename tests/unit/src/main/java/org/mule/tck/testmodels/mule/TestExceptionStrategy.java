@@ -6,6 +6,7 @@
  */
 package org.mule.tck.testmodels.mule;
 
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.exception.MessagingExceptionHandler;
 import org.mule.runtime.core.api.exception.RollbackSourceCallback;
@@ -88,7 +89,7 @@ public class TestExceptionStrategy extends AbstractExceptionListener implements 
         return event;
     }
 
-    public MuleEvent handleException(Exception exception, MuleEvent event)
+    public MuleEvent handleException(MessagingException exception, MuleEvent event)
     {
         return handleException(exception, event, null);
     }

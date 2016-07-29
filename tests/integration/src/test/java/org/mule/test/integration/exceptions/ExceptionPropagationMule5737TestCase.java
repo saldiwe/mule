@@ -100,14 +100,14 @@ public class ExceptionPropagationMule5737TestCase extends FunctionalTestCase
         boolean caught;
 
         @Override
-        public MuleEvent handleException(Exception e, MuleEvent event)
+        public MuleEvent handleException(MessagingException e, MuleEvent event)
         {
             caught = true;
             MuleEvent resultEvent = super.handleException(e, event);
             event.setMessage(MuleMessage.builder(event.getMessage())
-                                        .exceptionPayload(null)
-                                        .build());
-            ((MessagingException)e).setHandled(true);
+                                     .exceptionPayload(null)
+                                     .build());
+            e.setHandled(true);
             return resultEvent;
         }
 

@@ -291,7 +291,7 @@ public class ErrorHandlingExecutionTemplateTestCase extends AbstractMuleTestCase
             {
                 defaultMessagingExceptionStrategy.setCommitTxFilter(new WildcardFilter(commitFilter));
             }
-            defaultMessagingExceptionStrategy.handleException((Exception) invocationOnMock.getArguments()[0], (MuleEvent) invocationOnMock.getArguments()[1]);
+            defaultMessagingExceptionStrategy.handleException((MessagingException) invocationOnMock.getArguments()[0], (MuleEvent) invocationOnMock.getArguments()[1]);
             return null;
         });
     }

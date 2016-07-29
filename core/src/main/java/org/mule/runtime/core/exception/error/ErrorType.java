@@ -7,18 +7,43 @@
 
 package org.mule.runtime.core.exception.error;
 
-/**
- * This approach is more viable if we consider adding the error type to the MessagingException. Then it can be explicitly
- *  defined or implicitly resolved considering the implementors of this interface (a way to define them should be possible).
- */
-public interface ErrorType
-{
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import org.mule.runtime.api.connection.ConnectionException;
+import org.mule.runtime.core.api.MessagingException;
+import org.mule.runtime.core.api.routing.RoutingException;
+import org.mule.runtime.core.api.transformer.TransformerException;
 
-    /**
-     * Defines whether this ErrorType includes a certain error
-     *
-     * @param error the error to consider
-     * @return true if this type includes the error. false otherwise
-     */
-    boolean includes(Throwable error);
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * This will no longer be needed once the MessagingException does the error type inference at create time.
+ */
+public enum ErrorType
+{
+    CONNECTIVITY(IOException.class, ConnectionException.class),
+    TRANSFORMATION(TransformerException.class),
+    SCRIPTING(),
+    ROUTING(RoutingException.class),
+    GENERAL();
+
+    private List<Class<? extends Throwable>> handledExceptions;
+
+    ErrorType(Class<? extends Throwable>... errors)
+    {
+        if (errors == null)
+        {
+            this.handledExceptions = newArrayList();
+        }
+        else
+        {
+            this.handledExceptions = asList(errors);
+        }
+    }
+
+    public boolean accept(MessagingException error)
+    {
+        return handledExceptions.stream().anyMatch(error::causedBy);
+    }
 }

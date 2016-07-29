@@ -151,7 +151,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
         waitUntilRouteIsExecuted();
         waitUntilExceptionIsHandled();
 
-        verify(mockEvent.getFlowConstruct().getExceptionListener(), times(1)).handleException(argThat(new ArgumentMatcher<Exception>()
+        verify(mockEvent.getFlowConstruct().getExceptionListener(), times(1)).handleException(argThat(new ArgumentMatcher<MessagingException>()
         {
             @Override
             public boolean matches(Object item)
@@ -174,7 +174,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
         waitUntilRouteIsExecuted();
         waitUntilExceptionIsHandled();
 
-        verify(mockEvent.getFlowConstruct().getExceptionListener(), times(1)).handleException(argThat(new ArgumentMatcher<Exception>()
+        verify(mockEvent.getFlowConstruct().getExceptionListener(), times(1)).handleException(argThat(new ArgumentMatcher<MessagingException>()
         {
             @Override
             public boolean matches(Object item)
@@ -198,7 +198,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
         waitUntilRouteIsExecuted();
         waitUntilExceptionIsHandled();
 
-        verify(mockEvent.getFlowConstruct().getExceptionListener(), times(1)).handleException(argThat(new ArgumentMatcher<Exception>()
+        verify(mockEvent.getFlowConstruct().getExceptionListener(), times(1)).handleException(argThat(new ArgumentMatcher<MessagingException>()
         {
             @Override
             public boolean matches(Object item)
@@ -222,7 +222,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
         waitUntilRouteIsExecuted();
         waitUntilExceptionIsHandled();
 
-        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(Exception.class), any(MuleEvent.class));
+        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(MessagingException.class), any(MuleEvent.class));
         verify(mockDLQ, times(1)).process(argThat(new ArgumentMatcher<MuleEvent>()
         {
             @Override
@@ -258,7 +258,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
         waitUntilRouteIsExecuted();
         waitUntilExceptionIsHandled();
 
-        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(Exception.class), any(MuleEvent.class));
+        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(MessagingException.class), any(MuleEvent.class));
         verify(mockDLQ, times(1)).process(argThat(new ArgumentMatcher<MuleEvent>()
         {
             @Override
@@ -295,7 +295,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
         waitUntilRouteIsExecuted();
         waitUntilExceptionIsHandled();
 
-        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(Exception.class), any(MuleEvent.class));
+        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(MessagingException.class), any(MuleEvent.class));
         verify(mockDLQ, times(1)).process(argThat(new ArgumentMatcher<MuleEvent>()
         {
             @Override
@@ -325,7 +325,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
         executeUntilSuccessful();
         waitUntilRouteIsExecuted();
         verify(mockRoute, times(1)).process(mockEvent);
-        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(Exception.class), eq(mockEvent));
+        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(MessagingException.class), eq(mockEvent));
     }
 
     @Test
@@ -348,7 +348,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
                 return true;
             }
         }));
-        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(Exception.class), eq(mockEvent));
+        verify(mockEvent.getFlowConstruct().getExceptionListener(), never()).handleException(any(MessagingException.class), eq(mockEvent));
     }
 
     private void executeUntilSuccessfulFailingRoute(FailCallback failCallback) throws Exception
@@ -442,7 +442,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategyTestCase extends Abstr
 
     private void configureExceptionStrategyToReleaseLatchWhenExecuted()
     {
-        when(mockEvent.getFlowConstruct().getExceptionListener().handleException(any(Exception.class), any(MuleEvent.class))).thenAnswer(invocationOnMock ->
+        when(mockEvent.getFlowConstruct().getExceptionListener().handleException(any(MessagingException.class), any(MuleEvent.class))).thenAnswer(invocationOnMock ->
         {
             exceptionHandlingLatch.release();
             return null;

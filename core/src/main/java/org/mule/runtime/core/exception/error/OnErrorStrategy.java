@@ -5,15 +5,19 @@
  * LICENSE.txt file.
  */
 
-package org.mule.runtime.core.exception;
+package org.mule.runtime.core.exception.error;
 
-import static org.mule.runtime.core.exception.ErrorType.ANY;
+import static org.mule.runtime.core.exception.error.ErrorType.GENERAL;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleMessage;
+import org.mule.runtime.core.exception.TemplateMessagingExceptionStrategy;
 
 public class OnErrorStrategy extends TemplateMessagingExceptionStrategy
 {
     private ErrorType errorType;
+    private String transactionResolution = "COMMIT";
+    private String nextExecutionAction = "CONTINUE";
 
     public OnErrorStrategy()
     {
@@ -24,7 +28,7 @@ public class OnErrorStrategy extends TemplateMessagingExceptionStrategy
     protected boolean acceptsEvent(MuleEvent event)
     {
         Throwable exception = event.getMessage().getExceptionPayload().getException();
-        if (errorType.accept(exception))
+        if (errorType.accept((MessagingException) exception))
         {
             return true;
         }
@@ -34,7 +38,7 @@ public class OnErrorStrategy extends TemplateMessagingExceptionStrategy
     @Override
     public boolean acceptsAll()
     {
-        return ANY.equals(errorType);
+        return GENERAL.equals(errorType);
     }
 
     @Override
@@ -46,19 +50,36 @@ public class OnErrorStrategy extends TemplateMessagingExceptionStrategy
     }
 
     @Override
-    protected MuleEvent afterRouting(Exception exception, MuleEvent event)
+    protected MuleEvent beforeRouting(MessagingException exception, MuleEvent event)
     {
+        if ("ROLLBACK".equals(transactionResolution))
+        {
+            rollback(exception);
+        }
         return event;
     }
 
     @Override
-    protected MuleEvent beforeRouting(Exception exception, MuleEvent event)
+    protected void markExceptionAsHandled(Exception exception)
     {
-        return event;
+        if ("CONTINUE".equals(nextExecutionAction))
+        {
+            super.markExceptionAsHandled(exception);
+        }
     }
 
     public void setErrorType(String errorType)
     {
         this.errorType = ErrorType.valueOf(errorType);
+    }
+
+    public void setTransactionResolution(String transactionResolution)
+    {
+        this.transactionResolution = transactionResolution;
+    }
+
+    public void setNextExecutionAction(String nextExecutionAction)
+    {
+        this.nextExecutionAction = nextExecutionAction;
     }
 }

@@ -237,7 +237,7 @@ public class AsynchronousUntilSuccessfulProcessingStrategy extends AbstractUntil
         {
             logger.info("Retry attempts exhausted and no DLQ defined");
             //mutableEvent should be a local copy of event
-            messagingExceptionHandler.handleException(buildRetryPolicyExhaustedException(lastException), mutableEvent);
+            messagingExceptionHandler.handleException(new MessagingException(mutableEvent, buildRetryPolicyExhaustedException(lastException)), mutableEvent);
             return;
         }
         //we need another local copy in case mutableEvent is modified in the DLQ

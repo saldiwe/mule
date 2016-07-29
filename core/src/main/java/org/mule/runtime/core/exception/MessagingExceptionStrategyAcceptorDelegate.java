@@ -6,13 +6,14 @@
  */
 package org.mule.runtime.core.exception;
 
+import org.mule.runtime.core.api.MessagingException;
+import org.mule.runtime.core.api.MuleEvent;
+import org.mule.runtime.core.api.exception.MessagingExceptionHandler;
+import org.mule.runtime.core.api.exception.MessagingExceptionHandlerAcceptor;
+import org.mule.runtime.core.processor.AbstractMuleObjectOwner;
+
 import java.util.Arrays;
 import java.util.List;
-
-import org.mule.runtime.core.api.MuleEvent;
-import org.mule.runtime.core.api.exception.MessagingExceptionHandlerAcceptor;
-import org.mule.runtime.core.api.exception.MessagingExceptionHandler;
-import org.mule.runtime.core.processor.AbstractMuleObjectOwner;
 
 /**
  * Allows to use {@link org.mule.runtime.core.api.exception.MessagingExceptionHandler} as {@link org.mule.runtime.core.api.exception.MessagingExceptionHandlerAcceptor}.
@@ -47,7 +48,7 @@ public class MessagingExceptionStrategyAcceptorDelegate extends AbstractMuleObje
     }
 
     @Override
-    public MuleEvent handleException(Exception exception, MuleEvent event)
+    public MuleEvent handleException(MessagingException exception, MuleEvent event)
     {
         return delegate.handleException(exception,event);
     }

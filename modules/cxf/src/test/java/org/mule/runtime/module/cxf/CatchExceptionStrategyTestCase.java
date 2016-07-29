@@ -17,6 +17,7 @@ import static org.mule.runtime.module.http.api.HttpConstants.HttpStatus.OK;
 import static org.mule.runtime.module.http.api.HttpConstants.ResponseProperties.HTTP_STATUS_PROPERTY;
 import static org.mule.runtime.module.http.api.client.HttpRequestOptionsBuilder.newOptions;
 import org.mule.functional.junit4.FunctionalTestCase;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
 import org.mule.runtime.core.api.MuleMessage;
@@ -167,13 +168,13 @@ public class CatchExceptionStrategyTestCase extends FunctionalTestCase
         }
 
         @Override
-        protected MuleEvent afterRouting(Exception exception, MuleEvent event)
+        protected MuleEvent afterRouting(MessagingException exception, MuleEvent event)
         {
             return event;
         }
 
         @Override
-        protected MuleEvent beforeRouting(Exception exception, MuleEvent event)
+        protected MuleEvent beforeRouting(MessagingException exception, MuleEvent event)
         {
             return event;
         }

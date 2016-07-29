@@ -64,7 +64,7 @@ final class ExtensionFlowProcessingTemplate implements AsyncResponseFlowProcessi
         }
         catch (Exception e)
         {
-            responseCompletionCallback.responseSentWithFailure(e, (org.mule.runtime.core.api.MuleEvent) event);
+            responseCompletionCallback.responseSentWithFailure(new MessagingException((org.mule.runtime.core.api.MuleEvent) event, e), (org.mule.runtime.core.api.MuleEvent) event);
         }
     }
 

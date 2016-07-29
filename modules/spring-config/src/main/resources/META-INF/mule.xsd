@@ -4189,12 +4189,38 @@
                         </xsd:annotation>
                     </xsd:group>
                 </xsd:sequence>
-                <xsd:attribute name="withType" type="xsd:string" use="required">
+                <xsd:attribute name="errorType" type="xsd:string" use="required">
                     <xsd:annotation>
                         <xsd:documentation>
-                            A comma separated list of error types that these processor can handle.
+                            The error type able to handle.
                         </xsd:documentation>
                     </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="transactionResolution" type="xsd:string" use="optional" default="COMMIT">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The transaction action to execute. Defines whether to commit a transaction when the handler is done or rollback it before processing begins.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                    <!--<xsd:simpleType>-->
+                        <!--<xsd:restriction base="xsd:NMTOKEN">-->
+                            <!--<xsd:enumeration value="COMMIT" />-->
+                            <!--<xsd:enumeration value="ROLLBACK" />-->
+                        <!--</xsd:restriction>-->
+                    <!--</xsd:simpleType>-->
+                </xsd:attribute>
+                <xsd:attribute name="nextExecutionAction" type="xsd:string" use="optional" default="CONTINUE">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The action to carry when processing is done: either to continue executing or propagate the error.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                    <!--<xsd:simpleType>-->
+                        <!--<xsd:restriction base="xsd:NMTOKEN">-->
+                            <!--<xsd:enumeration value="CONTINUE" />-->
+                            <!--<xsd:enumeration value="PROPAGATE" />-->
+                        <!--</xsd:restriction>-->
+                    <!--</xsd:simpleType>-->
                 </xsd:attribute>
             </xsd:extension>
         </xsd:complexContent>

@@ -60,9 +60,9 @@ public abstract class AbstractNonBlockingMessageProcessor extends AbstractAnnota
 
     abstract protected MuleEvent processBlocking(MuleEvent event) throws MuleException;
 
-    protected ExceptionCallback<Void, ? extends Exception> createCompletionExceptionCallback(MuleEvent event)
+    protected ExceptionCallback<Void, ? extends MessagingException> createCompletionExceptionCallback(MuleEvent event)
     {
-        return (ExceptionCallback<Void, Exception>) exception -> {
+        return (ExceptionCallback<Void, MessagingException>) exception -> {
             messagingExceptionHandler.handleException(exception, event);
             return null;
         };

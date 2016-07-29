@@ -11,6 +11,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import org.mule.functional.junit4.FunctionalTestCase;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.component.ComponentException;
@@ -76,7 +77,7 @@ public class ExceptionStrategyCommonScenariosTestCase extends FunctionalTestCase
         }
 
         @Override
-        public MuleEvent handleException(Exception e, MuleEvent event)
+        public MuleEvent handleException(MessagingException e, MuleEvent event)
         {
             Object payloadBeforeException = event.getMessage().getPayload();
             MuleEvent resultEvent = super.handleException(e, event);

@@ -56,8 +56,8 @@ import org.mule.runtime.core.enricher.MessageEnricher;
 import org.mule.runtime.core.exception.CatchMessagingExceptionStrategy;
 import org.mule.runtime.core.exception.ChoiceMessagingExceptionStrategy;
 import org.mule.runtime.core.exception.DefaultMessagingExceptionStrategy;
-import org.mule.runtime.core.exception.ErrorHandler;
-import org.mule.runtime.core.exception.OnErrorStrategy;
+import org.mule.runtime.core.exception.error.ErrorHandler;
+import org.mule.runtime.core.exception.error.OnErrorStrategy;
 import org.mule.runtime.core.exception.RedeliveryExceeded;
 import org.mule.runtime.core.exception.RollbackMessagingExceptionStrategy;
 import org.mule.runtime.core.processor.AsyncDelegateMessageProcessor;
@@ -174,7 +174,9 @@ public class CoreComponentBuildingDefinitionProvider implements ComponentBuildin
         componentBuildingDefinitions.add(exceptionStrategyBaseBuilder.copy()
                                                  .withIdentifier("on-error")
                                                  .withTypeDefinition(fromType(OnErrorStrategy.class))
-                                                 .withSetterParameterDefinition("errorType", fromSimpleParameter("withType").build())
+                                                 .withSetterParameterDefinition("errorType", fromSimpleParameter("errorType").build())
+                                                 .withSetterParameterDefinition("transactionResolution", fromSimpleParameter("transactionResolution").build())
+                                                 .withSetterParameterDefinition("nextExecutionAction", fromSimpleParameter("nextExecutionAction").build())
                                                  .withSetterParameterDefinition(WHEN, fromSimpleParameter(WHEN).build())
                                                  .asPrototype()
                                                  .build());

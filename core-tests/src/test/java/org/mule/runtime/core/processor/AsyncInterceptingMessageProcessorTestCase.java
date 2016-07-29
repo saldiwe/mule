@@ -260,7 +260,7 @@ public class AsyncInterceptingMessageProcessorTestCase extends AbstractMuleConte
         }
 
         @Override
-        public MuleEvent handleException(Exception exception, MuleEvent event)
+        public MuleEvent handleException(MessagingException exception, MuleEvent event)
         {
             latch.countDown();
             return null;

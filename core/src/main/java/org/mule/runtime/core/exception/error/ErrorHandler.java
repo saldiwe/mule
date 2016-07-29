@@ -5,12 +5,14 @@
  * LICENSE.txt file.
  */
 
-package org.mule.runtime.core.exception;
+package org.mule.runtime.core.exception.error;
 
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.lifecycle.InitialisationException;
+import org.mule.runtime.core.exception.AbstractMessagingExceptionStrategy;
 import org.mule.runtime.core.message.DefaultExceptionPayload;
 
 import java.util.List;
@@ -30,7 +32,7 @@ public class ErrorHandler extends AbstractMessagingExceptionStrategy
     }
 
     @Override
-    public MuleEvent handleException(Exception ex, MuleEvent event)
+    public MuleEvent handleException(MessagingException ex, MuleEvent event)
     {
         event.setMessage(MuleMessage.builder(event.getMessage())
                                  .exceptionPayload(new DefaultExceptionPayload(ex))

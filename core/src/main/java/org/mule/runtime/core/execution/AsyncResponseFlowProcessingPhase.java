@@ -128,7 +128,7 @@ public class AsyncResponseFlowProcessingPhase extends NotificationFiringProcessi
             }
 
             @Override
-            public MuleEvent responseSentWithFailure(Exception e, MuleEvent event)
+            public MuleEvent responseSentWithFailure(MessagingException e, MuleEvent event)
             {
                 phaseResultNotifier.phaseFailure(e);
                 return event;
@@ -147,7 +147,7 @@ public class AsyncResponseFlowProcessingPhase extends NotificationFiringProcessi
             }
 
             @Override
-            public MuleEvent responseSentWithFailure(final Exception e, final MuleEvent event)
+            public MuleEvent responseSentWithFailure(final MessagingException e, final MuleEvent event)
             {
                 return executeCallback(() ->
                 {

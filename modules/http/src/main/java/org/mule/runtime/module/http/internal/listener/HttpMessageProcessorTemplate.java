@@ -120,7 +120,7 @@ public class HttpMessageProcessorTemplate implements AsyncResponseFlowProcessing
             try
             {
                 // Handle errors that occur while building the response.
-                MuleEvent exceptionStrategyResult = responseCompletationCallback.responseSentWithFailure(e, muleEvent);
+                MuleEvent exceptionStrategyResult = responseCompletationCallback.responseSentWithFailure(new MessagingException(muleEvent, e), muleEvent);
                 // Send the result from the event that was built from the Exception Strategy.
                 return this.responseBuilder.build(responseBuilder, exceptionStrategyResult);
             }

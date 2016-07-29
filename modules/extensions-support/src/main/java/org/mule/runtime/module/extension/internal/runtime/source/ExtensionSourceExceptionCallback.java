@@ -8,10 +8,11 @@ package org.mule.runtime.module.extension.internal.runtime.source;
 
 import org.mule.runtime.api.execution.ExceptionCallback;
 import org.mule.runtime.api.message.MuleEvent;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.execution.ResponseCompletionCallback;
 
 /**
- * Channels exceptions through the {@link ResponseCompletionCallback#responseSentWithFailure(Exception, org.mule.runtime.core.api.MuleEvent)}.
+ * Channels exceptions through the {@link ResponseCompletionCallback#responseSentWithFailure(MessagingException, org.mule.runtime.core.api.MuleEvent)}.
  *
  * @since 4.0
  */
@@ -34,7 +35,7 @@ class ExtensionSourceExceptionCallback implements ExceptionCallback<MuleEvent, E
     }
 
     /**
-     * Invokes {@link ResponseCompletionCallback#responseSentWithFailure(Exception, org.mule.runtime.core.api.MuleEvent)}
+     * Invokes {@link ResponseCompletionCallback#responseSentWithFailure(MessagingException, org.mule.runtime.core.api.MuleEvent)}
      * over the {@link #completionCallback}, using the {@code exception} and {@link #muleEvent}
      *
      * @param exception a {@link Exception}
@@ -43,6 +44,6 @@ class ExtensionSourceExceptionCallback implements ExceptionCallback<MuleEvent, E
     @Override
     public MuleEvent onException(Exception exception)
     {
-        return completionCallback.responseSentWithFailure(exception, (org.mule.runtime.core.api.MuleEvent) muleEvent);
+        return completionCallback.responseSentWithFailure(new MessagingException((org.mule.runtime.core.api.MuleEvent) muleEvent, exception), (org.mule.runtime.core.api.MuleEvent) muleEvent);
     }
 }

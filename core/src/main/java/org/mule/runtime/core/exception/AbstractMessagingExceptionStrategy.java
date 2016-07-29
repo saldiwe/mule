@@ -8,6 +8,7 @@ package org.mule.runtime.core.exception;
 
 import org.mule.runtime.core.RequestContext;
 import org.mule.runtime.core.api.ExceptionPayload;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
@@ -41,7 +42,7 @@ public abstract class AbstractMessagingExceptionStrategy extends AbstractExcepti
     }
 
     @Override
-    public MuleEvent handleException(Exception ex, MuleEvent event)
+    public MuleEvent handleException(MessagingException ex, MuleEvent event)
     {
         try
         {

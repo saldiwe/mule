@@ -82,9 +82,9 @@ public class AsyncResponseFlowProcessingPhaseTestCase extends AbstractMuleTestCa
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private MessagingException mockMessagingException;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private MuleException mockException;
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private DefaultMuleEvent mockMuleEvent;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private MessagingException mockException;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private NotificationHelper notificationHelper;
 
@@ -141,7 +141,7 @@ public class AsyncResponseFlowProcessingPhaseTestCase extends AbstractMuleTestCa
         when(mockContext.supportsAsynchronousProcessing()).thenReturn(false);
         doThrow(mockMessagingException).when(mockTemplate).routeEvent(any(MuleEvent.class));
         phase.runPhase(mockTemplate, mockContext, mockNotifier);
-        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(Exception.class), any(MuleEvent.class));
+        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(MessagingException.class), any(MuleEvent.class));
         verifyOnlySuccessfulWasCalled();
     }
 
@@ -236,7 +236,7 @@ public class AsyncResponseFlowProcessingPhaseTestCase extends AbstractMuleTestCa
             }
         }).when(mockTemplate).sendResponseToClient(any(MuleEvent.class), any(ResponseCompletionCallback.class));
         phase.runPhase(mockTemplate, mockContext, mockNotifier);
-        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(Exception.class), any(MuleEvent.class));
+        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(MessagingException.class), any(MuleEvent.class));
         verifyOnlySuccessfulWasCalled();
     }
 
@@ -267,7 +267,7 @@ public class AsyncResponseFlowProcessingPhaseTestCase extends AbstractMuleTestCa
         phase.runPhase(mockTemplate, mockContext, mockNotifier);
 
         sensingMessageProcessor.latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
-        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(Exception.class), any(MuleEvent.class));
+        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(MessagingException.class), any(MuleEvent.class));
         verifyOnlySuccessfulWasCalled();
     }
 
@@ -286,7 +286,7 @@ public class AsyncResponseFlowProcessingPhaseTestCase extends AbstractMuleTestCa
         }).when(mockTemplate).sendFailureResponseToClient(any(MessagingException.class), any(ResponseCompletionCallback.class));
         when(mockTemplate.routeEvent(any(MuleEvent.class))).thenThrow(mockMessagingException);
         phase.runPhase(mockTemplate, mockContext, mockNotifier);
-        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(Exception.class), any(MuleEvent.class));
+        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(MessagingException.class), any(MuleEvent.class));
         verifyOnlyFailureWasCalled(mockException);
     }
 
@@ -309,7 +309,7 @@ public class AsyncResponseFlowProcessingPhaseTestCase extends AbstractMuleTestCa
 
         phase.runPhase(mockTemplate, mockContext, mockNotifier);
 
-        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(Exception.class), any(MuleEvent.class));
+        verify(mockContext.getFlowConstruct().getExceptionListener()).handleException(any(MessagingException.class), any(MuleEvent.class));
         verifyOnlyFailureWasCalled(mockException);
     }
 

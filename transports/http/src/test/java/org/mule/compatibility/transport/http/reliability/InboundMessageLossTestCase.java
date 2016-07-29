@@ -129,10 +129,10 @@ public class InboundMessageLossTestCase extends FunctionalTestCase
     public static class Handler extends AbstractMessagingExceptionStrategy
     {
         @Override
-        public MuleEvent handleException(Exception ex, MuleEvent event)
+        public MuleEvent handleException(MessagingException ex, MuleEvent event)
         {
             doHandleException(ex, event);
-            ((MessagingException)ex).setHandled(true);
+            ex.setHandled(true);
             return new DefaultMuleEvent(MuleMessage.builder().payload("Success!").build(), event);
         }
     }
@@ -143,7 +143,7 @@ public class InboundMessageLossTestCase extends FunctionalTestCase
     public static class BadHandler extends AbstractMessagingExceptionStrategy
     {
         @Override
-        public MuleEvent handleException(Exception ex, MuleEvent event)
+        public MuleEvent handleException(MessagingException ex, MuleEvent event)
         {
             doHandleException(ex, event);
             MuleMessage message = MuleMessage.builder()

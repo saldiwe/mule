@@ -86,7 +86,7 @@ public class HttpMessageProcessorTemplateTestCase extends AbstractMuleTestCase
         ResponseCompletionCallback responseCompletionCallback = mock(ResponseCompletionCallback.class);
         httpMessageProcessorTemplate.sendResponseToClient(testEvent, responseCompletionCallback);
 
-        verify(responseCompletionCallback).responseSentWithFailure(isA(NullPointerException.class), eq(testEvent));
+        verify(responseCompletionCallback).responseSentWithFailure(isA(MessagingException.class), eq(testEvent));
         assertThat(httpResponseCaptor.getValue().getStatusCode(), is(INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 
@@ -119,7 +119,7 @@ public class HttpMessageProcessorTemplateTestCase extends AbstractMuleTestCase
             assertThat(e, sameInstance(expected));
         }
 
-        verify(responseCompletionCallback, never()).responseSentWithFailure(expected, testEvent);
+        verify(responseCompletionCallback, never()).responseSentWithFailure(any(MessagingException.class), testEvent);
         assertThat(httpResponseCaptor.getValue().getStatusCode(), is(INTERNAL_SERVER_ERROR.getStatusCode()));
     }
 

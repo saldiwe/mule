@@ -7,6 +7,7 @@
 package org.mule.runtime.core.exception;
 
 import org.mule.runtime.core.api.GlobalNameableObject;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.MuleRuntimeException;
@@ -50,7 +51,7 @@ public class ChoiceMessagingExceptionStrategy extends AbstractMuleObjectOwner<Me
     }
 
     @Override
-    public MuleEvent handleException(Exception exception, MuleEvent event)
+    public MuleEvent handleException(MessagingException exception, MuleEvent event)
     {
         event.setMessage(MuleMessage.builder(event.getMessage())
                                     .exceptionPayload(new DefaultExceptionPayload(exception))

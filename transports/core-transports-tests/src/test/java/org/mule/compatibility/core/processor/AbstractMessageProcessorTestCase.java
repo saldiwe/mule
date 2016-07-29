@@ -19,6 +19,7 @@ import org.mule.compatibility.core.endpoint.EndpointAware;
 import org.mule.compatibility.core.endpoint.EndpointURIEndpointBuilder;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.MessageExchangePattern;
+import org.mule.runtime.core.api.MessagingException;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
@@ -318,7 +319,7 @@ public abstract class AbstractMessageProcessorTestCase extends AbstractMuleConte
         public Exception sensedException;
 
         @Override
-        public MuleEvent handleException(Exception exception, MuleEvent event)
+        public MuleEvent handleException(MessagingException exception, MuleEvent event)
         {
             sensedException = exception;
             event.setMessage(MuleMessage.builder(event.getMessage())
