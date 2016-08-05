@@ -4,19 +4,16 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-
 package org.mule.extension.db.internal.domain.connection;
 
-/**
- * Notifies that a connection can be released
- */
-public interface DbConnectionReleaser
+import org.mule.runtime.api.connection.ConnectionException;
+
+public class DefaultDbConnectionProvider extends AbstractDbConnectionProvider
 {
 
-    /**
-     * Releases a given connection
-     *
-     * @param connection connection to release
-     */
-    void release(DbConnection connection);
+    @Override
+    public DbConnection connect() throws ConnectionException
+    {
+        new DefaultDbConnection()
+    }
 }

@@ -7,7 +7,6 @@
 
 package org.mule.extension.db.internal.domain.connection;
 
-import org.mule.extension.db.internal.domain.transaction.TransactionalAction;
 import org.mule.extension.db.internal.resolver.param.ParamTypeResolverFactory;
 
 import java.sql.Array;
@@ -35,9 +34,9 @@ import java.util.concurrent.Executor;
 public class DefaultDbConnection extends AbstractDbConnection
 {
 
-    public DefaultDbConnection(Connection delegate, TransactionalAction transactionalAction, DefaultDbConnectionReleaser connectionReleaseListener, ParamTypeResolverFactory paramTypeResolverFactory)
+    public DefaultDbConnection(Connection delegate, ParamTypeResolverFactory paramTypeResolverFactory)
     {
-        super(delegate, transactionalAction, connectionReleaseListener, paramTypeResolverFactory);
+        super(delegate, paramTypeResolverFactory);
     }
 
     @Override

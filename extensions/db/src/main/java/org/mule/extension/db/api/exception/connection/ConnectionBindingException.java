@@ -5,7 +5,7 @@
  * LICENSE.txt file.
  */
 
-package org.mule.extension.db.internal.domain.connection;
+package org.mule.extension.db.api.exception.connection;
 
 /**
  * Thrown to indicates an error binding a connection to a transaction

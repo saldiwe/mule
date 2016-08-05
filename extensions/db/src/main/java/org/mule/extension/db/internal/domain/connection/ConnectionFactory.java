@@ -7,6 +7,8 @@
 
 package org.mule.extension.db.internal.domain.connection;
 
+import org.mule.extension.db.api.exception.connection.ConnectionCreationException;
+
 import java.sql.Connection;
 
 import javax.sql.DataSource;

@@ -8,7 +8,6 @@
 package org.mule.extension.db.internal.domain.connection;
 
 import org.mule.extension.db.internal.domain.query.QueryTemplate;
-import org.mule.extension.db.internal.domain.transaction.TransactionalAction;
 import org.mule.extension.db.internal.domain.type.DbType;
 import org.mule.extension.db.internal.resolver.param.ParamTypeResolver;
 import org.mule.extension.db.internal.resolver.param.ParamTypeResolverFactory;
@@ -16,8 +15,11 @@ import org.mule.extension.db.internal.result.resultset.ResultSetHandler;
 import org.mule.extension.db.internal.result.statement.GenericStatementResultIteratorFactory;
 import org.mule.extension.db.internal.result.statement.StatementResultIteratorFactory;
 
+import com.google.common.collect.ImmutableList;
+
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,42 +28,52 @@ import java.util.Map;
 public abstract class AbstractDbConnection implements DbConnection
 {
 
-    private final TransactionalAction transactionalAction;
-    private final DefaultDbConnectionReleaser connectionReleaseListener;
     private final ParamTypeResolverFactory paramTypeResolverFactory;
     protected final Connection delegate;
 
-    public AbstractDbConnection(Connection delegate, TransactionalAction transactionalAction, DefaultDbConnectionReleaser connectionReleaseListener, ParamTypeResolverFactory paramTypeResolverFactory)
+    public AbstractDbConnection(Connection delegate, ParamTypeResolverFactory paramTypeResolverFactory)
     {
         this.delegate = delegate;
-        this.transactionalAction = transactionalAction;
-        this.connectionReleaseListener = connectionReleaseListener;
         this.paramTypeResolverFactory = paramTypeResolverFactory;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler)
     {
         return new GenericStatementResultIteratorFactory(resultSetHandler);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Map<Integer, DbType> getParamTypes(QueryTemplate queryTemplate) throws SQLException
     {
         ParamTypeResolver paramTypeResolver = paramTypeResolverFactory.create(queryTemplate);
-
         return paramTypeResolver.getParameterTypes(this, queryTemplate);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public TransactionalAction getTransactionalAction()
+    public void begin() throws Exception
     {
-        return transactionalAction;
+        if (getAutoCommit())
+        {
+            setAutoCommit(false);
+        }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void release()
+    public List<DbType> getVendorDataTypes()
     {
-        connectionReleaseListener.release(this);
+        return ImmutableList.of();
     }
 }

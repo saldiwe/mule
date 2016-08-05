@@ -30,7 +30,6 @@ public interface DbTypeManager
      * Finds a mapping for a given type name
      *
      * @param connection connection used to connect to the database if required
-     * @param id         type ID
      * @param name       type name
      * @return a type that corresponds to the given name
      * @throws UnknownDbTypeException when there is no managed type with the given name
