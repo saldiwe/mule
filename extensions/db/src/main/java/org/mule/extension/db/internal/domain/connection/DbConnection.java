@@ -7,7 +7,6 @@
 
 package org.mule.extension.db.internal.domain.connection;
 
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
 import org.mule.extension.db.internal.domain.type.DbType;
 import org.mule.extension.db.internal.result.resultset.ResultSetHandler;
 import org.mule.extension.db.internal.result.statement.StatementResultIterator;
@@ -15,9 +14,7 @@ import org.mule.extension.db.internal.result.statement.StatementResultIteratorFa
 import org.mule.runtime.extension.api.connectivity.TransactionalConnection;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Wraps a {@link Connection} adding connector's specific functionality
@@ -33,16 +30,6 @@ public interface DbConnection extends Connection, TransactionalConnection
      * @return the {@link StatementResultIterator} for this connection.
      */
     StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler);
-
-    /**
-     * Determines actual parameter types for the parameters defined in a
-     * query template.
-     *
-     * @param queryTemplate query template that needing parameter resolution
-     * @return a not null map containing the parameter type for each parameter index
-     * @throws SQLException when there are error processing the query
-     */
-    Map<Integer, DbType> getParamTypes(QueryTemplate queryTemplate) throws SQLException;
 
     List<DbType> getVendorDataTypes();
 }

@@ -5,9 +5,10 @@
  * LICENSE.txt file.
  */
 
-package org.mule.extension.db.internal.result.statement;
+package org.mule.extension.db.api;
 
 import org.mule.extension.db.internal.domain.connection.DbConnection;
+import org.mule.extension.db.internal.result.statement.AbstractStreamingResultSetCloser;
 
 import java.sql.ResultSet;
 import java.util.ConcurrentModificationException;
@@ -90,7 +91,7 @@ public class StatementStreamingResultSetCloser extends AbstractStreamingResultSe
 
             if (resultSets == null)
             {
-                resultSets = new HashSet<ResultSet>();
+                resultSets = new HashSet<>();
                 connectionResultSets.put(connection, resultSets);
             }
 

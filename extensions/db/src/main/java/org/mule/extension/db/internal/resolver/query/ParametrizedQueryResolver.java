@@ -7,6 +7,7 @@
 
 package org.mule.extension.db.internal.resolver.query;
 
+import org.mule.extension.db.internal.DbConnector;
 import org.mule.extension.db.internal.domain.connection.DbConnection;
 import org.mule.extension.db.internal.domain.param.DefaultInOutQueryParam;
 import org.mule.extension.db.internal.domain.param.DefaultInputQueryParam;
@@ -45,7 +46,7 @@ public class ParametrizedQueryResolver implements QueryResolver
     }
 
     @Override
-    public Query resolve(DbConnection connection, MuleEvent muleEvent)
+    public Query resolve(DbConnection connection, DbConnector connector)
     {
         List<QueryParamValue> resolvedParams = paramValueResolver.resolveParams(muleEvent, query.getParamValues());
 

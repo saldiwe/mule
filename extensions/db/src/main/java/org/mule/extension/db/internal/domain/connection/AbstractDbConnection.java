@@ -7,10 +7,7 @@
 
 package org.mule.extension.db.internal.domain.connection;
 
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
 import org.mule.extension.db.internal.domain.type.DbType;
-import org.mule.extension.db.internal.resolver.param.ParamTypeResolver;
-import org.mule.extension.db.internal.resolver.param.ParamTypeResolverFactory;
 import org.mule.extension.db.internal.result.resultset.ResultSetHandler;
 import org.mule.extension.db.internal.result.statement.GenericStatementResultIteratorFactory;
 import org.mule.extension.db.internal.result.statement.StatementResultIteratorFactory;
@@ -18,9 +15,7 @@ import org.mule.extension.db.internal.result.statement.StatementResultIteratorFa
 import com.google.common.collect.ImmutableList;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Implements connector side of {@link DbConnection}
@@ -28,13 +23,11 @@ import java.util.Map;
 public abstract class AbstractDbConnection implements DbConnection
 {
 
-    private final ParamTypeResolverFactory paramTypeResolverFactory;
     protected final Connection delegate;
 
-    public AbstractDbConnection(Connection delegate, ParamTypeResolverFactory paramTypeResolverFactory)
+    public AbstractDbConnection(Connection delegate)
     {
         this.delegate = delegate;
-        this.paramTypeResolverFactory = paramTypeResolverFactory;
     }
 
     /**
@@ -44,16 +37,6 @@ public abstract class AbstractDbConnection implements DbConnection
     public StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler)
     {
         return new GenericStatementResultIteratorFactory(resultSetHandler);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<Integer, DbType> getParamTypes(QueryTemplate queryTemplate) throws SQLException
-    {
-        ParamTypeResolver paramTypeResolver = paramTypeResolverFactory.create(queryTemplate);
-        return paramTypeResolver.getParameterTypes(this, queryTemplate);
     }
 
     /**

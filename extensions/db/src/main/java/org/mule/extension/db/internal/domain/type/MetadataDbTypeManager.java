@@ -19,8 +19,8 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages database types that are discovered using database metadata
@@ -31,7 +31,7 @@ public class MetadataDbTypeManager implements DbTypeManager
     static final String METADATA_TYPE_ID_COLUMN = "DATA_TYPE";
     static final String METADATA_TYPE_NAME_COLUMN = "TYPE_NAME";
 
-    private final Log logger = LogFactory.getLog(MetadataDbTypeManager.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(MetadataDbTypeManager.class);
 
     private final Map<String, DbType> typesById = new HashMap<>();
     private final Object lock = new Object();
@@ -42,7 +42,7 @@ public class MetadataDbTypeManager implements DbTypeManager
         String typeKey = dbType.getName() + dbType.getId();
         if (typesById.containsKey(typeKey))
         {
-            logger.warn(String.format("There is already a registered type with ID %s and name %s", dbType.getId(), dbType.getName()));
+            LOGGER.warn(String.format("There is already a registered type with ID %s and name %s", dbType.getId(), dbType.getName()));
         }
         else
         {
@@ -107,9 +107,9 @@ public class MetadataDbTypeManager implements DbTypeManager
                 {
                     registerType(resolvedDbType);
 
-                    if (logger.isDebugEnabled())
+                    if (LOGGER.isDebugEnabled())
                     {
-                        logger.debug("Type: " + typeRecord);
+                        LOGGER.debug("Type: " + typeRecord);
                     }
                 }
             }

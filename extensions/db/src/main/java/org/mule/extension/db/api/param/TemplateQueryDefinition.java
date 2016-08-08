@@ -10,8 +10,14 @@ import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
 
 @Alias("template-query")
-public class TemplateQueryDefinition extends QueryDefinition
+public class TemplateQueryDefinition implements QueryDefinition
 {
     @Parameter
     private String ref;
+
+    @Override
+    public void accept(QueryDefinitionVisitor visitor)
+    {
+        visitor.onTemplateQuery(this);
+    }
 }

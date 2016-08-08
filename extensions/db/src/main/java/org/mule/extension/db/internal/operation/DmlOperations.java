@@ -6,29 +6,54 @@
  */
 package org.mule.extension.db.internal.operation;
 
+import org.mule.extension.db.api.StatementStreamingResultSetCloser;
 import org.mule.extension.db.api.param.InputParameter;
 import org.mule.extension.db.api.param.QueryDefinition;
+import org.mule.extension.db.internal.domain.connection.DbConnection;
+import org.mule.extension.db.internal.domain.executor.SelectExecutor;
+import org.mule.extension.db.internal.domain.statement.QueryStatementFactory;
+import org.mule.extension.db.internal.result.resultset.IteratorResultSetHandler;
+import org.mule.extension.db.internal.result.resultset.ListResultSetHandler;
+import org.mule.extension.db.internal.result.resultset.ResultSetHandler;
+import org.mule.extension.db.internal.result.row.InsensitiveMapRowHandler;
 import org.mule.runtime.extension.api.annotation.ParameterGroup;
+import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import javax.inject.Inject;
 
 public class DmlOperations
 {
 
+    @Inject
+    private StatementStreamingResultSetCloser resultSetCloser;
+
     /**
      * Selects data from a database
      */
-    //TODO: MetadataResolver needed to change to Iterator<Map> in case streaming is enabled.
-    public List<Map<String, Object>> select(@ParameterGroup QueryDefinition queryDefinition,
-                                            @ParameterGroup QuerySettings settings,
-                                            @Optional List<InputParameter> inParams,
-                                            @Optional(defaultValue = "false") boolean streaming,
-                                            @Optional(defaultValue = "10") int fetchSize,
-                                            @Optional Integer maxRows)
+    public Object /*List<Map<String, Object>>*/ select(QueryDefinition queryDefinition,
+                                                       @ParameterGroup QuerySettings settings,
+                                                       @Optional List<InputParameter> inParams,
+                                                       @Optional(defaultValue = "false") boolean streaming,
+                                                       @Optional(defaultValue = "10") int fetchSize,
+                                                       @Connection DbConnection connection,
+                                                       @Optional Integer maxRows) throws Exception
     {
-        return new ArrayList<>();
+        QueryStatementFactory defaultStatementFactory = new QueryStatementFactory();
+        if (maxRows != null)
+        {
+            defaultStatementFactory.setMaxRows(maxRows);
+        }
+
+        defaultStatementFactory.setFetchSize(fetchSize);
+        defaultStatementFactory.setQueryTimeout(new Long(settings.getQueryTimeoutUnit().toSeconds(settings.getQueryTimeout())).intValue());
+
+        InsensitiveMapRowHandler recordHandler = new InsensitiveMapRowHandler();
+        ResultSetHandler resultSetHandler = streaming ? new IteratorResultSetHandler(recordHandler, resultSetCloser) : new ListResultSetHandler(recordHandler);
+
+        return new SelectExecutor(defaultStatementFactory, resultSetHandler).execute(connection, null);
     }
+
 }

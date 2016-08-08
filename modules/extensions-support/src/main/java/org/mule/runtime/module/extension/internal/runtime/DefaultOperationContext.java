@@ -206,7 +206,7 @@ public class DefaultOperationContext implements OperationContextAdapter
         return transactionConfigSupplier.get();
     }
 
-    private TransactionConfig buildTransactionConfig()
+    private TransactionConfig  buildTransactionConfig()
     {
         MuleTransactionConfig transactionConfig = new MuleTransactionConfig();
         transactionConfig.setAction(toActionCode(getTransactionalAction()));

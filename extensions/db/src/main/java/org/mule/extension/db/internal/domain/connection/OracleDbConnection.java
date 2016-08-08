@@ -9,7 +9,6 @@ package org.mule.extension.db.internal.domain.connection;
 import org.mule.extension.db.internal.domain.type.DbType;
 import org.mule.extension.db.internal.domain.type.ResolvedDbType;
 import org.mule.extension.db.internal.domain.type.oracle.OracleXmlType;
-import org.mule.extension.db.internal.resolver.param.ParamTypeResolverFactory;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -17,14 +16,18 @@ import java.util.List;
 
 public class OracleDbConnection extends DefaultDbConnection
 {
+
     private static final int CURSOR_TYPE_ID = -10;
     private static final String CURSOR_TYPE_NAME = "CURSOR";
 
-    public OracleDbConnection(Connection delegate, ParamTypeResolverFactory paramTypeResolverFactory)
+    public OracleDbConnection(Connection delegate)
     {
-        super(delegate, paramTypeResolverFactory);
+        super(delegate);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<DbType> getVendorDataTypes()
     {

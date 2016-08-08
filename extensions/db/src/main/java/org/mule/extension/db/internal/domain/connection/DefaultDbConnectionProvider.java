@@ -6,14 +6,14 @@
  */
 package org.mule.extension.db.internal.domain.connection;
 
-import org.mule.runtime.api.connection.ConnectionException;
+import java.sql.Connection;
 
-public class DefaultDbConnectionProvider extends AbstractDbConnectionProvider
+public class DefaultDbConnectionProvider extends AbstractDbConnectionProvider<DbConnection>
 {
 
     @Override
-    public DbConnection connect() throws ConnectionException
+    protected DbConnection createDbConnection(Connection connection) throws Exception
     {
-        new DefaultDbConnection()
+        return new DefaultDbConnection(connection);
     }
 }

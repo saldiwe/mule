@@ -25,4 +25,10 @@ public class ParameterizedQueryDefinition extends SqlQueryDefinition
     {
         return inputParameters;
     }
+
+    @Override
+    public void accept(QueryDefinitionVisitor visitor)
+    {
+        visitor.onParameterizedQuery(this);
+    }
 }

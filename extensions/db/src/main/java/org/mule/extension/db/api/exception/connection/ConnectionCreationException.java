@@ -7,10 +7,12 @@
 
 package org.mule.extension.db.api.exception.connection;
 
+import org.mule.runtime.api.connection.ConnectionException;
+
 /**
  * Thrown to indicate an error creating a connection
  */
-public class ConnectionCreationException extends RuntimeException
+public class ConnectionCreationException extends ConnectionException
 {
 
     public ConnectionCreationException(String message)

@@ -4,21 +4,19 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.extension.db.api.param;
+package org.mule.extension.db.internal.domain.connection;
 
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
-import org.mule.runtime.extension.api.annotation.param.display.Text;
 
-public abstract class SqlQueryDefinition implements QueryDefinition
+import java.util.Map;
+
+abstract class AbstractVendorConnectionProvider<T extends DbConnection> extends AbstractDbConnectionProvider<T>
 {
+    /**
+     * Specifies a list of custom key-value connectionProperties for the config.
+     */
     @Parameter
     @Optional
-    @Text
-    private String sql;
-
-    public String getSql()
-    {
-        return sql;
-    }
+    private Map<String, String> connectionProperties;
 }

@@ -34,7 +34,7 @@ public class ListResultSetHandler implements ResultSetHandler
     @Override
     public List<Map<String, Object>> processResultSet(DbConnection connection, ResultSet resultSet) throws SQLException
     {
-        List<Map<String, Object>> results = new LinkedList<Map<String, Object>>();
+        List<Map<String, Object>> results = new LinkedList<>();
         try
         {
             while (resultSet.next())

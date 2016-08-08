@@ -6,15 +6,11 @@
  */
 package org.mule.extension.db.api.param;
 
-import org.mule.runtime.extension.api.annotation.Alias;
-
-@Alias("dynamic-query")
-public class DynamicQueryDefinition extends SqlQueryDefinition
+public interface QueryDefinitionVisitor
 {
+    void onParameterizedQuery(ParameterizedQueryDefinition queryDefinition);
 
-    @Override
-    public void accept(QueryDefinitionVisitor visitor)
-    {
-        visitor.onDynamicQuery(this);
-    }
+    void onDynamicQuery(DynamicQueryDefinition queryDefinition);
+
+    void onTemplateQuery(TemplateQueryDefinition queryDefinition);
 }
