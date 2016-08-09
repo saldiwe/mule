@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.core.source.polling;
 
+import org.mule.runtime.core.DefaultMessageExecutionContext;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.OptimizedRequestContext;
@@ -220,7 +221,7 @@ public class PollingMessageSource implements MessageSource, FlowConstructAware, 
                 @Override
                 public MuleEvent process() throws Exception
                 {
-                    MuleEvent event = new DefaultMuleEvent(request, MessageExchangePattern.ONE_WAY, flowConstruct);
+                    MuleEvent event = new DefaultMuleEvent(new DefaultMessageExecutionContext(muleContext.getUniqueIdString(), null), request, MessageExchangePattern.ONE_WAY, flowConstruct);
                     event = interceptor.prepareSourceEvent(event);
 
                     OptimizedRequestContext.criticalSetEvent(event);

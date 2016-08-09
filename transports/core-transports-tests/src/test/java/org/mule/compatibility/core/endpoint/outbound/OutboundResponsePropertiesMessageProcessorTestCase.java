@@ -15,6 +15,7 @@ import org.mule.compatibility.core.api.endpoint.EndpointBuilder;
 import org.mule.compatibility.core.api.endpoint.OutboundEndpoint;
 import org.mule.compatibility.core.endpoint.AbstractEndpointBuilder;
 import org.mule.compatibility.core.processor.AbstractMessageProcessorTestCase;
+import org.mule.runtime.core.DefaultMessageExecutionContext;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleMessage;
@@ -39,8 +40,8 @@ public class OutboundResponsePropertiesMessageProcessorTestCase extends Abstract
             // return event with same payload but no properties
             try
             {
-                return new DefaultMuleEvent(MuleMessage.builder().payload(event.getMessage().getPayload()).build(), REQUEST_RESPONSE, getTestFlow(),
-                    getTestSession(null, muleContext));
+                return new DefaultMuleEvent(new DefaultMessageExecutionContext(muleContext.getUniqueIdString(), null), MuleMessage.builder().payload(event.getMessage().getPayload()).build(),
+                        REQUEST_RESPONSE, getTestFlow(), getTestSession(null, muleContext));
             }
             catch (Exception e)
             {

@@ -7,11 +7,13 @@
 package org.mule.test;
 
 import static org.junit.Assert.assertEquals;
+
 import org.mule.compatibility.core.api.endpoint.EndpointBuilder;
 import org.mule.compatibility.core.api.endpoint.ImmutableEndpoint;
 import org.mule.compatibility.core.api.endpoint.InboundEndpoint;
 import org.mule.compatibility.core.api.endpoint.OutboundEndpoint;
 import org.mule.compatibility.core.endpoint.DynamicOutboundEndpoint;
+import org.mule.runtime.core.DefaultMessageExecutionContext;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.api.MuleMessage;
@@ -93,7 +95,8 @@ public class EndpointURITestCase extends AbstractMuleContextEndpointTestCase
             String epUri;
             if (ep instanceof DynamicOutboundEndpoint)
             {
-                epUri = muleContext.getExpressionManager().parse(ep.getAddress(), new DefaultMuleEvent(message, getTestFlow()), true);
+                epUri = muleContext.getExpressionManager().parse(ep.getAddress(),
+                        new DefaultMuleEvent(new DefaultMessageExecutionContext(muleContext.getUniqueIdString(), null), message, getTestFlow()), true);
             }
             else
             {

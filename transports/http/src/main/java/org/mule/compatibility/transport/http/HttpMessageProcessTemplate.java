@@ -31,10 +31,12 @@ import static org.mule.compatibility.transport.http.HttpConstants.SC_BAD_REQUEST
 import static org.mule.compatibility.transport.http.HttpConstants.SC_CONTINUE;
 import static org.mule.runtime.core.api.config.MuleProperties.MULE_PROXY_ADDRESS;
 import static org.mule.runtime.core.api.config.MuleProperties.MULE_REMOTE_CLIENT_ADDRESS;
+
 import org.mule.compatibility.core.DefaultMuleEventEndpointUtils;
 import org.mule.compatibility.core.api.endpoint.ImmutableEndpoint;
 import org.mule.compatibility.core.transport.AbstractTransportMessageProcessTemplate;
 import org.mule.compatibility.transport.http.i18n.HttpMessages;
+import org.mule.runtime.core.DefaultMessageExecutionContext;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.OptimizedRequestContext;
 import org.mule.runtime.core.RequestContext;
@@ -238,7 +240,7 @@ public class HttpMessageProcessTemplate extends AbstractTransportMessageProcessT
     {
         try
         {
-            sendExpect100(request);
+            sendExpect100(request, muleEvent);
             return muleEvent;
         }
         catch (IOException e)
@@ -247,7 +249,7 @@ public class HttpMessageProcessTemplate extends AbstractTransportMessageProcessT
         }
     }
 
-    private void sendExpect100(HttpRequest request) throws MuleException, IOException
+    private void sendExpect100(HttpRequest request, MuleEvent muleEvent) throws MuleException, IOException
     {
         RequestLine requestLine = request.getRequestLine();
 
@@ -266,7 +268,8 @@ public class HttpMessageProcessTemplate extends AbstractTransportMessageProcessT
                 {
                     HttpResponse expected = new HttpResponse();
                     expected.setStatusLine(requestLine.getHttpVersion(), SC_CONTINUE);
-                    final DefaultMuleEvent event = new DefaultMuleEvent(MuleMessage.builder().payload(expected).build(), getFlowConstruct());
+                    final DefaultMuleEvent event = new DefaultMuleEvent(muleEvent.getExecutionContext(),
+                            MuleMessage.builder().payload(expected).build(), getFlowConstruct());
                     DefaultMuleEventEndpointUtils.populateFieldsFromInboundEndpoint(event, getInboundEndpoint());
 
                     RequestContext.setEvent(event);
@@ -464,7 +467,7 @@ public class HttpMessageProcessTemplate extends AbstractTransportMessageProcessT
     protected HttpResponse doBad(RequestLine requestLine) throws MuleException
     {
         MuleMessage message = getMessageReceiver().createMuleMessage(null);
-        DefaultMuleEvent event = new DefaultMuleEvent(message, getFlowConstruct());
+        DefaultMuleEvent event = new DefaultMuleEvent(new DefaultMessageExecutionContext(getFlowConstruct().getMuleContext().getUniqueIdString(), null), message, getFlowConstruct());
         DefaultMuleEventEndpointUtils.populateFieldsFromInboundEndpoint(event, getInboundEndpoint());
         OptimizedRequestContext.unsafeSetEvent(event);
         HttpResponse response = new HttpResponse();

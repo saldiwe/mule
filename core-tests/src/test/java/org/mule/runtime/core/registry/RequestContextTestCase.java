@@ -9,9 +9,11 @@ package org.mule.runtime.core.registry;
 import static org.junit.Assert.assertEquals;
 
 import org.mule.runtime.api.metadata.DataType;
+import org.mule.runtime.core.DefaultMessageExecutionContext;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.OptimizedRequestContext;
 import org.mule.runtime.core.RequestContext;
+import org.mule.runtime.core.api.MessageExecutionContext;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleException;
@@ -106,6 +108,12 @@ public class RequestContextTestCase extends AbstractMuleTestCase
     {
 
         private MuleMessage message = MuleMessage.builder().payload("").build();
+
+        @Override
+        public MessageExecutionContext getExecutionContext()
+        {
+            return new DefaultMessageExecutionContext("", null);
+        }
 
         @Override
         public MuleMessage getMessage()

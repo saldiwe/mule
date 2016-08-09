@@ -15,6 +15,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+
 import org.mule.compatibility.core.DefaultMuleEventEndpointUtils;
 import org.mule.compatibility.core.api.endpoint.InboundEndpoint;
 import org.mule.compatibility.core.api.security.EndpointSecurityFilter;
@@ -24,6 +25,7 @@ import org.mule.compatibility.core.endpoint.EndpointURIEndpointBuilder;
 import org.mule.compatibility.core.processor.AbstractMessageProcessorTestCase;
 import org.mule.compatibility.core.transformer.simple.InboundAppendTransformer;
 import org.mule.compatibility.core.transformer.simple.ResponseAppendTransformer;
+import org.mule.runtime.core.DefaultMessageExecutionContext;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.MessageExchangePattern;
 import org.mule.runtime.core.RequestContext;
@@ -355,14 +357,14 @@ public class InboundEndpointTestCase extends AbstractMessageProcessorTestCase
 
     protected MuleEvent createTestRequestEvent(InboundEndpoint ep) throws Exception
     {
-        final DefaultMuleEvent event = new DefaultMuleEvent(inMessage, getTestFlow(), getTestSession(null, muleContext));
+        final DefaultMuleEvent event = new DefaultMuleEvent(new DefaultMessageExecutionContext(muleContext.getUniqueIdString(), null), inMessage, getTestFlow(), getTestSession(null, muleContext));
         DefaultMuleEventEndpointUtils.populateFieldsFromInboundEndpoint(event, ep);
         return event;
     }
 
     protected MuleEvent createTestResponseEvent(InboundEndpoint ep) throws Exception
     {
-        final DefaultMuleEvent event = new DefaultMuleEvent(MuleMessage.builder().payload(RESPONSE_MESSAGE).build(),
+        final DefaultMuleEvent event = new DefaultMuleEvent(new DefaultMessageExecutionContext(muleContext.getUniqueIdString(), null), MuleMessage.builder().payload(RESPONSE_MESSAGE).build(),
                 getTestFlow(), getTestSession(null, muleContext));
         DefaultMuleEventEndpointUtils.populateFieldsFromInboundEndpoint(event, ep);
         return event;

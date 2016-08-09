@@ -18,6 +18,7 @@ import static org.mule.runtime.module.http.internal.multipart.HttpPartDataSource
 import static org.mule.runtime.module.http.internal.util.HttpToMuleMessage.getMediaType;
 
 import org.mule.runtime.api.metadata.MediaType;
+import org.mule.runtime.core.DefaultMessageExecutionContext;
 import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.MuleEvent;
@@ -141,6 +142,8 @@ public class HttpRequestToMuleEvent
                                                .outboundProperties(outboundProperties)
                                                .build();
         return new DefaultMuleEvent(
+                // TODO does a correlation id come as a header that we may use?
+                new DefaultMessageExecutionContext(muleContext.getUniqueIdString(), null),
                 message,
                 resolveUri(requestContext),
                 REQUEST_RESPONSE,

@@ -9,6 +9,7 @@ package org.mule.compatibility.transport.http.components;
 import static org.mule.compatibility.transport.http.HttpConnector.HTTP_METHOD_PROPERTY;
 import static org.mule.compatibility.transport.http.HttpConstants.FORM_URLENCODED_CONTENT_TYPE;
 import static org.mule.runtime.core.MessageExchangePattern.REQUEST_RESPONSE;
+
 import org.mule.compatibility.core.api.endpoint.EndpointBuilder;
 import org.mule.compatibility.core.api.endpoint.OutboundEndpoint;
 import org.mule.compatibility.core.endpoint.EndpointURIEndpointBuilder;
@@ -207,8 +208,8 @@ public class RestServiceWrapper extends AbstractComponent
         OutboundEndpoint outboundEndpoint = endpointBuilder.buildOutboundEndpoint();
 
         MuleEventContext eventContext = new DefaultMuleEventContext(event);
-        MuleEvent result = new DefaultMuleEvent(eventContext.sendEvent(
-                MuleMessage.builder(event.getMessage()).payload(requestBody).build(), outboundEndpoint.getEndpointURI().toString()), flowConstruct);
+        MuleEvent result = new DefaultMuleEvent(event.getExecutionContext(),
+                eventContext.sendEvent(MuleMessage.builder(event.getMessage()).payload(requestBody).build(), outboundEndpoint.getEndpointURI().toString()), flowConstruct);
 
         if (isErrorPayload(result))
         {
