@@ -90,7 +90,7 @@ public class StatementStreamingResultSetCloser extends AbstractStreamingResultSe
 
             if (resultSets == null)
             {
-                resultSets = new HashSet<ResultSet>();
+                resultSets = new HashSet<>();
                 connectionResultSets.put(connection, resultSets);
             }
 

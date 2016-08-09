@@ -7,7 +7,7 @@
 
 package org.mule.extension.db.internal.domain.logger;
 
-import org.mule.extension.db.internal.domain.param.InputQueryParam;
+import org.mule.extension.db.api.param.InputParameter;
 
 /**
  * Logs a single query
@@ -18,8 +18,7 @@ public interface SingleQueryLogger extends QueryLogger
     /**
      * Adds the value of a query parameter for logging
      *
-     * @param param non null parameter to log
-     * @param value value to log
+     * @param inputParameter non null parameter to log
      */
-    void addParameter(InputQueryParam param, Object value);
+    void addParameter(InputParameter inputParameter, int index);
 }

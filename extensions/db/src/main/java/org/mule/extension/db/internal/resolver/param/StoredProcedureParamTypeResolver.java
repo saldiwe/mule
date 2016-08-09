@@ -8,7 +8,7 @@
 package org.mule.extension.db.internal.resolver.param;
 
 import org.mule.extension.db.internal.domain.connection.DbConnection;
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
+import org.mule.extension.db.internal.domain.query.Query;
 import org.mule.extension.db.internal.domain.type.DbType;
 import org.mule.extension.db.internal.domain.type.DbTypeManager;
 import org.mule.extension.db.internal.domain.type.ResolvedDbType;
@@ -24,9 +24,6 @@ import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Resolves parameter types for stored procedure queries
@@ -49,11 +46,11 @@ public class StoredProcedureParamTypeResolver implements ParamTypeResolver
     }
 
     @Override
-    public Map<Integer, DbType> getParameterTypes(DbConnection connection, QueryTemplate queryTemplate) throws SQLException
+    public Map<Integer, DbType> getParameterTypes(DbConnection connection, Query query) throws SQLException
     {
         DatabaseMetaData dbMetaData = connection.getMetaData();
 
-        String storedProcedureName = getStoredProcedureName(dbMetaData, queryTemplate.getSqlText());
+        String storedProcedureName = getStoredProcedureName(dbMetaData, query.getDefinition().getSql());
         ResultSet procedureColumns = dbMetaData.getProcedureColumns(connection.getCatalog(), null, storedProcedureName, "%");
 
         try

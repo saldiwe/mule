@@ -8,7 +8,7 @@ package org.mule.extension.db.internal.domain.connection;
 
 import java.sql.Connection;
 
-public class DefaultDbConnectionProvider extends AbstractDbConnectionProvider<DbConnection>
+public class DefaultDbConnectionProvider extends AbstractDbConnectionProvider
 {
 
     @Override

@@ -7,8 +7,8 @@
 
 package org.mule.extension.db.internal.resolver.param;
 
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
-import org.mule.extension.db.internal.domain.query.StatementType;
+import static org.mule.extension.db.internal.domain.query.StatementType.STORE_PROCEDURE_CALL;
+import org.mule.extension.db.internal.domain.query.Query;
 import org.mule.extension.db.internal.domain.type.DbTypeManager;
 
 /**
@@ -24,11 +24,11 @@ public class GenericParamTypeResolverFactory implements ParamTypeResolverFactory
         this.dbTypeManager = dbTypeManager;
     }
 
-    public ParamTypeResolver create(QueryTemplate queryTemplate)
+    public ParamTypeResolver create(Query query)
     {
         ParamTypeResolver metadataParamTypeResolver;
 
-        if (queryTemplate.getType() == StatementType.STORE_PROCEDURE_CALL)
+        if (query.getStatementType() == STORE_PROCEDURE_CALL)
         {
             metadataParamTypeResolver = new StoredProcedureParamTypeResolver(dbTypeManager);
         }

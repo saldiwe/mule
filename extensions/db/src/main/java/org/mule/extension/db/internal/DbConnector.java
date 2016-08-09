@@ -6,15 +6,12 @@
  */
 package org.mule.extension.db.internal;
 
-import static java.util.Arrays.asList;
 import org.mule.extension.db.api.param.CustomDataType;
-import org.mule.extension.db.api.param.DynamicQueryDefinition;
-import org.mule.extension.db.api.param.ParameterizedQueryDefinition;
-import org.mule.extension.db.api.param.QueryDefinition;
-import org.mule.extension.db.api.param.TemplateQueryDefinition;
-import org.mule.extension.db.internal.domain.connection.DbConnection;
+import org.mule.extension.db.api.param.InOutQueryParameter;
+import org.mule.extension.db.api.param.InputParameter;
+import org.mule.extension.db.api.param.OutputParameter;
+import org.mule.extension.db.api.param.QueryParameter;
 import org.mule.extension.db.internal.domain.connection.DefaultDbConnectionProvider;
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
 import org.mule.extension.db.internal.domain.type.ArrayResolvedDbType;
 import org.mule.extension.db.internal.domain.type.CompositeDbTypeManager;
 import org.mule.extension.db.internal.domain.type.DbType;
@@ -25,9 +22,6 @@ import org.mule.extension.db.internal.domain.type.MetadataDbTypeManager;
 import org.mule.extension.db.internal.domain.type.ResolvedDbType;
 import org.mule.extension.db.internal.domain.type.StaticDbTypeManager;
 import org.mule.extension.db.internal.operation.DmlOperations;
-import org.mule.extension.db.internal.resolver.param.GenericParamTypeResolverFactory;
-import org.mule.extension.db.internal.resolver.param.ParamTypeResolver;
-import org.mule.extension.db.internal.resolver.param.ParamTypeResolverFactory;
 import org.mule.runtime.core.api.lifecycle.Initialisable;
 import org.mule.runtime.core.api.lifecycle.InitialisationException;
 import org.mule.runtime.core.util.collection.ImmutableListCollector;
@@ -38,19 +32,17 @@ import org.mule.runtime.extension.api.annotation.SubTypeMapping;
 import org.mule.runtime.extension.api.annotation.connector.Providers;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
 @Extension(name = "DB Connector", description = "Connector for connecting to relation Databases through the JDBC API")
 @Operations({DmlOperations.class})
 @Providers({DefaultDbConnectionProvider.class})
-@SubTypeMapping(baseType = QueryDefinition.class, subTypes = {TemplateQueryDefinition.class, ParameterizedQueryDefinition.class, DynamicQueryDefinition.class})
+@SubTypeMapping(baseType = QueryParameter.class, subTypes = {InputParameter.class, InOutQueryParameter.class, OutputParameter.class})
 public class DbConnector implements Initialisable
 {
 
@@ -61,38 +53,17 @@ public class DbConnector implements Initialisable
     @Optional
     private List<CustomDataType> customDataTypes = new LinkedList<>();
 
-    private DbTypeManager baseTypeManager;
-
-    /**
-     * Determines actual parameter types for the parameters defined in a
-     * query template.
-     *
-     * @param queryTemplate query template that needing parameter resolution
-     * @return a not null map containing the parameter type for each parameter index
-     * @throws SQLException when there are error processing the query
-     */
-    public Map<Integer, DbType> getParamTypes(DbConnection connection, QueryTemplate queryTemplate) throws SQLException
-    {
-        ParamTypeResolverFactory paramTypeResolverFactory = new GenericParamTypeResolverFactory(createTypeManager(connection));
-        ParamTypeResolver paramTypeResolver = paramTypeResolverFactory.create(queryTemplate);
-        return paramTypeResolver.getParameterTypes(connection, queryTemplate);
-    }
+    private DbTypeManager typeManager;
 
     @Override
     public void initialise() throws InitialisationException
     {
-        baseTypeManager = createBaseTypeManager();
+        typeManager = createBaseTypeManager();
     }
 
-    private DbTypeManager createTypeManager(DbConnection connection)
+    public DbTypeManager getTypeManager()
     {
-        List<DbType> vendorDataTypes = connection.getVendorDataTypes();
-        if (vendorDataTypes.size() > 0)
-        {
-            return new CompositeDbTypeManager(asList(baseTypeManager, new StaticDbTypeManager(connection.getVendorDataTypes())));
-        }
-
-        return baseTypeManager;
+        return typeManager;
     }
 
     private DbTypeManager createBaseTypeManager()

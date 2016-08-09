@@ -7,9 +7,9 @@
 
 package org.mule.extension.db.internal.resolver.param;
 
+import org.mule.extension.db.api.param.QueryParameter;
 import org.mule.extension.db.internal.domain.connection.DbConnection;
-import org.mule.extension.db.internal.domain.param.QueryParam;
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
+import org.mule.extension.db.internal.domain.query.Query;
 import org.mule.extension.db.internal.domain.type.DbType;
 import org.mule.extension.db.internal.domain.type.DbTypeManager;
 import org.mule.extension.db.internal.domain.type.DynamicDbType;
@@ -34,59 +34,62 @@ public class DefaultParamTypeResolver implements ParamTypeResolver
         this.metadataParamTypeResolver = metadataParamTypeResolver;
     }
 
-    public Map<Integer, DbType> getParameterTypes(DbConnection connection, QueryTemplate queryTemplate) throws SQLException
+    public Map<Integer, DbType> getParameterTypes(DbConnection connection, Query query) throws SQLException
     {
         Map<Integer, DbType> resolvedParamTypes = new HashMap<>();
-
         Map<Integer, DbType> metadataParamTypes = null;
 
-        for (QueryParam queryParam : queryTemplate.getParams())
+        int index = 1;
+        for (QueryParameter queryParam : query.getDefinition().getParameters())
         {
-            if (queryParam.getType() instanceof UnknownDbType)
+            final DbType dbType = queryParam.getType().getDbType();
+            if (dbType instanceof UnknownDbType)
             {
                 if (metadataParamTypes == null)
                 {
-                    metadataParamTypes = getParamTypesUsingMetadata(connection, queryTemplate);
+                    metadataParamTypes = getParamTypesUsingMetadata(connection, query);
                 }
 
-                resolvedParamTypes.put(queryParam.getIndex(), metadataParamTypes.get(queryParam.getIndex()));
+                resolvedParamTypes.put(index, metadataParamTypes.get(index));
             }
-            else if (queryParam.getType() instanceof DynamicDbType)
+            else if (dbType instanceof DynamicDbType)
             {
-                DbType dbType = dbTypeManager.lookup(connection, queryParam.getType().getName());
+                DbType resolvedType = dbTypeManager.lookup(connection, queryParam.getType().getDbType().getName());
 
-                resolvedParamTypes.put(queryParam.getIndex(), dbType);
+                resolvedParamTypes.put(index, resolvedType);
             }
             else
             {
-                resolvedParamTypes.put(queryParam.getIndex(), queryParam.getType());
+                resolvedParamTypes.put(index, queryParam.getType().getDbType());
             }
+
+            index++;
         }
 
         return resolvedParamTypes;
     }
 
-    protected Map<Integer, DbType> getParamTypesUsingMetadata(DbConnection connection, QueryTemplate queryTemplate)
+    protected Map<Integer, DbType> getParamTypesUsingMetadata(DbConnection connection, Query query)
     {
         Map<Integer, DbType> metadataParamTypes;
         try
         {
-            metadataParamTypes = metadataParamTypeResolver.getParameterTypes(connection, queryTemplate);
+            metadataParamTypes = metadataParamTypeResolver.getParameterTypes(connection, query);
         }
         catch (SQLException e)
         {
-            metadataParamTypes = getParamTypesFromQueryTemplate(queryTemplate);
+            metadataParamTypes = getParamTypesFromQueryTemplate(query);
         }
         return metadataParamTypes;
     }
 
-    private Map<Integer, DbType> getParamTypesFromQueryTemplate(QueryTemplate queryTemplate)
+    private Map<Integer, DbType> getParamTypesFromQueryTemplate(Query query)
     {
-        Map<Integer, DbType> paramTypes = new HashMap<Integer, DbType>();
-
-        for (QueryParam queryParam : queryTemplate.getParams())
+        Map<Integer, DbType> paramTypes = new HashMap<>();
+        int index = 1;
+        for (QueryParameter queryParam : query.getDefinition().getParameters())
         {
-            paramTypes.put(queryParam.getIndex(), queryParam.getType());
+            paramTypes.put(index++, queryParam.getType().getDbType());
         }
 
         return paramTypes;

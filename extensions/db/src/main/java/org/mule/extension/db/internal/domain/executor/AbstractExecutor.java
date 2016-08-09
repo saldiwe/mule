@@ -7,14 +7,11 @@
 
 package org.mule.extension.db.internal.domain.executor;
 
-import org.mule.extension.db.internal.domain.logger.DefaultQueryLoggerFactory;
-import org.mule.extension.db.internal.domain.logger.QueryLoggerFactory;
+import org.mule.extension.db.api.param.InputParameter;
+import org.mule.extension.db.api.param.OutputParameter;
+import org.mule.extension.db.api.param.QueryParameter;
 import org.mule.extension.db.internal.domain.logger.SingleQueryLogger;
-import org.mule.extension.db.internal.domain.param.InputQueryParam;
-import org.mule.extension.db.internal.domain.param.OutputQueryParam;
-import org.mule.extension.db.internal.domain.param.QueryParam;
-import org.mule.extension.db.internal.domain.query.QueryParamValue;
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
+import org.mule.extension.db.internal.domain.query.Query;
 import org.mule.extension.db.internal.domain.statement.StatementFactory;
 import org.mule.extension.db.internal.domain.type.DbType;
 
@@ -22,6 +19,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,33 +33,31 @@ public abstract class AbstractExecutor
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractExecutor.class);
 
     protected final StatementFactory statementFactory;
-    protected QueryLoggerFactory queryLoggerFactory = new DefaultQueryLoggerFactory();
 
     public AbstractExecutor(StatementFactory statementFactory)
     {
         this.statementFactory = statementFactory;
     }
 
-    protected void doProcessParameters(PreparedStatement statement, QueryTemplate queryTemplate, List<QueryParamValue> paramValues, SingleQueryLogger queryLogger) throws SQLException
+    protected void doProcessParameters(PreparedStatement statement, Query query, SingleQueryLogger queryLogger) throws SQLException
     {
-        int valueIndex = 0;
+        final List<QueryParameter> parameters = query.getDefinition().getParameters();
+        final Map<Integer, DbType> paramTypes = query.getParamTypes();
 
-        for (int paramIndex = 1, inputParamsSize = queryTemplate.getParams().size(); paramIndex <= inputParamsSize; paramIndex++)
+        for (int paramIndex = 1, inputParamsSize = parameters.size(); paramIndex <= inputParamsSize; paramIndex++)
         {
-            QueryParam queryParam = queryTemplate.getParams().get(paramIndex - 1);
-            if (queryParam instanceof InputQueryParam)
+            QueryParameter queryParam = parameters.get(paramIndex - 1);
+            if (queryParam instanceof InputParameter)
             {
-                QueryParamValue param = paramValues.get(valueIndex);
+                InputParameter inputParam = (InputParameter) queryParam;
+                queryLogger.addParameter(inputParam, paramIndex);
 
-                queryLogger.addParameter(queryTemplate.getInputParams().get(valueIndex), param.getValue());
-
-                processInputParam(statement, paramIndex, param.getValue(), queryParam.getType());
-                valueIndex++;
+                processInputParam(statement, paramIndex, inputParam.getValue(), paramTypes.get(paramIndex));
             }
 
-            if (queryParam instanceof OutputQueryParam)
+            if (queryParam instanceof OutputParameter)
             {
-                processOutputParam((CallableStatement) statement, paramIndex, queryParam.getType());
+                processOutputParam((CallableStatement) statement, paramIndex, paramTypes.get(paramIndex));
             }
         }
     }
@@ -74,10 +70,5 @@ public abstract class AbstractExecutor
     private void processOutputParam(CallableStatement statement, int index, DbType type) throws SQLException
     {
         type.registerOutParameter(statement, index);
-    }
-
-    public void setQueryLoggerFactory(QueryLoggerFactory queryLoggerFactory)
-    {
-        this.queryLoggerFactory = queryLoggerFactory;
     }
 }

@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Wraps a {@link Connection} adding connector's specific functionality
  */
-public interface DbConnection extends Connection, TransactionalConnection
+public interface DbConnection extends TransactionalConnection
 {
 
     /**
@@ -32,4 +32,8 @@ public interface DbConnection extends Connection, TransactionalConnection
     StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler);
 
     List<DbType> getVendorDataTypes();
+
+    Connection getJdbcConnection();
+
+    void release();
 }

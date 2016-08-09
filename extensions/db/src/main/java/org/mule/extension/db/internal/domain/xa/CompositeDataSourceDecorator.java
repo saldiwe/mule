@@ -22,9 +22,9 @@ public class CompositeDataSourceDecorator implements DataSourceDecorator
 
     private final LinkedList<DataSourceDecorator> decorators = new LinkedList<>();
 
-    public CompositeDataSourceDecorator()
+    public CompositeDataSourceDecorator(Collection<DataSourceDecorator> decorators)
     {
-        decorators.add(new DefaultDataSourceDecorator());
+        this.decorators.addAll(decorators);
     }
 
     @Override
@@ -44,11 +44,5 @@ public class CompositeDataSourceDecorator implements DataSourceDecorator
     public boolean appliesTo(DataSource dataSource, MuleContext muleContext)
     {
         return true;
-    }
-
-    public void init(MuleContext muleContext)
-    {
-        Collection<DataSourceDecorator> connectionFactoryDecorators = muleContext.getRegistry().lookupObjects(DataSourceDecorator.class);
-        connectionFactoryDecorators.forEach(decorators::addFirst);
     }
 }

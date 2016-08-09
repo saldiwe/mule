@@ -56,19 +56,19 @@ public enum JdbcType
     NCLOB_DB_TYPE(new ResolvedDbType(Types.NCLOB, "NCLOB")),
     SQLXML_DB_TYPE(new ResolvedDbType(Types.SQLXML, "SQLXML"));
 
-    private final ResolvedDbType dbType;
+    private final DbType dbType;
+
+    JdbcType(DbType dbType)
+    {
+        this.dbType = dbType;
+    }
 
     public static List<DbType> getAllTypes()
     {
         return stream(JdbcType.values()).map(JdbcType::getDbType).collect(toList());
     }
 
-    JdbcType(ResolvedDbType dbType)
-    {
-        this.dbType = dbType;
-    }
-
-    public ResolvedDbType getDbType()
+    public DbType getDbType()
     {
         return dbType;
     }

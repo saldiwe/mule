@@ -7,24 +7,25 @@
 
 package org.mule.extension.db.internal.domain.logger;
 
+import org.mule.extension.db.internal.domain.query.Query;
 import org.mule.extension.db.internal.domain.query.QueryTemplate;
 
 import org.slf4j.Logger;
 
 
 /**
- * Creates query loggers with different implementations depending on whether a given {@link Log}
+ * Creates query loggers with different implementations depending on whether a given {@link Logger}
  * has the debug level enabled or not
  */
 public class DefaultQueryLoggerFactory implements QueryLoggerFactory
 {
 
     @Override
-    public SingleQueryLogger createQueryLogger(Logger logger, QueryTemplate queryTemplate)
+    public SingleQueryLogger createQueryLogger(Logger logger, Query query)
     {
         if (logger.isDebugEnabled())
         {
-            return new DebugSingleQueryLogger(logger, queryTemplate);
+            return new DebugSingleQueryLogger(logger, query);
         }
         else
         {
@@ -33,11 +34,11 @@ public class DefaultQueryLoggerFactory implements QueryLoggerFactory
     }
 
     @Override
-    public PreparedBulkQueryLogger createBulkQueryLogger(Logger logger, QueryTemplate queryTemplate, int bulkSize)
+    public PreparedBulkQueryLogger createBulkQueryLogger(Logger logger, Query query, int bulkSize)
     {
         if (logger.isDebugEnabled())
         {
-            return new DebugPreparedBulkQueryLogger(logger, queryTemplate, bulkSize);
+            return new DebugPreparedBulkQueryLogger(logger, query, bulkSize);
         }
         else
         {

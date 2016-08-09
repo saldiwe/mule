@@ -7,7 +7,7 @@
 
 package org.mule.extension.db.internal.domain.logger;
 
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
+import org.mule.extension.db.internal.domain.query.Query;
 
 import org.slf4j.Logger;
 
@@ -23,9 +23,9 @@ public class DebugPreparedBulkQueryLogger extends DebugSingleQueryLogger impleme
     private final int bulkSize;
     private int currentBulkSize = 0;
 
-    public DebugPreparedBulkQueryLogger(Logger logger, QueryTemplate queryTemplate, int bulkSize)
+    public DebugPreparedBulkQueryLogger(Logger logger, Query query, int bulkSize)
     {
-        super(logger, queryTemplate);
+        super(logger, query);
         this.bulkSize = bulkSize;
 
         if (hasParameters())

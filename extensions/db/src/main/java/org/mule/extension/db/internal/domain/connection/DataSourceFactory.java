@@ -5,11 +5,11 @@
  * LICENSE.txt file.
  */
 
-package org.mule.extension.db.internal.domain.database;
+package org.mule.extension.db.internal.domain.connection;
 
 import org.mule.extension.db.api.config.DbPoolingProfile;
-import org.mule.extension.db.internal.domain.connection.DataSourceConfig;
 import org.mule.extension.db.internal.domain.xa.CompositeDataSourceDecorator;
+import org.mule.extension.db.internal.domain.xa.DataSourceDecorator;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.lifecycle.Disposable;
 import org.mule.runtime.core.util.concurrent.ConcurrentHashSet;
@@ -40,11 +40,13 @@ public class DataSourceFactory implements Disposable
     private final MuleContext muleContext;
     private final Set<DataSource> pooledDataSources = new ConcurrentHashSet();
     private final Set<Disposable> disposableDataSources = new ConcurrentHashSet();
+    private final CompositeDataSourceDecorator dataSourceDecorator;
 
     public DataSourceFactory(String name, MuleContext muleContext)
     {
         this.name = name;
         this.muleContext = muleContext;
+        dataSourceDecorator = new CompositeDataSourceDecorator(muleContext.getRegistry().lookupObjects(DataSourceDecorator.class));
     }
 
     /**
@@ -86,9 +88,6 @@ public class DataSourceFactory implements Disposable
 
     public DataSource decorateDataSource(DataSource dataSource, DbPoolingProfile poolingProfile, MuleContext muleContext)
     {
-        CompositeDataSourceDecorator dataSourceDecorator = new CompositeDataSourceDecorator();
-        dataSourceDecorator.init(muleContext);
-
         return dataSourceDecorator.decorate(dataSource, name, poolingProfile, muleContext);
     }
 

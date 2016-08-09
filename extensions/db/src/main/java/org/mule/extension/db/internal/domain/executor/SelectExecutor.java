@@ -45,7 +45,7 @@ public class SelectExecutor extends AbstractSingleQueryExecutor
             }
             else
             {
-                resultSet = statement.executeQuery(query.getQueryTemplate().getSqlText());
+                resultSet = statement.executeQuery(query.getDefinition().getSql());
             }
 
             return resultHandler.processResultSet(connection, resultSet);

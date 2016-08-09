@@ -7,8 +7,8 @@
 
 package org.mule.extension.db.internal.domain.logger;
 
-import org.mule.extension.db.internal.domain.param.InputQueryParam;
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
+import org.mule.extension.db.api.param.InputParameter;
+import org.mule.extension.db.internal.domain.query.Query;
 
 import org.slf4j.Logger;
 
@@ -18,15 +18,15 @@ import org.slf4j.Logger;
 public class DebugSingleQueryLogger extends AbstractDebugQueryLogger implements SingleQueryLogger
 {
 
-    private final QueryTemplate queryTemplate;
+    private final Query query;
 
-    public DebugSingleQueryLogger(Logger logger, QueryTemplate queryTemplate)
+    public DebugSingleQueryLogger(Logger logger, Query query)
     {
         super(logger);
 
-        this.queryTemplate = queryTemplate;
+        this.query = query;
 
-        builder.append("Executing query:\n").append(queryTemplate.getSqlText());
+        builder.append("Executing query:\n").append(query.getDefinition().getSql());
 
         if (hasParameters())
         {
@@ -36,14 +36,14 @@ public class DebugSingleQueryLogger extends AbstractDebugQueryLogger implements 
 
     protected boolean hasParameters()
     {
-        return queryTemplate.getInputParams().size() > 0;
+        return query.hasInputParameters();
     }
 
     @Override
-    public void addParameter(InputQueryParam param, Object value)
+    public void addParameter(InputParameter param, int index)
     {
         builder.append("\n")
-                .append(param.getName() != null ? param.getName() : param.getIndex())
-                .append(" = ").append(value);
+                .append(param.getName() != null ? param.getName() : index)
+                .append(" = ").append(param.getValue());
     }
 }

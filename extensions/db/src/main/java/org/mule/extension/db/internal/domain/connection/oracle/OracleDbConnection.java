@@ -4,27 +4,33 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
+package org.mule.extension.db.internal.domain.connection.oracle;
 
-package org.mule.extension.db.internal.domain.database;
-
+import org.mule.extension.db.internal.domain.connection.DefaultDbConnection;
 import org.mule.extension.db.internal.domain.type.DbType;
 import org.mule.extension.db.internal.domain.type.ResolvedDbType;
 import org.mule.extension.db.internal.domain.type.oracle.OracleXmlType;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Creates {@link DbConfig} instances for Oracle databases
- */
-public class OracleDbConfigFactory extends GenericDbConfigFactory
+public class OracleDbConnection extends DefaultDbConnection
 {
 
     private static final int CURSOR_TYPE_ID = -10;
     private static final String CURSOR_TYPE_NAME = "CURSOR";
 
+    public OracleDbConnection(Connection jdbcConnection)
+    {
+        super(jdbcConnection);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected List<DbType> getVendorDataTypes()
+    public List<DbType> getVendorDataTypes()
     {
         List<DbType> dbTypes = new ArrayList<>();
         dbTypes.add(new ResolvedDbType(CURSOR_TYPE_ID, CURSOR_TYPE_NAME));

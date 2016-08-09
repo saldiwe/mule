@@ -8,11 +8,11 @@ package org.mule.extension.db.internal.operation;
 
 import org.mule.extension.db.api.StatementStreamingResultSetCloser;
 import org.mule.extension.db.api.param.QueryDefinition;
+import org.mule.extension.db.internal.DbConnector;
 import org.mule.extension.db.internal.domain.connection.DbConnection;
 import org.mule.extension.db.internal.domain.executor.SelectExecutor;
 import org.mule.extension.db.internal.domain.query.Query;
 import org.mule.extension.db.internal.domain.statement.QueryStatementFactory;
-import org.mule.extension.db.internal.metadata.DeletemeMetadataResolver;
 import org.mule.extension.db.internal.parser.QueryTemplateParser;
 import org.mule.extension.db.internal.parser.SimpleQueryTemplateParser;
 import org.mule.extension.db.internal.result.resultset.IteratorResultSetHandler;
@@ -21,10 +21,11 @@ import org.mule.extension.db.internal.result.resultset.ResultSetHandler;
 import org.mule.extension.db.internal.result.row.InsensitiveMapRowHandler;
 import org.mule.runtime.core.util.StringUtils;
 import org.mule.runtime.extension.api.annotation.ParameterGroup;
-import org.mule.runtime.extension.api.annotation.metadata.MetadataScope;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.Optional;
+import org.mule.runtime.extension.api.annotation.param.UseConfig;
 import org.mule.runtime.extension.api.annotation.param.display.Text;
+import org.mule.runtime.extension.api.runtime.operation.InterceptingCallback;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import javax.inject.Inject;
 
 public class DmlOperations
 {
+
     @Inject
     private StatementStreamingResultSetCloser resultSetCloser;
 
@@ -43,36 +45,35 @@ public class DmlOperations
      * Selects data from a database
      */
     //TODO: MetadataResolver needed to change to Iterator<Map> in case streaming is enabled.
-    public Object select(QueryDefinition query,
-                                            @Optional(defaultValue = "false") boolean streaming,
-                                            @Optional(defaultValue = "10") int fetchSize,
-                                            @Optional Integer maxRows,
-                                            @ParameterGroup QuerySettings settings,
-                                            @Connection DbConnection connection) throws SQLException
+    public InterceptingCallback<Object> select(QueryDefinition query,
+                                               @Optional(defaultValue = "false") boolean streaming,
+                                               @Optional(defaultValue = "10") int fetchSize,
+                                               @Optional Integer maxRows,
+                                               @ParameterGroup QuerySettings settings,
+                                               @UseConfig DbConnector connector,
+                                               @Connection DbConnection connection) throws SQLException
     {
         QueryStatementFactory statementFactory = getStatementFactory(fetchSize, maxRows, settings);
 
         InsensitiveMapRowHandler recordHandler = new InsensitiveMapRowHandler();
         ResultSetHandler resultSetHandler = streaming ? new IteratorResultSetHandler(recordHandler, resultSetCloser) : new ListResultSetHandler(recordHandler);
 
-        return new SelectExecutor(statementFactory, resultSetHandler).execute(connection, buildQuery(query, settings));
-    }
+        Object result = new SelectExecutor(statementFactory, resultSetHandler).execute(connection, buildQuery(query, settings, connector, connection));
 
-    private QueryStatementFactory getStatementFactory(Integer fetchSize, @Optional Integer maxRows, @ParameterGroup QuerySettings settings)
-    {
-        QueryStatementFactory statementFactory = new QueryStatementFactory();
-        if (maxRows != null)
+        return new InterceptingCallback<Object>()
         {
-            statementFactory.setMaxRows(maxRows);
-        }
+            @Override
+            public Object getResult() throws Exception
+            {
+                return result;
+            }
 
-        if (fetchSize != null)
-        {
-            statementFactory.setFetchSize(fetchSize);
-        }
-
-        statementFactory.setQueryTimeout(new Long(settings.getQueryTimeoutUnit().toSeconds(settings.getQueryTimeout())).intValue());
-        return statementFactory;
+            @Override
+            public void onException(Exception exception)
+            {
+                resultSetCloser.closeResultSets(connection);
+            }
+        };
     }
 
     /**
@@ -127,7 +128,6 @@ public class DmlOperations
      * @param settings
      * @return
      */
-    @MetadataScope(outputResolver = DeletemeMetadataResolver.class)
     public Map<String, Object> storedProcedure(QueryDefinition queryDefinition,
                                                @Optional(defaultValue = "false") boolean streaming,
                                                @Optional(defaultValue = "10") int fetchSize,
@@ -147,22 +147,42 @@ public class DmlOperations
      * @param settings
      * @return
      */
-    public int bulkUpdate(@Optional @Text String dynamicQuery, @Optional String file, @ParameterGroup QuerySettings settings)
+    public int[] bulkUpdate(@Optional @Text String dynamicQuery, @Optional String file, @ParameterGroup QuerySettings settings)
     {
-        //return new int[] {0};
-        return 0;
+        return new int[] {0};
     }
 
-    private Query buildQuery(QueryDefinition definition, QuerySettings settings) {
+    private Query buildQuery(QueryDefinition definition, QuerySettings settings, DbConnector connector, DbConnection connection)
+    {
+        definition = definition.copy();
         final QueryDefinition template = settings.getQueryTemplate();
-        if (template != null) {
-            if (StringUtils.isBlank(definition.getSql())) {
+        if (template != null)
+        {
+            if (StringUtils.isBlank(definition.getSql()))
+            {
                 definition.setSql(template.getSql());
             }
 
             definition.addParameters(template.getParameters());
         }
 
-        return new Query(definition, queryParser.getStatementType(definition.getSql()));
+        return new Query(definition, queryParser.getStatementType(definition.getSql()), connector, connection);
+    }
+
+    private QueryStatementFactory getStatementFactory(Integer fetchSize, Integer maxRows, QuerySettings settings)
+    {
+        QueryStatementFactory statementFactory = new QueryStatementFactory();
+        if (maxRows != null)
+        {
+            statementFactory.setMaxRows(maxRows);
+        }
+
+        if (fetchSize != null)
+        {
+            statementFactory.setFetchSize(fetchSize);
+        }
+
+        statementFactory.setQueryTimeout(new Long(settings.getQueryTimeoutUnit().toSeconds(settings.getQueryTimeout())).intValue());
+        return statementFactory;
     }
 }

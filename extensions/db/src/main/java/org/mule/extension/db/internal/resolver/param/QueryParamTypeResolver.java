@@ -8,8 +8,7 @@
 package org.mule.extension.db.internal.resolver.param;
 
 import org.mule.extension.db.internal.domain.connection.DbConnection;
-import org.mule.extension.db.internal.domain.param.QueryParam;
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
+import org.mule.extension.db.internal.domain.query.Query;
 import org.mule.extension.db.internal.domain.type.DbType;
 import org.mule.extension.db.internal.domain.type.DbTypeManager;
 import org.mule.extension.db.internal.domain.type.ResolvedDbType;
@@ -36,18 +35,18 @@ public class QueryParamTypeResolver implements ParamTypeResolver
     }
 
     @Override
-    public Map<Integer, DbType> getParameterTypes(DbConnection connection, QueryTemplate queryTemplate) throws SQLException
+    public Map<Integer, DbType> getParameterTypes(DbConnection connection, Query query) throws SQLException
     {
         Map<Integer, DbType> paramTypes = new HashMap<>();
 
-        PreparedStatement statement = connection.prepareStatement(queryTemplate.getSqlText());
+        PreparedStatement statement = connection.prepareStatement(query.getDefinition().getSql());
 
         ParameterMetaData parameterMetaData = statement.getParameterMetaData();
 
-        for (QueryParam queryParam : queryTemplate.getParams())
+        for (int index = 1; index <= query.getDefinition().getParameters().size(); index++)
         {
-            int parameterTypeId = parameterMetaData.getParameterType(queryParam.getIndex());
-            String parameterTypeName = parameterMetaData.getParameterTypeName(queryParam.getIndex());
+            int parameterTypeId = parameterMetaData.getParameterType(index);
+            String parameterTypeName = parameterMetaData.getParameterTypeName(index);
             DbType dbType;
             if (parameterTypeName == null)
             {
@@ -67,7 +66,8 @@ public class QueryParamTypeResolver implements ParamTypeResolver
                 }
             }
 
-            paramTypes.put(queryParam.getIndex(), dbType);
+            paramTypes.put(index, dbType);
+            index++;
         }
 
         return paramTypes;

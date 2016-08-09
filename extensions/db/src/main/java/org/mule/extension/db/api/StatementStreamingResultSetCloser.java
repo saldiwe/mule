@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StatementStreamingResultSetCloser extends AbstractStreamingResultSetCloser
 {
     private final ConcurrentHashMap<DbConnection, Set<ResultSet>> connectionResultSets = new ConcurrentHashMap<>();
-
     private final ConcurrentHashMap<DbConnection, Object> connectionLocks = new ConcurrentHashMap<>();
 
     /**
@@ -114,7 +113,6 @@ public class StatementStreamingResultSetCloser extends AbstractStreamingResultSe
     protected void releaseResources(DbConnection connection, Object connectionLock)
     {
         connectionResultSets.remove(connection);
-
         connectionLocks.remove(connectionLock);
 
         connection.release();
