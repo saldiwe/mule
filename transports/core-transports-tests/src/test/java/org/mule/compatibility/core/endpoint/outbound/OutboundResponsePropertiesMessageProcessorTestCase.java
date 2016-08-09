@@ -28,7 +28,6 @@ public class OutboundResponsePropertiesMessageProcessorTestCase extends Abstract
 
     private static String MY_PROPERTY_KEY = "myProperty";
     private static String MY_PROPERTY_VAL = "myPropertyValue";
-    private static String MULE_CORRELATION_ID_VAL = "152";
 
     @Test
     public void testProcess() throws Exception
@@ -52,7 +51,6 @@ public class OutboundResponsePropertiesMessageProcessorTestCase extends Abstract
         MuleEvent event = createTestOutboundEvent();
         event.setMessage(MuleMessage.builder(event.getMessage())
                                     .addOutboundProperty(MY_PROPERTY_KEY, MY_PROPERTY_VAL)
-                                    .correlationId(MULE_CORRELATION_ID_VAL)
                                     .build());
 
         MuleEvent result = mp.process(event);
@@ -60,7 +58,6 @@ public class OutboundResponsePropertiesMessageProcessorTestCase extends Abstract
         assertNotNull(result);
         assertThat(result.getMessageAsString(), is(TEST_MESSAGE));
         assertThat(result.getMessage().getOutboundProperty(MY_PROPERTY_KEY), is(MY_PROPERTY_VAL));
-        assertThat(result.getMessage().getCorrelation().getId().get(), is(MULE_CORRELATION_ID_VAL));
     }
 
     @Override

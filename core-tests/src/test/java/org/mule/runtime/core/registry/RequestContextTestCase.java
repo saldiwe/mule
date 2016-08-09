@@ -27,6 +27,7 @@ import org.mule.runtime.core.api.security.Credentials;
 import org.mule.runtime.core.api.security.SecurityContext;
 import org.mule.runtime.core.api.transformer.TransformerException;
 import org.mule.runtime.core.management.stats.ProcessingTime;
+import org.mule.runtime.core.message.Correlation;
 import org.mule.runtime.core.message.DefaultExceptionPayload;
 import org.mule.tck.junit4.AbstractMuleTestCase;
 
@@ -348,6 +349,24 @@ public class RequestContextTestCase extends AbstractMuleTestCase
         public void setSecurityContext(SecurityContext context)
         {
 
+        }
+
+        @Override
+        public Correlation getCorrelation()
+        {
+            return null;
+        }
+
+        @Override
+        public String getCorrelationId()
+        {
+            return null;
+        }
+
+        @Override
+        public MuleEvent getParent()
+        {
+            return null;
         }
     }
 

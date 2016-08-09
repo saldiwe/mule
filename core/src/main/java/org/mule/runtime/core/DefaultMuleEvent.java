@@ -35,6 +35,7 @@ import org.mule.runtime.core.connector.DefaultReplyToHandler;
 import org.mule.runtime.core.context.notification.DefaultFlowCallStack;
 import org.mule.runtime.core.context.notification.DefaultProcessorsTrace;
 import org.mule.runtime.core.management.stats.ProcessingTime;
+import org.mule.runtime.core.message.Correlation;
 import org.mule.runtime.core.metadata.TypedValue;
 import org.mule.runtime.core.processor.strategy.NonBlockingProcessingStrategy;
 import org.mule.runtime.core.security.MuleCredentials;
@@ -438,6 +439,8 @@ public class DefaultMuleEvent implements MuleEvent, DeserializationPostInitialis
                                MessageExchangePattern messageExchangePattern)
     {
         this.executionContext = rewriteEvent.getExecutionContext();
+        this.correlation = rewriteEvent.getCorrelation();
+        this.parent = rewriteEvent.getParent();
         this.id = rewriteEvent.getId();
         this.flowConstruct = flowConstruct;
         this.session = session;
@@ -1146,5 +1149,36 @@ public class DefaultMuleEvent implements MuleEvent, DeserializationPostInitialis
     public void setSecurityContext(SecurityContext context)
     {
         session.setSecurityContext(context);
+    }
+
+    private MuleEvent parent;
+    private Correlation correlation;
+
+    public void setParent(MuleEvent parent)
+    {
+        this.parent = parent;
+    }
+
+    @Override
+    public MuleEvent getParent()
+    {
+        return parent;
+    }
+
+    public void setCorrelation(Correlation correlation)
+    {
+        this.correlation = correlation;
+    }
+
+    @Override
+    public Correlation getCorrelation()
+    {
+        return correlation;
+    }
+
+    @Override
+    public String getCorrelationId()
+    {
+        return getExecutionContext().getSourceCorrelationId().orElse(getId());
     }
 }

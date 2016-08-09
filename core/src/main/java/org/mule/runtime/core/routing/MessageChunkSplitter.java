@@ -11,6 +11,7 @@ import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.routing.RoutingException;
 import org.mule.runtime.core.config.i18n.CoreMessages;
+import org.mule.runtime.core.message.Correlation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,13 +78,14 @@ public class MessageChunkSplitter extends AbstractSplitter
             buffer = new byte[len];
             System.arraycopy(data, pos, buffer, 0, buffer.length);
             pos += len;
-            messageParts.add(new DefaultMuleEvent(MuleMessage.builder(message)
+            final DefaultMuleEvent childEvent = new DefaultMuleEvent(MuleMessage.builder(message)
                                                              .payload(buffer)
-                                                             .correlationId(message.getUniqueId())
-                                                             .correlationGroupSize(parts)
-                                                             .correlationSequence(parts)
                                                              .build(),
-                    event));
+                    event);
+            childEvent.setParent(event);
+            childEvent.setCorrelation(new Correlation(event.getExecutionContext().getSourceCorrelationId().orElse(null), parts, count));
+
+            messageParts.add(childEvent);
         }
         return messageParts;
     }
