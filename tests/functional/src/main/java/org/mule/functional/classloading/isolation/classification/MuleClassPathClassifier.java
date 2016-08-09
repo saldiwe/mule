@@ -38,6 +38,7 @@ import com.google.common.collect.Lists;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -73,6 +74,7 @@ public class MuleClassPathClassifier implements ClassPathClassifier
     public static final String GENERATED_TEST_SOURCES = "generated-test-sources";
     private static final String TARGET_FOLDER_NAME = "target";
     private static final String CLASSES_FOLDER_NAME = "classes";
+    public static final String SERVICE_PROPERTIES = "service.properties";
 
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -92,6 +94,7 @@ public class MuleClassPathClassifier implements ClassPathClassifier
 
         List<URL> appUrls = buildAppUrls(extendedClassPathClassifierContext);
         List<PluginUrlClassification> pluginUrlClassifications = buildPluginsUrlClassification(extendedClassPathClassifierContext);
+        List<ServiceUrlClassification> servicesUrlClassifications = buildServicesUrlClassification(extendedClassPathClassifierContext);
         List<URL> containerUrls = buildContainerUrls(extendedClassPathClassifierContext, appUrls, pluginUrlClassifications);
 
         return new ArtifactUrlClassification(containerUrls, pluginUrlClassifications, appUrls);
@@ -125,7 +128,7 @@ public class MuleClassPathClassifier implements ClassPathClassifier
      * Builds the list of {@link URL}s for the plugins classification. Compile scope is what mostly drives this classification.
      *
      * @param extendedContext {@link ExtendedClassPathClassifierContext} that holds the data needed for classifying the artifacts
-     * @return a {@link List} of {@link URL}s that would be the one used for the plugins class loaders.
+     * @return a {@link List} of {@link PluginUrlClassification}s that would be the one used for the plugins class loaders.
      */
     private List<PluginUrlClassification> buildPluginsUrlClassification(final ExtendedClassPathClassifierContext extendedContext)
     {
@@ -176,6 +179,21 @@ public class MuleClassPathClassifier implements ClassPathClassifier
             pluginClassifications.add(pluginClassPathClassification(extendedContext));
         }
         return pluginClassifications;
+    }
+
+    /**
+     * Finds if there are {@value #SERVICE_PROPERTIES} in classpath in order to build a {@link ServiceUrlClassification} for
+     * each artifact that contains the {@value #SERVICE_PROPERTIES} file.
+     * Once an artifact is identified the dependencies are going to be collected from the graph using Maven compile scope. Similar
+     * to how discovering process for plugins and extensions works.
+     *
+     * @param extendedContext
+     * @return a {@link List} of {@link ServiceUrlClassification}s that would be the one used for the plugins class loaders.
+     */
+    private List<ServiceUrlClassification> buildServicesUrlClassification(final ExtendedClassPathClassifierContext extendedContext)
+    {
+        //TODO(gfernandes) MULE-10202, change this when issue is done, already added a CL in context
+        URLClassLoader classLoader = new URLClassLoader(extendedContext.getClassificationContext().getClassPathURLs().toArray(new URL[0]), null);
     }
 
     /**
