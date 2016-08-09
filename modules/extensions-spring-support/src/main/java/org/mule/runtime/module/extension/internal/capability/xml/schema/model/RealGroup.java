@@ -22,10 +22,13 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for realGroup complex type.
+ * <p>
+ * Java class for realGroup complex type.
  * <p/>
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * <p/>
+ * 
  * <pre>
  * &lt;complexType name="realGroup">
  *   &lt;complexContent>
@@ -47,10 +50,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "realGroup")
 @XmlSeeAlso({
-                    NamedGroup.class,
-                    GroupRef.class
-            })
-public class RealGroup extends Group
-{
+    NamedGroup.class,
+    GroupRef.class
+})
+public class RealGroup extends Group {
 
 }

@@ -22,10 +22,13 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for localElement complex type.
+ * <p>
+ * Java class for localElement complex type.
  * <p/>
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * <p/>
+ * 
  * <pre>
  * &lt;complexType name="localElement">
  *   &lt;complexContent>
@@ -47,9 +50,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "localElement")
 @XmlSeeAlso({
-                    NarrowMaxMin.class
-            })
-public class LocalElement extends Element
-{
+    NarrowMaxMin.class
+})
+public class LocalElement extends Element {
 
 }

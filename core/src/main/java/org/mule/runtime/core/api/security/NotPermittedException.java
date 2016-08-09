@@ -6,7 +6,8 @@
  */
 package org.mule.runtime.core.api.security;
 
-import org.mule.runtime.core.RequestContext;
+import static org.mule.runtime.core.DefaultMuleEvent.getCurrentEvent;
+import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 import org.mule.runtime.core.config.i18n.CoreMessages;
@@ -15,56 +16,46 @@ import org.mule.runtime.core.config.i18n.Message;
 import java.net.URI;
 
 /**
- * <code>NotPermittedException</code> is thrown if the user isn't authorized
- * to perform an action.
+ * <code>NotPermittedException</code> is thrown if the user isn't authorized to perform an action.
  */
-public class NotPermittedException extends SecurityException
-{
-    /**
-     * Serial version
-     */
-    private static final long serialVersionUID = -6664384216189042673L;
+public class NotPermittedException extends SecurityException {
 
-    public NotPermittedException(Message message)
-    {
-        super(message, RequestContext.getEvent());
+  /**
+   * Serial version
+   */
+  private static final long serialVersionUID = -6664384216189042673L;
+
+  public NotPermittedException(Message message) {
+    super(message, getCurrentEvent());
+  }
+
+  public NotPermittedException(Message message, Throwable cause, MessageProcessor failingMessageProcessor) {
+    super(message, getCurrentEvent(), cause, failingMessageProcessor);
+  }
+
+  public NotPermittedException(Message message, MuleEvent event) {
+    super(message, event);
+  }
+
+  public NotPermittedException(Message message, MuleEvent event, Throwable cause, MessageProcessor failingMessageProcessor) {
+    super(message, event, cause, failingMessageProcessor);
+  }
+
+  public NotPermittedException(MuleEvent event, SecurityContext context, SecurityFilter filter) {
+    super(constructMessage(context, event.getMessageSourceURI(), filter), event);
+  }
+
+  private static Message constructMessage(SecurityContext context,
+                                          URI endpointURI,
+                                          SecurityFilter filter) {
+
+    Message m;
+    if (context == null) {
+      m = CoreMessages.authSetButNoContext(filter.getClass().getName());
+    } else {
+      m = CoreMessages.authFailedForUser(context.getAuthentication().getPrincipal());
     }
-
-    public NotPermittedException(Message message, Throwable cause, MessageProcessor failingMessageProcessor)
-    {
-        super(message, RequestContext.getEvent(), cause, failingMessageProcessor);
-    }
-
-    public NotPermittedException(Message message, MuleEvent event)
-    {
-        super(message, event);
-    }
-
-    public NotPermittedException(Message message, MuleEvent event, Throwable cause, MessageProcessor failingMessageProcessor)
-    {
-        super(message, event, cause, failingMessageProcessor);
-    }
-
-    public NotPermittedException(MuleEvent event, SecurityContext context,SecurityFilter filter)
-    {
-        super(constructMessage(context, event.getMessageSourceURI(), filter), event);
-    }
-
-    private static Message constructMessage(SecurityContext context, 
-                                            URI endpointURI,
-                                            SecurityFilter filter)
-    {
-
-        Message m;
-        if (context == null)
-        {
-            m = CoreMessages.authSetButNoContext(filter.getClass().getName());
-        }
-        else
-        {
-            m = CoreMessages.authFailedForUser(context.getAuthentication().getPrincipal());
-        }
-        m.setNextMessage(CoreMessages.authorizationDeniedOnEndpoint(endpointURI));
-        return m;
-    }
+    m.setNextMessage(CoreMessages.authorizationDeniedOnEndpoint(endpointURI));
+    return m;
+  }
 }

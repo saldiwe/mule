@@ -6,8 +6,12 @@
  */
 package org.mule.runtime.core.exception;
 
-import org.mule.runtime.core.RequestContext;
+import static org.mule.runtime.core.DefaultMuleEvent.getCurrentEvent;
+import static org.mule.runtime.core.DefaultMuleEvent.setCurrentEvent;
+import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.api.ExceptionPayload;
+import org.mule.runtime.core.api.MuleEvent;
+import org.mule.runtime.core.api.MuleMessage;
 import org.mule.runtime.core.api.exception.RollbackSourceCallback;
 import org.mule.runtime.core.api.exception.SystemExceptionHandler;
 import org.mule.runtime.core.connector.ConnectException;
@@ -15,58 +19,50 @@ import org.mule.runtime.core.message.DefaultExceptionPayload;
 import org.mule.runtime.core.transaction.TransactionCoordination;
 
 /**
- * Fire a notification, log exception, clean up transaction if any, and trigger reconnection strategy 
- * if this is a <code>ConnectException</code>.
+ * Fire a notification, log exception, clean up transaction if any, and trigger reconnection strategy if this is a
+ * <code>ConnectException</code>.
  */
-public abstract class AbstractSystemExceptionStrategy extends AbstractExceptionListener implements SystemExceptionHandler
-{
-    @Override
-    public void handleException(Exception ex, RollbackSourceCallback rollbackMethod)
-    {
-        fireNotification(ex);
+public abstract class AbstractSystemExceptionStrategy extends AbstractExceptionListener implements SystemExceptionHandler {
 
-        doLogException(ex);
-        
-        if (isRollback(ex))
-        {
-            logger.debug("Rolling back transaction");
-            rollback(ex, rollbackMethod);
-        }
-        else
-        {
-            logger.debug("Committing transaction");
-            commit();
-        }
+  @Override
+  public void handleException(Exception ex, RollbackSourceCallback rollbackMethod) {
+    fireNotification(ex);
 
-        ExceptionPayload exceptionPayload = new DefaultExceptionPayload(ex);
-        if (RequestContext.getEvent() != null)
-        {
-            RequestContext.setExceptionPayload(exceptionPayload);
-        }
+    doLogException(ex);
 
-        if (ex instanceof ConnectException)
-        {
-            ((ConnectException) ex).handleReconnection();
-        }
+    if (isRollback(ex)) {
+      logger.debug("Rolling back transaction");
+      rollback(ex, rollbackMethod);
+    } else {
+      logger.debug("Committing transaction");
+      commit();
     }
 
-    private void rollback(Exception ex, RollbackSourceCallback rollbackMethod)
-    {
-        if (TransactionCoordination.getInstance().getTransaction() != null)
-        {
-            rollback(ex);
-        }
-        if (rollbackMethod != null)
-        {
-            rollbackMethod.rollback();
-        }
+    ExceptionPayload exceptionPayload = new DefaultExceptionPayload(ex);
+    if (getCurrentEvent() != null) {
+      MuleEvent currentEvent = getCurrentEvent();
+      currentEvent.setMessage(MuleMessage.builder(currentEvent.getMessage()).exceptionPayload(exceptionPayload).build());
+      setCurrentEvent(currentEvent);
     }
 
-    @Override
-    public void handleException(Exception ex)
-    {
-        handleException(ex, null);
+    if (ex instanceof ConnectException) {
+      ((ConnectException) ex).handleReconnection();
     }
+  }
+
+  private void rollback(Exception ex, RollbackSourceCallback rollbackMethod) {
+    if (TransactionCoordination.getInstance().getTransaction() != null) {
+      rollback(ex);
+    }
+    if (rollbackMethod != null) {
+      rollbackMethod.rollback();
+    }
+  }
+
+  @Override
+  public void handleException(Exception ex) {
+    handleException(ex, null);
+  }
 }
 
 

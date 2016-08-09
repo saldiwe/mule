@@ -8,31 +8,29 @@ package org.mule.compatibility.core.endpoint.outbound;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.mule.runtime.core.DefaultMuleEvent.getCurrentEvent;
 
 import org.mule.compatibility.core.api.endpoint.OutboundEndpoint;
-import org.mule.compatibility.core.endpoint.outbound.OutboundEndpointPropertyMessageProcessor;
 import org.mule.compatibility.core.processor.AbstractMessageProcessorTestCase;
-import org.mule.runtime.core.RequestContext;
+import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.api.MuleEvent;
 import org.mule.runtime.core.api.config.MuleProperties;
 import org.mule.runtime.core.api.processor.MessageProcessor;
 
 import org.junit.Test;
 
-public class OutboundEndpointPropertyMessageProcessorTestCase extends AbstractMessageProcessorTestCase
-{
+public class OutboundEndpointPropertyMessageProcessorTestCase extends AbstractMessageProcessorTestCase {
 
-    @Test
-    public void testProcess() throws Exception
-    {
-        OutboundEndpoint endpoint = createTestOutboundEndpoint(null, null);
-        MessageProcessor mp = new OutboundEndpointPropertyMessageProcessor(endpoint);
+  @Test
+  public void testProcess() throws Exception {
+    OutboundEndpoint endpoint = createTestOutboundEndpoint(null, null);
+    MessageProcessor mp = new OutboundEndpointPropertyMessageProcessor(endpoint);
 
-        MuleEvent event = mp.process(createTestOutboundEvent());
+    MuleEvent event = mp.process(createTestOutboundEvent());
 
-        assertEquals(endpoint.getEndpointURI().getUri().toString(),
-                     event.getMessage().getOutboundProperty(MuleProperties.MULE_ENDPOINT_PROPERTY));
-        assertSame(event, RequestContext.getEvent());
-    }
+    assertEquals(endpoint.getEndpointURI().getUri().toString(),
+                 event.getMessage().getOutboundProperty(MuleProperties.MULE_ENDPOINT_PROPERTY));
+    assertSame(event, getCurrentEvent());
+  }
 
 }

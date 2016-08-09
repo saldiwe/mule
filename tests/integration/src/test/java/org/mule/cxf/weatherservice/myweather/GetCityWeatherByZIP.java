@@ -14,9 +14,11 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  *
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
  * &lt;complexType>
@@ -39,31 +41,27 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "GetCityWeatherByZIP", namespace = "http://ws.cdyne.com/WeatherWS/")
 public class GetCityWeatherByZIP {
 
-    @XmlElement(name = "ZIP", namespace = "http://ws.cdyne.com/WeatherWS/")
-    protected String zip;
+  @XmlElement(name = "ZIP", namespace = "http://ws.cdyne.com/WeatherWS/")
+  protected String zip;
 
-    /**
-     * Gets the value of the zip property.
-     *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
-     */
-    public String getZIP() {
-        return zip;
-    }
+  /**
+   * Gets the value of the zip property.
+   *
+   * @return possible object is {@link String }
+   *
+   */
+  public String getZIP() {
+    return zip;
+  }
 
-    /**
-     * Sets the value of the zip property.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *
-     */
-    public void setZIP(String value) {
-        this.zip = value;
-    }
+  /**
+   * Sets the value of the zip property.
+   *
+   * @param value allowed object is {@link String }
+   *
+   */
+  public void setZIP(String value) {
+    this.zip = value;
+  }
 
 }

@@ -6,7 +6,8 @@
  */
 package org.mule.functional.testmodels.services;
 
-import org.mule.runtime.core.RequestContext;
+import static org.mule.runtime.core.DefaultMuleEvent.getCurrentEvent;
+import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.util.StringMessageUtils;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,28 +15,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestReceiver
-{
-    protected static final Logger logger = LoggerFactory.getLogger(TestComponent.class);
+public class TestReceiver {
 
-    protected AtomicInteger count = new AtomicInteger(0);
+  protected static final Logger logger = LoggerFactory.getLogger(TestComponent.class);
 
-    public String receive(String message) throws Exception
-    {
-        if (logger.isDebugEnabled())
-        {
-            logger.debug(StringMessageUtils.getBoilerPlate("Received: " + message + " Number: " + inc()
-                                                           + " in thread: "
-                                                           + Thread.currentThread().getName()));
-            logger.debug("Message ID is: " + RequestContext.getEventContext().getMessage().getCorrelation().getId());
-        }
+  protected AtomicInteger count = new AtomicInteger(0);
 
-        return "Received: " + message;
+  public String receive(String message) throws Exception {
+    if (logger.isDebugEnabled()) {
+      logger.debug(StringMessageUtils.getBoilerPlate("Received: " + message + " Number: " + inc()
+          + " in thread: "
+          + Thread.currentThread().getName()));
+      logger.debug("Message ID is: " + getCurrentEvent().getMessage().getCorrelation().getId());
     }
 
-    protected int inc()
-    {
-        return count.incrementAndGet();
-    }
+    return "Received: " + message;
+  }
+
+  protected int inc() {
+    return count.incrementAndGet();
+  }
 
 }

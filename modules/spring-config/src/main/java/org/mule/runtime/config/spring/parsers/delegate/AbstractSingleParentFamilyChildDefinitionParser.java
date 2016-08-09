@@ -15,22 +15,18 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 
 public class AbstractSingleParentFamilyChildDefinitionParser
-    extends AbstractSingleParentFamilyDefinitionParser implements MuleChildDefinitionParser
-{
+    extends AbstractSingleParentFamilyDefinitionParser implements MuleChildDefinitionParser {
 
-    protected MuleDefinitionParserConfiguration addDelegate(MuleDefinitionParser delegate)
-    {
-        return addDelegateAsChild(delegate);
-    }
+  protected MuleDefinitionParserConfiguration addDelegate(MuleDefinitionParser delegate) {
+    return addDelegateAsChild(delegate);
+  }
 
-    public void forceParent(BeanDefinition parent)
-    {
-        ((MuleChildDefinitionParser) getDelegate(0)).forceParent(parent);
-    }
+  public void forceParent(BeanDefinition parent) {
+    ((MuleChildDefinitionParser) getDelegate(0)).forceParent(parent);
+  }
 
-    public PropertyConfiguration getTargetPropertyConfiguration()
-    {
-        return ((MuleChildDefinitionParser) getDelegate(0)).getTargetPropertyConfiguration();
-    }
+  public PropertyConfiguration getTargetPropertyConfiguration() {
+    return ((MuleChildDefinitionParser) getDelegate(0)).getTargetPropertyConfiguration();
+  }
 
 }

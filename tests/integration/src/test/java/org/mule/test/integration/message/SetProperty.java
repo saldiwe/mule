@@ -6,20 +6,21 @@
  */
 package org.mule.test.integration.message;
 
-import org.mule.runtime.core.RequestContext;
+import static org.mule.runtime.core.DefaultMuleEvent.getCurrentEvent;
+import static org.mule.runtime.core.DefaultMuleEvent.setCurrentEvent;
+import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.api.transformer.TransformerException;
 import org.mule.runtime.core.transformer.AbstractTransformer;
 
 import java.nio.charset.Charset;
 
-public class SetProperty extends AbstractTransformer
-{
-    @Override
-    protected Object doTransform(Object obj, Charset encoding) throws TransformerException
-    {
-        RequestContext.getEventContext().getSession().setProperty("foo", "bar");
-        return obj;
-    }
+public class SetProperty extends AbstractTransformer {
+
+  @Override
+  protected Object doTransform(Object obj, Charset encoding) throws TransformerException {
+    getCurrentEvent().getSession().setProperty("foo", "bar");
+    return obj;
+  }
 }
 
 

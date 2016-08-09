@@ -6,7 +6,8 @@
  */
 package org.mule.runtime.module.cxf.support;
 
-import org.mule.runtime.core.RequestContext;
+import static org.mule.runtime.core.DefaultMuleEvent.getCurrentEvent;
+import org.mule.runtime.core.DefaultMuleEvent;
 import org.mule.runtime.core.api.security.Authentication;
 import org.mule.runtime.core.api.security.SecurityContext;
 import org.mule.runtime.core.api.security.SecurityProviderNotFoundException;
@@ -22,54 +23,46 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *  Integrates mule spring security with CXF ws-security
+ * Integrates mule spring security with CXF ws-security
  */
-public class MuleSecurityManagerValidator implements Validator
-{
-    private static Logger logger = LoggerFactory.getLogger(MuleSecurityManagerValidator.class);
-    
-    private org.mule.runtime.core.api.security.SecurityManager securityManager;
+public class MuleSecurityManagerValidator implements Validator {
 
-    public Credential validate(Credential credential, RequestData data) throws WSSecurityException
-    {
-        if (credential == null || credential.getUsernametoken() == null) {
-            throw new WSSecurityException(WSSecurityException.FAILURE, "noCredential");
-        }
+  private static Logger logger = LoggerFactory.getLogger(MuleSecurityManagerValidator.class);
 
-        DefaultMuleAuthentication auth = new DefaultMuleAuthentication(
-            new MuleCredentials(credential.getUsernametoken().getName(), credential.getUsernametoken().getPassword().toCharArray()));
+  private org.mule.runtime.core.api.security.SecurityManager securityManager;
 
-        try
-        {
-          Authentication authentication = securityManager.authenticate(auth);
-
-          SecurityContext secContext = null;
-          try
-          {
-              secContext = securityManager.createSecurityContext(authentication);
-              secContext.setAuthentication(authentication);
-          }
-          catch (UnknownAuthenticationTypeException e)
-          {
-              logger.warn("Could not create security context after having successfully authenticated.", e);
-          }
-          RequestContext.getEvent().getSession().setSecurityContext(secContext);
-        }
-        catch (org.mule.runtime.core.api.security.SecurityException e)
-        {
-            throw new WSSecurityException(WSSecurityException.FAILED_AUTHENTICATION, null, null, e);
-        }
-        catch (SecurityProviderNotFoundException e)
-        {
-            throw new WSSecurityException(WSSecurityException.FAILED_AUTHENTICATION, null, null, e);
-        }
-
-        return credential;
+  public Credential validate(Credential credential, RequestData data) throws WSSecurityException {
+    if (credential == null || credential.getUsernametoken() == null) {
+      throw new WSSecurityException(WSSecurityException.FAILURE, "noCredential");
     }
 
-    public void setSecurityManager(org.mule.runtime.core.api.security.SecurityManager securityManager)
-    {
-        this.securityManager = securityManager;
+    DefaultMuleAuthentication auth = new DefaultMuleAuthentication(
+                                                                   new MuleCredentials(credential.getUsernametoken().getName(),
+                                                                                       credential.getUsernametoken().getPassword()
+                                                                                           .toCharArray()));
+
+    try {
+      Authentication authentication = securityManager.authenticate(auth);
+
+      SecurityContext secContext = null;
+      try {
+        secContext = securityManager.createSecurityContext(authentication);
+        secContext.setAuthentication(authentication);
+      } catch (UnknownAuthenticationTypeException e) {
+        logger.warn("Could not create security context after having successfully authenticated.", e);
+      }
+      getCurrentEvent().getSession().setSecurityContext(secContext);
+    } catch (org.mule.runtime.core.api.security.SecurityException e) {
+      throw new WSSecurityException(WSSecurityException.FAILED_AUTHENTICATION, null, null, e);
+    } catch (SecurityProviderNotFoundException e) {
+      throw new WSSecurityException(WSSecurityException.FAILED_AUTHENTICATION, null, null, e);
     }
+
+    return credential;
+  }
+
+  public void setSecurityManager(org.mule.runtime.core.api.security.SecurityManager securityManager) {
+    this.securityManager = securityManager;
+  }
 
 }
