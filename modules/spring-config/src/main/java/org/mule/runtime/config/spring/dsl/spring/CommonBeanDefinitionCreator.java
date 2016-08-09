@@ -6,8 +6,10 @@
  */
 package org.mule.runtime.config.spring.dsl.spring;
 
+import static org.apache.commons.beanutils.BeanUtils.copyProperty;
 import static org.mule.runtime.api.meta.AnnotatedObject.PROPERTY_NAME;
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.ANNOTATIONS_ELEMENT_IDENTIFIER;
+import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.CUSTOM_TRANSFORMER_IDENTIFIER;
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.DEFAULT_ES_ELEMENT_IDENTIFIER;
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.FILTER_ELEMENT_SUFFIX;
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.MESSAGE_FILTER_ELEMENT_IDENTIFIER;
@@ -15,11 +17,13 @@ import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.MULE_IDE
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.MULE_PROPERTY_IDENTIFIER;
 import static org.mule.runtime.config.spring.dsl.model.ApplicationModel.SPRING_PROPERTY_IDENTIFIER;
 import static org.mule.runtime.config.spring.dsl.processor.xml.XmlCustomAttributeHandler.from;
+import static org.mule.runtime.config.spring.dsl.spring.BeanDefinitionFactory.SPRING_PROTOTYPE_OBJECT;
 import static org.mule.runtime.config.spring.dsl.spring.PropertyComponentUtils.getPropertyValueFromPropertyComponent;
 import static org.mule.runtime.config.spring.parsers.AbstractMuleBeanDefinitionParser.processMetadataAnnotationsHelper;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 import org.mule.runtime.api.meta.AnnotatedObject;
 import org.mule.runtime.config.spring.dsl.api.ComponentBuildingDefinition;
+import org.mule.runtime.config.spring.dsl.model.ApplicationModel;
 import org.mule.runtime.config.spring.dsl.model.ComponentIdentifier;
 import org.mule.runtime.config.spring.dsl.model.ComponentModel;
 import org.mule.runtime.config.spring.dsl.processor.ObjectTypeVisitor;
@@ -32,15 +36,17 @@ import org.mule.runtime.core.util.ClassUtils;
 
 import com.google.common.collect.ImmutableSet;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
 
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -63,7 +69,6 @@ import org.w3c.dom.Node;
 public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
 {
 
-    private static final String SPRING_PROTOTYPE_OBJECT = "prototype";
     private static final String TRANSPORT_BEAN_DEFINITION_POST_PROCESSOR_CLASS = "org.mule.compatibility.config.spring.parsers.specific.TransportElementBeanDefinitionPostProcessor";
     private static final ImmutableSet<ComponentIdentifier> MESSAGE_FILTER_WRAPPERS = new ImmutableSet.Builder<ComponentIdentifier>()
             .add(MESSAGE_FILTER_ELEMENT_IDENTIFIER)
@@ -174,9 +179,13 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
         BeanDefinitionBuilder beanDefinitionBuilder;
         Class<?> objectFactoryType = componentBuildingDefinition.getObjectFactoryType();
         Enhancer enhancer = new Enhancer();
-        enhancer.setInterfaces(new Class[] {FactoryBean.class});
+        //Use SmartFactoryBean since it's the only way to force spring to pre-instantiate FactoryBean for singletons
+        enhancer.setInterfaces(new Class[] {SmartFactoryBean.class});
         enhancer.setSuperclass(objectFactoryType);
         enhancer.setCallbackType(MethodInterceptor.class);
+        //If cache is used then the same class instance with the same callback instance will be repeated for the
+        //same ObjectFactory which prevents reusing the same ObjectFactory class for different components
+        enhancer.setUseCache(false);
         Class factoryBeanClass = enhancer.createClass();
         Enhancer.registerStaticCallbacks(factoryBeanClass, new Callback[] {
                 new MethodInterceptor()
@@ -192,12 +201,45 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
                         {
                             return objectTypeVisitor.getType();
                         }
+                        if (method.getName().equals("getObject"))
+                        {
+                            Object createdInstance = proxy.invokeSuper(obj, args);
+                            injectSpringProperties(componentModel, createdInstance);
+                            return createdInstance;
+                        }
+                        if (method.getName().equals("isPrototype"))
+                        {
+                            return componentBuildingDefinition.isPrototype();
+                        }
+                        if (method.getName().equals("isEagerInit"))
+                        {
+                            return !componentModel.getBeanDefinition().isLazyInit();
+                        }
                         return proxy.invokeSuper(obj, args);
                     }
                 }
         });
         beanDefinitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(factoryBeanClass);
         return beanDefinitionBuilder;
+    }
+
+    private void injectSpringProperties(ComponentModel componentModel, Object createdInstance) throws InvocationTargetException, IllegalAccessException
+    {
+        ComponentIdentifier identifier = componentModel.getIdentifier();
+        if (identifier.equals(CUSTOM_TRANSFORMER_IDENTIFIER))
+        {
+            Map<String, Object> propertyValues = componentModel.getInnerComponents()
+                    .stream()
+                    .filter(innerComponent -> {
+                        ComponentIdentifier childIdentifier = innerComponent.getIdentifier();
+                        return childIdentifier.equals(SPRING_PROPERTY_IDENTIFIER) || childIdentifier.equals(MULE_PROPERTY_IDENTIFIER);
+                    })
+                    .collect(Collectors.toMap(springComponent -> getPropertyValueFromPropertyComponent(springComponent).getName(), springComponent -> getPropertyValueFromPropertyComponent(springComponent).getValue()));
+            for (String propertyName : propertyValues.keySet())
+            {
+                copyProperty(createdInstance, propertyName, propertyValues.get(propertyName));
+            }
+        }
     }
 
     private void processComponentDefinitionModel(final ComponentModel parentComponentModel, final ComponentModel componentModel, ComponentBuildingDefinition componentBuildingDefinition, final BeanDefinitionBuilder beanDefinitionBuilder)
@@ -221,6 +263,10 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
     //TODO MULE-9638 Remove once we don't mix spring beans with mule beans.
     private void processSpringOrMuleProperties(ComponentModel componentModel, BeanDefinitionBuilder beanDefinitionBuilder)
     {
+        if (componentModel.getIdentifier().equals(CUSTOM_TRANSFORMER_IDENTIFIER))
+        {
+            return;
+        }
         componentModel.getInnerComponents()
                 .stream()
                 .filter(innerComponent -> {

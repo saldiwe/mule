@@ -111,6 +111,35 @@ public class SpringRegistryLifecycleManager extends RegistryLifecycleManager
                     Service.class
             });
         }
+
+        @Override
+        public void applyLifecycle(Object o) throws LifecycleException
+        {
+            if (o instanceof Transformer)
+            {
+                String name = ((Transformer) o).getName();
+                if (isInnerBean(name))
+                {
+                    super.applyLifecycle(o);
+                }
+            }
+            else
+            {
+                super.applyLifecycle(o);
+            }
+        }
+    }
+
+    /**
+     * Detects if a bean is an inner bean to prevent applying lifecycle to it since
+     * lifecycle is already applied by the owner, i.e.: a flow
+     *
+     * @param name bean name.
+     * @return true if contains inner bean as prefix of the bean name, false otherwise.
+     */
+    private boolean isInnerBean(String name)
+    {
+        return name != null && !name.startsWith(MuleArtifactContext.INNER_BEAN_PREFIX);
     }
 
     /**
@@ -129,7 +158,6 @@ public class SpringRegistryLifecycleManager extends RegistryLifecycleManager
                     MessageSource.class,
                     InterceptingMessageProcessor.class,
                     OutboundRouter.class,
-                    Transformer.class,
                     MuleContext.class,
                     ServerNotificationManager.class,
                     Service.class
@@ -142,6 +170,14 @@ public class SpringRegistryLifecycleManager extends RegistryLifecycleManager
             if (o instanceof SpringRegistry)
             {
                 ((SpringRegistry) o).doDispose();
+            }
+            else if (o instanceof Transformer)
+            {
+                String name = ((Transformer) o).getName();
+                if (!name.startsWith(MuleArtifactContext.INNER_BEAN_PREFIX))
+                {
+                    super.applyLifecycle(o);
+                }
             }
             else
             {
