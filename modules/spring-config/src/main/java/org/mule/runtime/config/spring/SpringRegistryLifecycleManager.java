@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.config.spring;
 
+import static org.mule.runtime.config.spring.MuleArtifactContext.INNER_BEAN_PREFIX;
 import org.mule.runtime.api.service.Service;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.agent.Agent;
@@ -118,7 +119,7 @@ public class SpringRegistryLifecycleManager extends RegistryLifecycleManager
             if (o instanceof Transformer)
             {
                 String name = ((Transformer) o).getName();
-                if (isInnerBean(name))
+                if (isNamedBean(name))
                 {
                     super.applyLifecycle(o);
                 }
@@ -137,9 +138,9 @@ public class SpringRegistryLifecycleManager extends RegistryLifecycleManager
      * @param name bean name.
      * @return true if contains inner bean as prefix of the bean name, false otherwise.
      */
-    private boolean isInnerBean(String name)
+    private boolean isNamedBean(String name)
     {
-        return name != null && !name.startsWith(MuleArtifactContext.INNER_BEAN_PREFIX);
+        return name != null && !name.startsWith(INNER_BEAN_PREFIX);
     }
 
     /**
@@ -174,7 +175,7 @@ public class SpringRegistryLifecycleManager extends RegistryLifecycleManager
             else if (o instanceof Transformer)
             {
                 String name = ((Transformer) o).getName();
-                if (!name.startsWith(MuleArtifactContext.INNER_BEAN_PREFIX))
+                if (isNamedBean(name))
                 {
                     super.applyLifecycle(o);
                 }

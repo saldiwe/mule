@@ -7,7 +7,6 @@
 package org.mule.runtime.config.spring.dsl.processor;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.mule.runtime.core.util.ClassUtils.instanciateClass;
 
 import org.mule.runtime.api.metadata.DataType;
 import org.mule.runtime.api.metadata.DataTypeParamsBuilder;

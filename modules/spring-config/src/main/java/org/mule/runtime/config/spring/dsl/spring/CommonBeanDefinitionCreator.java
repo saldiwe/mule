@@ -21,6 +21,7 @@ import static org.mule.runtime.config.spring.dsl.spring.BeanDefinitionFactory.SP
 import static org.mule.runtime.config.spring.dsl.spring.PropertyComponentUtils.getPropertyValueFromPropertyComponent;
 import static org.mule.runtime.config.spring.parsers.AbstractMuleBeanDefinitionParser.processMetadataAnnotationsHelper;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
+import static org.springframework.beans.factory.support.BeanDefinitionBuilder.rootBeanDefinition;
 import org.mule.runtime.api.meta.AnnotatedObject;
 import org.mule.runtime.config.spring.dsl.api.ComponentBuildingDefinition;
 import org.mule.runtime.config.spring.dsl.model.ApplicationModel;
@@ -185,7 +186,7 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
         enhancer.setCallbackType(MethodInterceptor.class);
         //If cache is used then the same class instance with the same callback instance will be repeated for the
         //same ObjectFactory which prevents reusing the same ObjectFactory class for different components
-        enhancer.setUseCache(false);
+        //enhancer.setUseCache(false);
         Class factoryBeanClass = enhancer.createClass();
         Enhancer.registerStaticCallbacks(factoryBeanClass, new Callback[] {
                 new MethodInterceptor()
@@ -219,7 +220,7 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
                     }
                 }
         });
-        beanDefinitionBuilder = BeanDefinitionBuilder.rootBeanDefinition(factoryBeanClass);
+        beanDefinitionBuilder = rootBeanDefinition(factoryBeanClass);
         return beanDefinitionBuilder;
     }
 
@@ -263,6 +264,7 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
     //TODO MULE-9638 Remove once we don't mix spring beans with mule beans.
     private void processSpringOrMuleProperties(ComponentModel componentModel, BeanDefinitionBuilder beanDefinitionBuilder)
     {
+        //for now we skip custom-transformer since requires injection by the object factory.
         if (componentModel.getIdentifier().equals(CUSTOM_TRANSFORMER_IDENTIFIER))
         {
             return;
@@ -334,7 +336,7 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
         {
             boolean failOnUnaccepted = false;
             Object processorWhenUnaccepted = null;
-            newBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(MessageFilter.class)
+            newBeanDefinition = rootBeanDefinition(MessageFilter.class)
                     .addConstructorArgValue(originalBeanDefinition)
                     .addConstructorArgValue(failOnUnaccepted)
                     .addConstructorArgValue(processorWhenUnaccepted)
@@ -343,7 +345,7 @@ public class CommonBeanDefinitionCreator extends BeanDefinitionCreator
         }
         else if (areMatchingTypes(SecurityFilter.class, beanClass))
         {
-            newBeanDefinition = BeanDefinitionBuilder.rootBeanDefinition(SecurityFilterMessageProcessor.class)
+            newBeanDefinition = rootBeanDefinition(SecurityFilterMessageProcessor.class)
                     .addPropertyValue("filter", originalBeanDefinition)
                     .getBeanDefinition();
             return (AbstractBeanDefinition) newBeanDefinition;

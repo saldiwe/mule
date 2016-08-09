@@ -7,6 +7,7 @@
 package org.mule.runtime.config.spring.dsl.api;
 
 import static java.lang.Thread.*;
+import static org.springframework.util.ClassUtils.forName;
 
 import org.mule.runtime.core.api.MuleRuntimeException;
 
@@ -29,7 +30,7 @@ public class CommonTypeConverters
         return className -> {
             try
             {
-                return ClassUtils.forName(className, currentThread().getContextClassLoader());
+                return forName(className, currentThread().getContextClassLoader());
             }
             catch (ClassNotFoundException e)
             {

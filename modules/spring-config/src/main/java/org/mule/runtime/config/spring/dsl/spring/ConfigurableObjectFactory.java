@@ -18,7 +18,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-//TODO remove from API
+/**
+ * {@inheritDoc}
+ *
+ * @since 4.0
+ */
 public class ConfigurableObjectFactory<T> extends AbstractAnnotatedObject implements ObjectFactory<T>
 {
     @Inject
@@ -48,16 +52,30 @@ public class ConfigurableObjectFactory<T> extends AbstractAnnotatedObject implem
         return (T) instance;
     }
 
+    /**
+     * injection method for the {@link ObjectFactoryCommonConfigurator} of the object instance.
+     *
+     * @param commonConfiguratorType the common configuration type.
+     */
     public void setCommonConfiguratorType(Class<ObjectFactoryCommonConfigurator> commonConfiguratorType)
     {
         this.commonConfiguratorType = commonConfiguratorType;
     }
 
+    /**
+     * Sets a {@link ConfigurableInstanceFactory} to create a do custom configuration for the
+     * object to be used at runtime.
+     *
+     * @param factory the factory to create the runtime object instance.
+     */
     public void setFactory(ConfigurableInstanceFactory factory)
     {
         this.factory = factory;
     }
 
+    /**
+     * @param parameters set of component parameters map to this {@link ObjectFactory}
+     */
     public void setParameters(Map<String, Object> parameters)
     {
         this.parameters = parameters;
