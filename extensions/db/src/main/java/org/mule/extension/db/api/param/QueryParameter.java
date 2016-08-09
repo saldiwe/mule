@@ -17,7 +17,7 @@ public abstract class QueryParameter
      * The name of the input parameter.
      */
     @Parameter
-    private String key;
+    private String name;
 
     /**
      * Parameter type name.
@@ -26,9 +26,9 @@ public abstract class QueryParameter
     @Optional
     private JdbcType type;
 
-    public String getKey()
+    public String getName()
     {
-        return key;
+        return name;
     }
 
     public JdbcType getType()

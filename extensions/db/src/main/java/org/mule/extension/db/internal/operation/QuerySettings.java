@@ -35,7 +35,21 @@ public class QuerySettings
 
     @Parameter
     @Optional
-    @XmlHints(allowReferences = false)
+    @XmlHints(allowInlineDefinition = false)
     private QueryDefinition queryTemplate;
 
+    public int getQueryTimeout()
+    {
+        return queryTimeout;
+    }
+
+    public TimeUnit getQueryTimeoutUnit()
+    {
+        return queryTimeoutUnit;
+    }
+
+    public QueryDefinition getQueryTemplate()
+    {
+        return queryTemplate;
+    }
 }

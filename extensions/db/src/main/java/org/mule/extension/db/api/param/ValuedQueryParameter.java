@@ -6,18 +6,22 @@
  */
 package org.mule.extension.db.api.param;
 
-import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Parameter;
+import org.mule.runtime.extension.api.annotation.dsl.xml.XmlHints;
+import org.mule.runtime.extension.api.annotation.param.Optional;
 
-@Alias("template-query")
-public class TemplateQueryDefinition implements QueryDefinition
+abstract class ValuedQueryParameter extends QueryParameter
 {
+    /**
+     * The parameter's value
+     */
     @Parameter
-    private String ref;
+    @Optional
+    @XmlHints(allowReferences = false)
+    private Object value;
 
-    @Override
-    public void accept(QueryDefinitionVisitor visitor)
+    public Object getValue()
     {
-        visitor.onTemplateQuery(this);
+        return value;
     }
 }

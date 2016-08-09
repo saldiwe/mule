@@ -9,7 +9,7 @@ package org.mule.extension.db.api.param;
 import org.mule.runtime.extension.api.annotation.Alias;
 
 @Alias("inout-param")
-public class InOutQueryParameter extends QueryParameter
+public class InOutQueryParameter extends ValuedQueryParameter
 {
 
 }

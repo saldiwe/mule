@@ -17,7 +17,7 @@ import java.util.List;
 public class BulkQuery
 {
 
-    private final LinkedList<QueryTemplate> queryTemplates = new LinkedList<QueryTemplate>();
+    private final LinkedList<QueryTemplate> queryTemplates = new LinkedList<>();
 
     public List<QueryTemplate> getQueryTemplates()
     {

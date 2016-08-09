@@ -31,7 +31,7 @@ public abstract class AbstractSingleQueryExecutor extends AbstractExecutor imple
     @Override
     public Object execute(DbConnection connection, Query query) throws SQLException
     {
-        Statement statement = statementFactory.create(connection, query.getQueryTemplate());
+        Statement statement = statementFactory.create(connection, query.getQueryDefinition());
 
         prepareQuery(statement, query);
 

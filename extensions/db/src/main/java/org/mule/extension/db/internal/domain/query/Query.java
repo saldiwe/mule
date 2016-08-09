@@ -7,6 +7,7 @@
 
 package org.mule.extension.db.internal.domain.query;
 
+import org.mule.extension.db.api.param.QueryDefinition;
 import org.mule.extension.db.internal.domain.param.InputQueryParam;
 
 import java.util.LinkedList;
@@ -18,8 +19,8 @@ import java.util.List;
 public class Query
 {
 
-    private final QueryTemplate queryTemplate;
-    private final List<QueryParamValue> paramValues;
+    private final QueryDefinition queryDefinition;
+    private final StatementType statementType;
 
     /**
      * Creates a query from a template and a set of parameter values
@@ -27,42 +28,19 @@ public class Query
      * @param queryTemplate template describing the query
      * @param paramValues parameter values for the query
      */
-    public Query(QueryTemplate queryTemplate, List<QueryParamValue> paramValues)
+    public Query(QueryDefinition queryDefinition, StatementType statementType)
     {
-        this.paramValues = paramValues;
-        this.queryTemplate = queryTemplate;
+        this.queryDefinition = queryDefinition;
+        this.statementType = statementType;
     }
 
-    /**
-     * Creates a query from a template
-     *
-     * @param queryTemplate template describing the query and parameter values
-     */
-    public Query(QueryTemplate queryTemplate)
+    public QueryDefinition getQueryDefinition()
     {
-        this.queryTemplate = queryTemplate;
-
-        paramValues = new LinkedList<>();
-        for (InputQueryParam inputParam : queryTemplate.getInputParams())
-        {
-            QueryParamValue paramValue = new QueryParamValue(inputParam.getName(), inputParam.getValue());
-
-            paramValues.add(paramValue);
-        }
+        return queryDefinition;
     }
 
-    public QueryTemplate getQueryTemplate()
+    public StatementType getStatementType()
     {
-        return queryTemplate;
-    }
-
-    public List<QueryParamValue> getParamValues()
-    {
-        return paramValues;
-    }
-
-    public boolean isDynamic()
-    {
-        return queryTemplate.isDynamic();
+        return statementType;
     }
 }

@@ -29,7 +29,7 @@ public class QueryTemplate
     private final List<InputQueryParam> inputParams;
     private final List<OutputQueryParam> outputParams;
     private final List<QueryParam> params;
-    private final QueryType type;
+    private final StatementType type;
     private final boolean dynamic;
     private final boolean namedParams;
 
@@ -40,7 +40,7 @@ public class QueryTemplate
      * @param type    the type of SQL query.
      * @param params  parameters definitions for the query. Non null
      */
-    public QueryTemplate(String sqlText, QueryType type, List<QueryParam> params)
+    public QueryTemplate(String sqlText, StatementType type, List<QueryParam> params)
     {
         this(sqlText, type, params, false);
     }
@@ -53,7 +53,7 @@ public class QueryTemplate
      * @param params  parameters definitions for the query. Non null
      * @param dynamic indicates whether or not the query is dynamic
      */
-    public QueryTemplate(String sqlText, QueryType type, List<QueryParam> params, boolean dynamic)
+    public QueryTemplate(String sqlText, StatementType type, List<QueryParam> params, boolean dynamic)
     {
         Validate.notEmpty(sqlText);
         this.sqlText = sqlText;
@@ -160,7 +160,7 @@ public class QueryTemplate
     /**
      * Returns the type of SQL query.
      */
-    public QueryType getType()
+    public StatementType getType()
     {
         return type;
     }
