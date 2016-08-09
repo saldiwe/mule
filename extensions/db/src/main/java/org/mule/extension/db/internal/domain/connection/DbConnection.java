@@ -7,21 +7,19 @@
 
 package org.mule.extension.db.internal.domain.connection;
 
-import org.mule.extension.db.internal.domain.query.QueryTemplate;
-import org.mule.extension.db.internal.domain.transaction.TransactionalAction;
 import org.mule.extension.db.internal.domain.type.DbType;
 import org.mule.extension.db.internal.result.resultset.ResultSetHandler;
 import org.mule.extension.db.internal.result.statement.StatementResultIterator;
 import org.mule.extension.db.internal.result.statement.StatementResultIteratorFactory;
+import org.mule.runtime.extension.api.connectivity.TransactionalConnection;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Wraps a {@link Connection} adding connector's specific functionality
  */
-public interface DbConnection extends Connection
+public interface DbConnection extends Connection, TransactionalConnection
 {
 
     /**
@@ -33,26 +31,5 @@ public interface DbConnection extends Connection
      */
     StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler);
 
-    /**
-     * Determines actual parameter types for the parameters defined in a
-     * query template.
-     *
-     * @param queryTemplate query template that needing parameter resolution
-     * @return a not null map containing the parameter type for each parameter index
-     * @throws SQLException when there are error processing the query
-     */
-    Map<Integer, DbType> getParamTypes(QueryTemplate queryTemplate) throws SQLException;
-
-    /**
-     * Indicates which {@link TransactionalAction} used to create this connection
-
-     * @return connection's transactional action
-     */
-    TransactionalAction getTransactionalAction();
-
-    /**
-     * Indicates that the connection is not used anymore
-     */
-    void release();
-
+    List<DbType> getVendorDataTypes();
 }

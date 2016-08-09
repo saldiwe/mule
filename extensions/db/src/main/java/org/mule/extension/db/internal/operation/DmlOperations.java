@@ -7,13 +7,18 @@
 package org.mule.extension.db.internal.operation;
 
 import org.mule.extension.db.api.param.QueryDefinition;
+import org.mule.extension.db.internal.domain.executor.SelectExecutor;
+import org.mule.extension.db.internal.domain.statement.QueryStatementFactory;
 import org.mule.extension.db.internal.metadata.DeletemeMetadataResolver;
+import org.mule.extension.db.internal.result.resultset.IteratorResultSetHandler;
+import org.mule.extension.db.internal.result.resultset.ListResultSetHandler;
+import org.mule.extension.db.internal.result.resultset.ResultSetHandler;
+import org.mule.extension.db.internal.result.row.InsensitiveMapRowHandler;
 import org.mule.runtime.extension.api.annotation.ParameterGroup;
 import org.mule.runtime.extension.api.annotation.metadata.MetadataScope;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 import org.mule.runtime.extension.api.annotation.param.display.Text;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +36,19 @@ public class DmlOperations
                                             @Optional Integer maxRows,
                                             @ParameterGroup QuerySettings settings)
     {
-        return new ArrayList<>();
+        QueryStatementFactory defaultStatementFactory = new QueryStatementFactory();
+        if (maxRows != null)
+        {
+            defaultStatementFactory.setMaxRows(maxRows);
+        }
+
+        defaultStatementFactory.setFetchSize(fetchSize);
+        defaultStatementFactory.setQueryTimeout(new Long(settings.getQueryTimeoutUnit().toSeconds(settings.getQueryTimeout())).intValue());
+
+        InsensitiveMapRowHandler recordHandler = new InsensitiveMapRowHandler();
+        ResultSetHandler resultSetHandler = streaming ? new IteratorResultSetHandler(recordHandler, resultSetCloser) : new ListResultSetHandler(recordHandler);
+
+        return new SelectExecutor(defaultStatementFactory, resultSetHandler).execute(connection, null);
     }
 
     /**
@@ -54,8 +71,8 @@ public class DmlOperations
      * Updates data in a database.
      *
      * @param queryDefinition
-     * @param bulkMode  Indicates whether or not a bulk update is requested. When true, payload is required to be a
-     *                  collection and a bulk update executes for each item in the collection.
+     * @param bulkMode        Indicates whether or not a bulk update is requested. When true, payload is required to be a
+     *                        collection and a bulk update executes for each item in the collection.
      */
     public int update(QueryDefinition queryDefinition, @Optional(defaultValue = "false") boolean bulkMode, @ParameterGroup QuerySettings settings)
     {
@@ -66,8 +83,8 @@ public class DmlOperations
      * Deletes data in a database.
      *
      * @param queryDefinition
-     * @param bulkMode  Indicates whether or not a bulk update is requested. When true, payload is required to be a
-     *                  collection and a bulk update executes for each item in the collection.
+     * @param bulkMode        Indicates whether or not a bulk update is requested. When true, payload is required to be a
+     *                        collection and a bulk update executes for each item in the collection.
      */
     public int delete(QueryDefinition queryDefinition, @Optional(defaultValue = "false") boolean bulkMode, @ParameterGroup QuerySettings settings)
     {
@@ -101,8 +118,8 @@ public class DmlOperations
      * Updates data in a database.
      *
      * @param dynamicQuery
-     * @param file     The location of a file to load. The file can point to a resource on the classpath or on a disk.
-     *                 This parameter is mutually exclusive with {@code sql}
+     * @param file         The location of a file to load. The file can point to a resource on the classpath or on a disk.
+     *                     This parameter is mutually exclusive with {@code sql}
      * @param settings
      * @return
      */

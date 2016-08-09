@@ -110,7 +110,6 @@ public class ResultSetIterator implements Iterator<Map<String, Object>>, Closeab
         catch (SQLException e)
         {
             LOGGER.warn("Unable to obtain next row", e);
-
             throw new NoSuchElementException();
         }
     }

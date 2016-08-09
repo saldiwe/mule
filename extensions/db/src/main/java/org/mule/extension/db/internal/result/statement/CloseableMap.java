@@ -18,7 +18,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Defines a {@link Map} that will close any contained {@link Closeable} value
  */
@@ -45,7 +44,6 @@ public class CloseableMap<K, V> implements Map<K,V>, Closeable
                 }
             }
         });
-
     }
 
     @Override

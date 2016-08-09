@@ -127,7 +127,6 @@ public class StatementResultIterator implements Iterator<StatementResult>
         catch (SQLException e)
         {
             LOGGER.warn("Unable to determine if there are more statement results", e);
-
             return false;
         }
     }
@@ -204,7 +203,7 @@ public class StatementResultIterator implements Iterator<StatementResult>
         {
             if (hasProcessedResultSet && resultSetHandler.requiresMultipleOpenedResults())
             {
-               throw new IllegalStateException("Database does not supports streaming of resultSets on stored procedures");
+                throw new IllegalStateException("Database does not supports streaming of resultSets on stored procedures");
             }
             else
             {
@@ -219,7 +218,7 @@ public class StatementResultIterator implements Iterator<StatementResult>
 
         try
         {
-            Object paramValue= outputSqlParam.getType().getParameterValue((CallableStatement) statement, outputSqlParam.getIndex());
+            Object paramValue = outputSqlParam.getType().getParameterValue((CallableStatement) statement, outputSqlParam.getIndex());
 
             return doProcessOutputParam(outputSqlParam, paramValue);
         }

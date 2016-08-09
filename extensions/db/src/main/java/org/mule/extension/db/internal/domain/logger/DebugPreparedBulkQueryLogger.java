@@ -11,7 +11,6 @@ import org.mule.extension.db.internal.domain.query.QueryTemplate;
 
 import org.slf4j.Logger;
 
-
 /**
  * Logs a prepared bulk query in debug level
  */

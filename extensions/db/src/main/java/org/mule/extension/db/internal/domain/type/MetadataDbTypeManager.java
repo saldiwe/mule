@@ -22,7 +22,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Manages database types that are discovered using database metadata
  */
@@ -32,7 +31,6 @@ public class MetadataDbTypeManager implements DbTypeManager
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataDbTypeManager.class);
     static final String METADATA_TYPE_ID_COLUMN = "DATA_TYPE";
     static final String METADATA_TYPE_NAME_COLUMN = "TYPE_NAME";
-
 
     private final Map<String, DbType> typesById = new HashMap<>();
     private final Object lock = new Object();

@@ -8,9 +8,9 @@
 package org.mule.extension.db.internal.domain.database;
 
 import org.mule.extension.db.api.config.DbPoolingProfile;
+import org.mule.extension.db.internal.domain.connection.DataSourceConfig;
 import org.mule.extension.db.internal.domain.xa.CompositeDataSourceDecorator;
 import org.mule.runtime.core.api.MuleContext;
-import org.mule.runtime.core.api.context.MuleContextAware;
 import org.mule.runtime.core.api.lifecycle.Disposable;
 import org.mule.runtime.core.util.concurrent.ConcurrentHashSet;
 
@@ -31,25 +31,20 @@ import org.slf4j.LoggerFactory;
 /**
  * Creates {@link DataSource} instances
  */
-public class DataSourceFactory implements MuleContextAware, Disposable
+public class DataSourceFactory implements Disposable
 {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFactory.class);
 
     private final String name;
+    private final MuleContext muleContext;
     private final Set<DataSource> pooledDataSources = new ConcurrentHashSet();
     private final Set<Disposable> disposableDataSources = new ConcurrentHashSet();
-    private MuleContext muleContext;
 
-    public DataSourceFactory(String name)
+    public DataSourceFactory(String name, MuleContext muleContext)
     {
         this.name = name;
-    }
-
-    @Override
-    public void setMuleContext(MuleContext context)
-    {
-        this.muleContext = context;
+        this.muleContext = muleContext;
     }
 
     /**
@@ -74,7 +69,7 @@ public class DataSourceFactory implements MuleContextAware, Disposable
 
         if (dataSourceConfig.isUseXaTransactions())
         {
-            dataSource = decorateDataSource(dataSource, dataSourceConfig.getPoolingProfile(), getMuleContext());
+            dataSource = decorateDataSource(dataSource, dataSourceConfig.getPoolingProfile(), muleContext);
         }
 
         if (!(dataSourceConfig.getPoolingProfile() == null || dataSourceConfig.isUseXaTransactions()))
@@ -97,18 +92,18 @@ public class DataSourceFactory implements MuleContextAware, Disposable
         return dataSourceDecorator.decorate(dataSource, name, poolingProfile, muleContext);
     }
 
-    protected DataSource createSingleDataSource(DataSourceConfig resolvedDataSourceConfig) throws SQLException
+    protected DataSource createSingleDataSource(DataSourceConfig dataSourceConfig) throws SQLException
     {
-        StandardDataSource dataSource = resolvedDataSourceConfig.isUseXaTransactions() ? new StandardXADataSource() : new StandardDataSource();
-        dataSource.setDriverName(resolvedDataSourceConfig.getDriverClassName());
-        if (resolvedDataSourceConfig.getConnectionTimeout() >= 0)
+        StandardDataSource dataSource = dataSourceConfig.isUseXaTransactions() ? new StandardXADataSource() : new StandardDataSource();
+        dataSource.setDriverName(dataSourceConfig.getDriverClassName());
+        if (dataSourceConfig.getConnectionTimeout() >= 0)
         {
-            dataSource.setLoginTimeout(resolvedDataSourceConfig.getConnectionTimeout());
+            dataSource.setLoginTimeout(new Long(dataSourceConfig.getConnectionTimeoutUnit().toSeconds(dataSourceConfig.getConnectionTimeout())).intValue());
         }
-        dataSource.setPassword(resolvedDataSourceConfig.getPassword());
-        dataSource.setTransactionIsolation(resolvedDataSourceConfig.getTransactionIsolation());
-        dataSource.setUrl(resolvedDataSourceConfig.getUrl());
-        dataSource.setUser(resolvedDataSourceConfig.getUser());
+        dataSource.setPassword(dataSourceConfig.getPassword());
+        dataSource.setTransactionIsolation(dataSourceConfig.getTransactionIsolation().getCode());
+        dataSource.setUrl(dataSourceConfig.getUrl());
+        dataSource.setUser(dataSourceConfig.getUser());
 
         return dataSource;
     }
@@ -150,7 +145,7 @@ public class DataSourceFactory implements MuleContextAware, Disposable
             }
             catch (SQLException e)
             {
-                logger.warn("Unable to properly release pooled data source", e);
+                LOGGER.warn("Unable to properly release pooled data source", e);
             }
         }
 
@@ -162,14 +157,8 @@ public class DataSourceFactory implements MuleContextAware, Disposable
             }
             catch (Exception e)
             {
-                logger.warn("Unable to properly dispose data source", e);
+                LOGGER.warn("Unable to properly dispose data source", e);
             }
         }
-
-    }
-
-    public MuleContext getMuleContext()
-    {
-        return muleContext;
     }
 }

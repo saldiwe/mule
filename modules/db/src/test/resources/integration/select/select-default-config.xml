@@ -10,7 +10,9 @@
 
     <flow name="defaultQueryOneWay" processingStrategy="asynchronous">
         <db:select config-ref="dbConfig">
-            <db:parameterized-query>select * from PLANET order by ID</db:parameterized-query>
+            <db:query>
+                <db:parameterized-query>select * from PLANET order by ID</db:parameterized-query>
+            </db:query>
         </db:select>
 
         <test:queue name="testOut"/>
