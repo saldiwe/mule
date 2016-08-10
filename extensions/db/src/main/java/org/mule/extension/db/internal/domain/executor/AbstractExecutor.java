@@ -27,48 +27,41 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for query executors
  */
-public abstract class AbstractExecutor
-{
+public abstract class AbstractExecutor {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractExecutor.class);
+  protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractExecutor.class);
 
-    protected final StatementFactory statementFactory;
+  protected final StatementFactory statementFactory;
 
-    public AbstractExecutor(StatementFactory statementFactory)
-    {
-        this.statementFactory = statementFactory;
+  public AbstractExecutor(StatementFactory statementFactory) {
+    this.statementFactory = statementFactory;
+  }
+
+  protected void doProcessParameters(PreparedStatement statement, Query query, SingleQueryLogger queryLogger)
+      throws SQLException {
+    final List<QueryParameter> parameters = query.getDefinition().getParameters();
+    final Map<Integer, DbType> paramTypes = query.getParamTypes();
+
+    for (int paramIndex = 1, inputParamsSize = parameters.size(); paramIndex <= inputParamsSize; paramIndex++) {
+      QueryParameter queryParam = parameters.get(paramIndex - 1);
+      if (queryParam instanceof InputParameter) {
+        InputParameter inputParam = (InputParameter) queryParam;
+        queryLogger.addParameter(inputParam, paramIndex);
+
+        processInputParam(statement, paramIndex, inputParam.getValue(), paramTypes.get(paramIndex));
+      }
+
+      if (queryParam instanceof OutputParameter) {
+        processOutputParam((CallableStatement) statement, paramIndex, paramTypes.get(paramIndex));
+      }
     }
+  }
 
-    protected void doProcessParameters(PreparedStatement statement, Query query, SingleQueryLogger queryLogger) throws SQLException
-    {
-        final List<QueryParameter> parameters = query.getDefinition().getParameters();
-        final Map<Integer, DbType> paramTypes = query.getParamTypes();
+  protected void processInputParam(PreparedStatement statement, int index, Object value, DbType type) throws SQLException {
+    type.setParameterValue(statement, index, value);
+  }
 
-        for (int paramIndex = 1, inputParamsSize = parameters.size(); paramIndex <= inputParamsSize; paramIndex++)
-        {
-            QueryParameter queryParam = parameters.get(paramIndex - 1);
-            if (queryParam instanceof InputParameter)
-            {
-                InputParameter inputParam = (InputParameter) queryParam;
-                queryLogger.addParameter(inputParam, paramIndex);
-
-                processInputParam(statement, paramIndex, inputParam.getValue(), paramTypes.get(paramIndex));
-            }
-
-            if (queryParam instanceof OutputParameter)
-            {
-                processOutputParam((CallableStatement) statement, paramIndex, paramTypes.get(paramIndex));
-            }
-        }
-    }
-
-    protected void processInputParam(PreparedStatement statement, int index, Object value, DbType type) throws SQLException
-    {
-        type.setParameterValue(statement, index, value);
-    }
-
-    private void processOutputParam(CallableStatement statement, int index, DbType type) throws SQLException
-    {
-        type.registerOutParameter(statement, index);
-    }
+  private void processOutputParam(CallableStatement statement, int index, DbType type) throws SQLException {
+    type.registerOutParameter(statement, index);
+  }
 }

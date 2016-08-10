@@ -6,8 +6,6 @@
  */
 package org.mule.extension.db.api.param;
 
-public enum QueryType
-{
-    PARAMETERIZED,
-    DYNAMIC
+public enum QueryType {
+  PARAMETERIZED, DYNAMIC
 }

@@ -12,15 +12,14 @@ import org.mule.extension.db.internal.domain.query.Query;
 /**
  * Creates {@link ParamTypeResolver} instances
  */
-public interface ParamTypeResolverFactory
-{
+public interface ParamTypeResolverFactory {
 
-    /**
-     * Creates a new parameter type resolver to resolve the parameter types
-     * of a given query.
-     *
-     * @param query query to resolve
-     * @return a non null {@link ParamTypeResolver} to resolve the given query
-     */
-    ParamTypeResolver create(Query query);
+  /**
+   * Creates a new parameter type resolver to resolve the parameter types
+   * of a given query.
+   *
+   * @param query query to resolve
+   * @return a non null {@link ParamTypeResolver} to resolve the given query
+   */
+  ParamTypeResolver create(Query query);
 }

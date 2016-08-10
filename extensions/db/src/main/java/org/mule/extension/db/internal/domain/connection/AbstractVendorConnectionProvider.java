@@ -11,12 +11,12 @@ import org.mule.runtime.extension.api.annotation.param.Optional;
 
 import java.util.Map;
 
-abstract class AbstractVendorConnectionProvider<T extends DbConnection> extends AbstractDbConnectionProvider<T>
-{
-    /**
-     * Specifies a list of custom key-value connectionProperties for the config.
-     */
-    @Parameter
-    @Optional
-    private Map<String, String> connectionProperties;
+abstract class AbstractVendorConnectionProvider<T extends DbConnection> extends AbstractDbConnectionProvider<T> {
+
+  /**
+   * Specifies a list of custom key-value connectionProperties for the config.
+   */
+  @Parameter
+  @Optional
+  private Map<String, String> connectionProperties;
 }

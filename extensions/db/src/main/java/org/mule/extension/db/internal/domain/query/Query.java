@@ -26,65 +26,57 @@ import java.util.Map;
 /**
  * Represents an instantiation of a {@link QueryTemplate} with parameter values
  */
-public class Query
-{
+public class Query {
 
-    private final QueryDefinition queryDefinition;
-    private final StatementType statementType;
-    private final DbConnection connection;
-    private final ParamTypeResolverFactory paramTypeResolverFactory;
+  private final QueryDefinition queryDefinition;
+  private final StatementType statementType;
+  private final DbConnection connection;
+  private final ParamTypeResolverFactory paramTypeResolverFactory;
 
 
-    /**
-     * Creates a query from a template and a set of parameter values
-     *
-     * @param queryTemplate template describing the query
-     * @param paramValues   parameter values for the query
-     */
-    public Query(QueryDefinition queryDefinition, StatementType statementType, DbConnector connector, DbConnection connection)
-    {
-        this.queryDefinition = queryDefinition;
-        this.statementType = statementType;
-        this.connection = connection;
-        paramTypeResolverFactory = new GenericParamTypeResolverFactory(createTypeManager(connection, connector));
+  /**
+   * Creates a query from a template and a set of parameter values
+   *
+   * @param queryTemplate template describing the query
+   * @param paramValues   parameter values for the query
+   */
+  public Query(QueryDefinition queryDefinition, StatementType statementType, DbConnector connector, DbConnection connection) {
+    this.queryDefinition = queryDefinition;
+    this.statementType = statementType;
+    this.connection = connection;
+    paramTypeResolverFactory = new GenericParamTypeResolverFactory(createTypeManager(connection, connector));
+  }
+
+  public QueryDefinition getDefinition() {
+    return queryDefinition;
+  }
+
+  public StatementType getStatementType() {
+    return statementType;
+  }
+
+  public boolean hasInputParameters() {
+    return queryDefinition.getParameters().stream().anyMatch(p -> p instanceof InputParameter);
+  }
+
+  /**
+   * Determines actual parameter types for the parameters defined in {@code this}
+   * query
+   *
+   * @return a not null map containing the parameter type for each parameter index
+   * @throws SQLException when there are error processing the query
+   */
+  public Map<Integer, DbType> getParamTypes() throws SQLException {
+    return paramTypeResolverFactory.create(this).getParameterTypes(connection, this);
+  }
+
+  private DbTypeManager createTypeManager(DbConnection connection, DbConnector connector) {
+    final DbTypeManager baseTypeManager = connector.getTypeManager();
+    List<DbType> vendorDataTypes = connection.getVendorDataTypes();
+    if (vendorDataTypes.size() > 0) {
+      return new CompositeDbTypeManager(asList(baseTypeManager, new StaticDbTypeManager(connection.getVendorDataTypes())));
     }
 
-    public QueryDefinition getDefinition()
-    {
-        return queryDefinition;
-    }
-
-    public StatementType getStatementType()
-    {
-        return statementType;
-    }
-
-    public boolean hasInputParameters()
-    {
-        return queryDefinition.getParameters().stream().anyMatch(p -> p instanceof InputParameter);
-    }
-
-    /**
-     * Determines actual parameter types for the parameters defined in {@code this}
-     * query
-     *
-     * @return a not null map containing the parameter type for each parameter index
-     * @throws SQLException when there are error processing the query
-     */
-    public Map<Integer, DbType> getParamTypes() throws SQLException
-    {
-        return paramTypeResolverFactory.create(this).getParameterTypes(connection, this);
-    }
-
-    private DbTypeManager createTypeManager(DbConnection connection, DbConnector connector)
-    {
-        final DbTypeManager baseTypeManager = connector.getTypeManager();
-        List<DbType> vendorDataTypes = connection.getVendorDataTypes();
-        if (vendorDataTypes.size() > 0)
-        {
-            return new CompositeDbTypeManager(asList(baseTypeManager, new StaticDbTypeManager(connection.getVendorDataTypes())));
-        }
-
-        return baseTypeManager;
-    }
+    return baseTypeManager;
+  }
 }

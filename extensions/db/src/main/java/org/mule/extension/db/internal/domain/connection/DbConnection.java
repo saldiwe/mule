@@ -19,21 +19,20 @@ import java.util.List;
 /**
  * Wraps a {@link Connection} adding connector's specific functionality
  */
-public interface DbConnection extends TransactionalConnection
-{
+public interface DbConnection extends TransactionalConnection {
 
-    /**
-     * Returns the {@link StatementResultIteratorFactory} used to create
-     * the {@link StatementResultIterator} for this connection.
-     *
-     * @param resultSetHandler used to process resultSets created from this connection
-     * @return the {@link StatementResultIterator} for this connection.
-     */
-    StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler);
+  /**
+   * Returns the {@link StatementResultIteratorFactory} used to create
+   * the {@link StatementResultIterator} for this connection.
+   *
+   * @param resultSetHandler used to process resultSets created from this connection
+   * @return the {@link StatementResultIterator} for this connection.
+   */
+  StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler);
 
-    List<DbType> getVendorDataTypes();
+  List<DbType> getVendorDataTypes();
 
-    Connection getJdbcConnection();
+  Connection getJdbcConnection();
 
-    void release();
+  void release();
 }

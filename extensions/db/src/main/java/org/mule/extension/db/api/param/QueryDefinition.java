@@ -17,56 +17,49 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Alias("query")
-public class QueryDefinition
-{
+public class QueryDefinition {
 
-    @Parameter
-    @Optional
-    @Text
-    private String sql;
+  @Parameter
+  @Optional
+  @Text
+  private String sql;
 
-    @Parameter
-    private QueryType queryType;
+  @Parameter
+  private QueryType queryType;
 
-    @Parameter
-    @Optional
-    private List<QueryParameter> parameters = new LinkedList<>();
+  @Parameter
+  @Optional
+  private List<QueryParameter> parameters = new LinkedList<>();
 
-    public QueryDefinition copy() {
-        QueryDefinition copy = new QueryDefinition();
-        copy.sql = sql;
-        copy.parameters = new LinkedList<>(parameters);
-        copy.queryType = queryType;
+  public QueryDefinition copy() {
+    QueryDefinition copy = new QueryDefinition();
+    copy.sql = sql;
+    copy.parameters = new LinkedList<>(parameters);
+    copy.queryType = queryType;
 
-        return copy;
+    return copy;
+  }
+
+  public String getSql() {
+    return sql;
+  }
+
+  public QueryType getQueryType() {
+    return queryType;
+  }
+
+  public List<QueryParameter> getParameters() {
+    return copyOf(parameters);
+  }
+
+  public void addParameters(Collection<QueryParameter> parameters) {
+    if (parameters != null) {
+      this.parameters.addAll(parameters);
     }
+  }
 
-    public String getSql()
-    {
-        return sql;
-    }
-
-    public QueryType getQueryType()
-    {
-        return queryType;
-    }
-
-    public List<QueryParameter> getParameters()
-    {
-        return copyOf(parameters);
-    }
-
-    public void addParameters(Collection<QueryParameter> parameters)
-    {
-        if (parameters != null)
-        {
-            this.parameters.addAll(parameters);
-        }
-    }
-
-    public void setSql(String sql)
-    {
-        this.sql = sql;
-    }
+  public void setSql(String sql) {
+    this.sql = sql;
+  }
 
 }

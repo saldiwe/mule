@@ -9,8 +9,7 @@ package org.mule.extension.db.api.param;
 import org.mule.runtime.extension.api.annotation.Alias;
 
 @Alias("in-param")
-public class InputParameter extends ValuedQueryParameter
-{
+public class InputParameter extends ValuedQueryParameter {
 
 
 }

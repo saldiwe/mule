@@ -19,83 +19,70 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-public class DefaultDbConnection implements DbConnection
-{
+public class DefaultDbConnection implements DbConnection {
 
-    private final Connection jdbcConnection;
+  private final Connection jdbcConnection;
 
-    public DefaultDbConnection(Connection jdbcConnection)
-    {
-        this.jdbcConnection = jdbcConnection;
+  public DefaultDbConnection(Connection jdbcConnection) {
+    this.jdbcConnection = jdbcConnection;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler) {
+    return new GenericStatementResultIteratorFactory(resultSetHandler);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<DbType> getVendorDataTypes() {
+    return ImmutableList.of();
+  }
+
+  @Override
+  public Connection getJdbcConnection() {
+    return jdbcConnection;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void begin() throws Exception {
+    if (jdbcConnection.getAutoCommit()) {
+      jdbcConnection.setAutoCommit(false);
     }
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler)
-    {
-        return new GenericStatementResultIteratorFactory(resultSetHandler);
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void commit() throws SQLException {
+    jdbcConnection.commit();
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<DbType> getVendorDataTypes()
-    {
-        return ImmutableList.of();
-    }
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void rollback() throws SQLException {
+    jdbcConnection.rollback();
+  }
 
-    @Override
-    public Connection getJdbcConnection()
-    {
-        return jdbcConnection;
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void release() {
+    try {
+      jdbcConnection.close();
+    } catch (SQLException e) {
+      throw new ConnectionClosingException(e);
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void begin() throws Exception
-    {
-        if (jdbcConnection.getAutoCommit())
-        {
-            jdbcConnection.setAutoCommit(false);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void commit() throws SQLException
-    {
-        jdbcConnection.commit();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void rollback() throws SQLException
-    {
-        jdbcConnection.rollback();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void release()
-    {
-        try
-        {
-            jdbcConnection.close();
-        }
-        catch (SQLException e)
-        {
-            throw new ConnectionClosingException(e);
-        }
-    }
+  }
 }

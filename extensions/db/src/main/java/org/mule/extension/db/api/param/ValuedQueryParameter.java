@@ -10,18 +10,17 @@ import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.dsl.xml.XmlHints;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
-abstract class ValuedQueryParameter extends QueryParameter
-{
-    /**
-     * The parameter's value
-     */
-    @Parameter
-    @Optional
-    @XmlHints(allowReferences = false)
-    private Object value;
+abstract class ValuedQueryParameter extends QueryParameter {
 
-    public Object getValue()
-    {
-        return value;
-    }
+  /**
+   * The parameter's value
+   */
+  @Parameter
+  @Optional
+  @XmlHints(allowReferences = false)
+  private Object value;
+
+  public Object getValue() {
+    return value;
+  }
 }

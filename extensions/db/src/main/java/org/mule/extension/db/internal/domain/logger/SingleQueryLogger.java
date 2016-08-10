@@ -12,13 +12,12 @@ import org.mule.extension.db.api.param.InputParameter;
 /**
  * Logs a single query
  */
-public interface SingleQueryLogger extends QueryLogger
-{
+public interface SingleQueryLogger extends QueryLogger {
 
-    /**
-     * Adds the value of a query parameter for logging
-     *
-     * @param inputParameter non null parameter to log
-     */
-    void addParameter(InputParameter inputParameter, int index);
+  /**
+   * Adds the value of a query parameter for logging
+   *
+   * @param inputParameter non null parameter to log
+   */
+  void addParameter(InputParameter inputParameter, int index);
 }

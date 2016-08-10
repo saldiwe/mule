@@ -15,27 +15,24 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OracleDbConnection extends DefaultDbConnection
-{
+public class OracleDbConnection extends DefaultDbConnection {
 
-    private static final int CURSOR_TYPE_ID = -10;
-    private static final String CURSOR_TYPE_NAME = "CURSOR";
+  private static final int CURSOR_TYPE_ID = -10;
+  private static final String CURSOR_TYPE_NAME = "CURSOR";
 
-    public OracleDbConnection(Connection jdbcConnection)
-    {
-        super(jdbcConnection);
-    }
+  public OracleDbConnection(Connection jdbcConnection) {
+    super(jdbcConnection);
+  }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<DbType> getVendorDataTypes()
-    {
-        List<DbType> dbTypes = new ArrayList<>();
-        dbTypes.add(new ResolvedDbType(CURSOR_TYPE_ID, CURSOR_TYPE_NAME));
-        dbTypes.add(new OracleXmlType());
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public List<DbType> getVendorDataTypes() {
+    List<DbType> dbTypes = new ArrayList<>();
+    dbTypes.add(new ResolvedDbType(CURSOR_TYPE_ID, CURSOR_TYPE_NAME));
+    dbTypes.add(new OracleXmlType());
 
-        return dbTypes;
-    }
+    return dbTypes;
+  }
 }

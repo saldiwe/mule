@@ -12,23 +12,17 @@ import static java.sql.Connection.TRANSACTION_READ_UNCOMMITTED;
 import static java.sql.Connection.TRANSACTION_REPEATABLE_READ;
 import static java.sql.Connection.TRANSACTION_SERIALIZABLE;
 
-public enum TransactionIsolation
-{
-    NONE(TRANSACTION_NONE),
-    READ_COMMITTED(TRANSACTION_READ_COMMITTED),
-    READ_UNCOMMITTED(TRANSACTION_READ_UNCOMMITTED),
-    REPEATABLE_READ(TRANSACTION_REPEATABLE_READ),
-    SERIALIZABLE(TRANSACTION_SERIALIZABLE);
+public enum TransactionIsolation {
+  NONE(TRANSACTION_NONE), READ_COMMITTED(TRANSACTION_READ_COMMITTED), READ_UNCOMMITTED(
+      TRANSACTION_READ_UNCOMMITTED), REPEATABLE_READ(TRANSACTION_REPEATABLE_READ), SERIALIZABLE(TRANSACTION_SERIALIZABLE);
 
-    private final int code;
+  private final int code;
 
-    TransactionIsolation(int code)
-    {
-        this.code = code;
-    }
+  TransactionIsolation(int code) {
+    this.code = code;
+  }
 
-    public int getCode()
-    {
-        return code;
-    }
+  public int getCode() {
+    return code;
+  }
 }

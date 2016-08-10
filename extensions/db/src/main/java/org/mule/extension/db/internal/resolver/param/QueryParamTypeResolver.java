@@ -24,52 +24,42 @@ import java.util.Map;
 /**
  * Resolves parameter types for standard queries
  */
-public class QueryParamTypeResolver implements ParamTypeResolver
-{
+public class QueryParamTypeResolver implements ParamTypeResolver {
 
-    private final DbTypeManager dbTypeManager;
+  private final DbTypeManager dbTypeManager;
 
-    public QueryParamTypeResolver(DbTypeManager dbTypeManager)
-    {
-        this.dbTypeManager = dbTypeManager;
-    }
+  public QueryParamTypeResolver(DbTypeManager dbTypeManager) {
+    this.dbTypeManager = dbTypeManager;
+  }
 
-    @Override
-    public Map<Integer, DbType> getParameterTypes(DbConnection connection, Query query) throws SQLException
-    {
-        Map<Integer, DbType> paramTypes = new HashMap<>();
+  @Override
+  public Map<Integer, DbType> getParameterTypes(DbConnection connection, Query query) throws SQLException {
+    Map<Integer, DbType> paramTypes = new HashMap<>();
 
-        PreparedStatement statement = connection.prepareStatement(query.getDefinition().getSql());
+    PreparedStatement statement = connection.prepareStatement(query.getDefinition().getSql());
 
-        ParameterMetaData parameterMetaData = statement.getParameterMetaData();
+    ParameterMetaData parameterMetaData = statement.getParameterMetaData();
 
-        for (int index = 1; index <= query.getDefinition().getParameters().size(); index++)
-        {
-            int parameterTypeId = parameterMetaData.getParameterType(index);
-            String parameterTypeName = parameterMetaData.getParameterTypeName(index);
-            DbType dbType;
-            if (parameterTypeName == null)
-            {
-                // Use unknown data type
-                dbType = UnknownDbType.getInstance();
-            }
-            else
-            {
-                try
-                {
-                    dbType = dbTypeManager.lookup(connection, parameterTypeId, parameterTypeName);
-                }
-                catch (UnknownDbTypeException e)
-                {
-                    // Type was not found in the type manager, but the DB knows about it
-                    dbType = new ResolvedDbType(parameterTypeId, parameterTypeName);
-                }
-            }
-
-            paramTypes.put(index, dbType);
-            index++;
+    for (int index = 1; index <= query.getDefinition().getParameters().size(); index++) {
+      int parameterTypeId = parameterMetaData.getParameterType(index);
+      String parameterTypeName = parameterMetaData.getParameterTypeName(index);
+      DbType dbType;
+      if (parameterTypeName == null) {
+        // Use unknown data type
+        dbType = UnknownDbType.getInstance();
+      } else {
+        try {
+          dbType = dbTypeManager.lookup(connection, parameterTypeId, parameterTypeName);
+        } catch (UnknownDbTypeException e) {
+          // Type was not found in the type manager, but the DB knows about it
+          dbType = new ResolvedDbType(parameterTypeId, parameterTypeName);
         }
+      }
 
-        return paramTypes;
+      paramTypes.put(index, dbType);
+      index++;
     }
+
+    return paramTypes;
+  }
 }

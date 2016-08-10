@@ -7,54 +7,46 @@
 
 package org.mule.functional.classloading.isolation.classification;
 
+import org.mule.functional.api.classloading.isolation.ClassPathClassifierContext;
 import org.mule.functional.classloading.isolation.classpath.MavenArtifactToClassPathUrlsResolver;
-import org.mule.functional.classloading.isolation.maven.MavenArtifact;
+import org.mule.functional.api.classloading.isolation.MavenArtifact;
 import org.mule.functional.junit4.runners.ArtifactClassLoaderRunner;
 
-import java.io.File;
-
 /**
- * Just extends {@link ClassPathClassifierContext} to append specific data needed to classify the context internally in {@link MuleClassPathClassifier}.
+ * Just extends {@link ClassPathClassifierContext} to append specific data needed to classify the context internally in
+ * {@link DefaultClassPathClassifier}.
  *
  * @since 4.0
  */
-public class ExtendedClassPathClassifierContext
-{
-    private final ClassPathClassifierContext classificationContext;
-    private final MavenArtifactToClassPathUrlsResolver artifactToClassPathURLResolver;
-    private final File targetTestClassesFolder;
+public class ExtendedClassPathClassifierContext {
 
-    /**
-     * Creates a {@link ExtendedClassPathClassifierContext} used internally in {@link MuleClassPathClassifier} to do the classification.
-     *
-     * @param classificationContext the initial {@link ClassPathClassifierContext} context passed by {@link ArtifactClassLoaderRunner}
-     * @param artifactToClassPathURLResolver resolves the {@link java.net.URL} from the class path for a given artifactId
-     * @param targetTestClassesFolder the target/test-classes folder of the current artifact being tested
-     */
-    public ExtendedClassPathClassifierContext(final ClassPathClassifierContext classificationContext, final MavenArtifactToClassPathUrlsResolver artifactToClassPathURLResolver, final File targetTestClassesFolder)
-    {
-        this.classificationContext = classificationContext;
-        this.artifactToClassPathURLResolver = artifactToClassPathURLResolver;
-        this.targetTestClassesFolder = targetTestClassesFolder;
-    }
+  private final ClassPathClassifierContext classificationContext;
+  private final MavenArtifactToClassPathUrlsResolver artifactToClassPathURLResolver;
 
-    public MavenArtifactToClassPathUrlsResolver getArtifactToClassPathURLResolver()
-    {
-        return artifactToClassPathURLResolver;
-    }
+  /**
+   * Creates a {@link ExtendedClassPathClassifierContext} used internally in {@link DefaultClassPathClassifier} to do the
+   * classification.
+   *
+   * @param classificationContext the initial {@link ClassPathClassifierContext} context passed by
+   *        {@link ArtifactClassLoaderRunner}
+   * @param artifactToClassPathURLResolver resolves the {@link java.net.URL} from the class path for a given artifactId
+   */
+  public ExtendedClassPathClassifierContext(final ClassPathClassifierContext classificationContext,
+                                            final MavenArtifactToClassPathUrlsResolver artifactToClassPathURLResolver) {
+    this.classificationContext = classificationContext;
+    this.artifactToClassPathURLResolver = artifactToClassPathURLResolver;
+  }
 
-    public MavenArtifact getRootArtifact()
-    {
-        return classificationContext.getDependencyGraph().getRootArtifact();
-    }
+  public MavenArtifactToClassPathUrlsResolver getArtifactToClassPathURLResolver() {
+    return artifactToClassPathURLResolver;
+  }
 
-    public ClassPathClassifierContext getClassificationContext()
-    {
-        return classificationContext;
-    }
+  public MavenArtifact getRootArtifact() {
+    return classificationContext.getDependencyGraph().getRootArtifact();
+  }
 
-    public File getTargetTestClassesFolder()
-    {
-        return targetTestClassesFolder;
-    }
+  public ClassPathClassifierContext getClassificationContext() {
+    return classificationContext;
+  }
+
 }

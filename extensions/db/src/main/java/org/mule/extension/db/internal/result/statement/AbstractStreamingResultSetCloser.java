@@ -19,21 +19,16 @@ import org.slf4j.LoggerFactory;
 /**
  * Base class for implementing {@link StreamingResultSetCloser}
  */
-public class AbstractStreamingResultSetCloser implements StreamingResultSetCloser
-{
+public class AbstractStreamingResultSetCloser implements StreamingResultSetCloser {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractStreamingResultSetCloser.class);
+  protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractStreamingResultSetCloser.class);
 
-    @Override
-    public void close(DbConnection connection, ResultSet resultSet)
-    {
-        try
-        {
-            resultSet.close();
-        }
-        catch (SQLException e)
-        {
-            LOGGER.warn("Error attempting to close resultSet", e);
-        }
+  @Override
+  public void close(DbConnection connection, ResultSet resultSet) {
+    try {
+      resultSet.close();
+    } catch (SQLException e) {
+      LOGGER.warn("Error attempting to close resultSet", e);
     }
+  }
 }

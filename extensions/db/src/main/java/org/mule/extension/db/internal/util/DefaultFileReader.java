@@ -14,12 +14,10 @@ import java.io.IOException;
 /**
  * Reads files using {@link IOUtils}
  */
-public class DefaultFileReader implements FileReader
-{
+public class DefaultFileReader implements FileReader {
 
-    @Override
-    public String getResourceAsString(String resourceName) throws IOException
-    {
-        return IOUtils.getResourceAsString(resourceName, getClass());
-    }
+  @Override
+  public String getResourceAsString(String resourceName) throws IOException {
+    return IOUtils.getResourceAsString(resourceName, getClass());
+  }
 }

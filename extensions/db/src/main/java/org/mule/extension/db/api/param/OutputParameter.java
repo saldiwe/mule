@@ -9,7 +9,6 @@ package org.mule.extension.db.api.param;
 import org.mule.runtime.extension.api.annotation.Alias;
 
 @Alias("out-param")
-public class OutputParameter extends QueryParameter
-{
+public class OutputParameter extends QueryParameter {
 
 }

@@ -14,29 +14,23 @@ import org.mule.extension.db.internal.domain.type.DbTypeManager;
 /**
  * Creates {@link ParamTypeResolver} for generic databases
  */
-public class GenericParamTypeResolverFactory implements ParamTypeResolverFactory
-{
+public class GenericParamTypeResolverFactory implements ParamTypeResolverFactory {
 
-    private final DbTypeManager dbTypeManager;
+  private final DbTypeManager dbTypeManager;
 
-    public GenericParamTypeResolverFactory(DbTypeManager dbTypeManager)
-    {
-        this.dbTypeManager = dbTypeManager;
+  public GenericParamTypeResolverFactory(DbTypeManager dbTypeManager) {
+    this.dbTypeManager = dbTypeManager;
+  }
+
+  public ParamTypeResolver create(Query query) {
+    ParamTypeResolver metadataParamTypeResolver;
+
+    if (query.getStatementType() == STORE_PROCEDURE_CALL) {
+      metadataParamTypeResolver = new StoredProcedureParamTypeResolver(dbTypeManager);
+    } else {
+      metadataParamTypeResolver = new QueryParamTypeResolver(dbTypeManager);
     }
 
-    public ParamTypeResolver create(Query query)
-    {
-        ParamTypeResolver metadataParamTypeResolver;
-
-        if (query.getStatementType() == STORE_PROCEDURE_CALL)
-        {
-            metadataParamTypeResolver = new StoredProcedureParamTypeResolver(dbTypeManager);
-        }
-        else
-        {
-            metadataParamTypeResolver = new QueryParamTypeResolver(dbTypeManager);
-        }
-
-        return new DefaultParamTypeResolver(dbTypeManager, metadataParamTypeResolver);
-    }
+    return new DefaultParamTypeResolver(dbTypeManager, metadataParamTypeResolver);
+  }
 }

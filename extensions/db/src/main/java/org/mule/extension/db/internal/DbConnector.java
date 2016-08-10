@@ -42,83 +42,65 @@ import org.apache.commons.lang.StringUtils;
 @Extension(name = "DB Connector", description = "Connector for connecting to relation Databases through the JDBC API")
 @Operations({DmlOperations.class})
 @Providers({DefaultDbConnectionProvider.class})
-@SubTypeMapping(baseType = QueryParameter.class, subTypes = {InputParameter.class, InOutQueryParameter.class, OutputParameter.class})
-public class DbConnector implements Initialisable
-{
+@SubTypeMapping(baseType = QueryParameter.class,
+    subTypes = {InputParameter.class, InOutQueryParameter.class, OutputParameter.class})
+public class DbConnector implements Initialisable {
 
-    /**
-     * A {@link List} which specifies non-standard custom data types
-     */
-    @Parameter
-    @Optional
-    private List<CustomDataType> customDataTypes = new LinkedList<>();
+  /**
+   * A {@link List} which specifies non-standard custom data types
+   */
+  @Parameter
+  @Optional
+  private List<CustomDataType> customDataTypes = new LinkedList<>();
 
-    private DbTypeManager typeManager;
+  private DbTypeManager typeManager;
 
-    @Override
-    public void initialise() throws InitialisationException
-    {
-        typeManager = createBaseTypeManager();
+  @Override
+  public void initialise() throws InitialisationException {
+    typeManager = createBaseTypeManager();
+  }
+
+  public DbTypeManager getTypeManager() {
+    return typeManager;
+  }
+
+  private DbTypeManager createBaseTypeManager() {
+    List<DbTypeManager> typeManagers = new ArrayList<>();
+
+    typeManagers.add(new MetadataDbTypeManager());
+
+    if (customDataTypes.size() > 0) {
+      typeManagers.add(new StaticDbTypeManager(getCustomTypes()));
     }
 
-    public DbTypeManager getTypeManager()
-    {
-        return typeManager;
-    }
+    typeManagers.add(new StaticDbTypeManager(JdbcType.getAllTypes()));
 
-    private DbTypeManager createBaseTypeManager()
-    {
-        List<DbTypeManager> typeManagers = new ArrayList<>();
+    return new CompositeDbTypeManager(typeManagers);
+  }
 
-        typeManagers.add(new MetadataDbTypeManager());
-
-        if (customDataTypes.size() > 0)
-        {
-            typeManagers.add(new StaticDbTypeManager(getCustomTypes()));
+  private List<DbType> getCustomTypes() {
+    return customDataTypes.stream().map(type -> {
+      final String name = type.getName();
+      final int id = type.getId();
+      if (id == Types.ARRAY) {
+        return new ArrayResolvedDbType(id, name);
+      } else if (id == Types.STRUCT) {
+        final String className = type.getClassName();
+        if (!StringUtils.isEmpty(className)) {
+          Class<?> mappedClass;
+          try {
+            mappedClass = Class.forName(className);
+          } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("Cannot find mapped class: " + className);
+          }
+          return new MappedStructResolvedDbType<>(id, name, mappedClass);
+        } else {
+          return new ResolvedDbType(id, name);
         }
-
-        typeManagers.add(new StaticDbTypeManager(JdbcType.getAllTypes()));
-
-        return new CompositeDbTypeManager(typeManagers);
-    }
-
-    private List<DbType> getCustomTypes()
-    {
-        return customDataTypes.stream()
-                .map(type ->
-                     {
-                         final String name = type.getName();
-                         final int id = type.getId();
-                         if (id == Types.ARRAY)
-                         {
-                             return new ArrayResolvedDbType(id, name);
-                         }
-                         else if (id == Types.STRUCT)
-                         {
-                             final String className = type.getClassName();
-                             if (!StringUtils.isEmpty(className))
-                             {
-                                 Class<?> mappedClass;
-                                 try
-                                 {
-                                     mappedClass = Class.forName(className);
-                                 }
-                                 catch (ClassNotFoundException e)
-                                 {
-                                     throw new IllegalArgumentException("Cannot find mapped class: " + className);
-                                 }
-                                 return new MappedStructResolvedDbType<>(id, name, mappedClass);
-                             }
-                             else
-                             {
-                                 return new ResolvedDbType(id, name);
-                             }
-                         }
-                         else
-                         {
-                             return new ResolvedDbType(id, name);
-                         }
-                     })
-                .collect(new ImmutableListCollector<>());
-    }
+      } else {
+        return new ResolvedDbType(id, name);
+      }
+    })
+        .collect(new ImmutableListCollector<>());
+  }
 }

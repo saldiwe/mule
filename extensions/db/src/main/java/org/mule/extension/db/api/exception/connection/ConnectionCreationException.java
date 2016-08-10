@@ -12,16 +12,13 @@ import org.mule.runtime.api.connection.ConnectionException;
 /**
  * Thrown to indicate an error creating a connection
  */
-public class ConnectionCreationException extends ConnectionException
-{
+public class ConnectionCreationException extends ConnectionException {
 
-    public ConnectionCreationException(String message)
-    {
-        super(message);
-    }
+  public ConnectionCreationException(String message) {
+    super(message);
+  }
 
-    public ConnectionCreationException(Throwable throwable)
-    {
-        super(throwable);
-    }
+  public ConnectionCreationException(Throwable throwable) {
+    super(throwable);
+  }
 }

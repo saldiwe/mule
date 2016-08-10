@@ -13,17 +13,16 @@ import org.mule.extension.db.internal.domain.query.StatementType;
 /**
  * Parses a SQL queries
  */
-public interface QueryTemplateParser
-{
+public interface QueryTemplateParser {
 
-    /**
-     * Parses a SQL query
-     *
-     * @param sql non empty query to parse
-     * @return a non null {@link QueryTemplate} representing the input SQL query
-     * @throws QueryTemplateParsingException when there is a parsing error
-     */
-    QueryTemplate parse(String sql) throws QueryTemplateParsingException;
+  /**
+   * Parses a SQL query
+   *
+   * @param sql non empty query to parse
+   * @return a non null {@link QueryTemplate} representing the input SQL query
+   * @throws QueryTemplateParsingException when there is a parsing error
+   */
+  QueryTemplate parse(String sql) throws QueryTemplateParsingException;
 
-    StatementType getStatementType(String sql);
+  StatementType getStatementType(String sql);
 }

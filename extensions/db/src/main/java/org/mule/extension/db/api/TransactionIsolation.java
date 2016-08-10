@@ -6,11 +6,6 @@
  */
 package org.mule.extension.db.api;
 
-public enum TransactionIsolation
-{
-    NONE,
-    READ_COMMITTED,
-    READ_UNCOMMITTED,
-    REPEATABLE_READ,
-    SERIALIZABLE
+public enum TransactionIsolation {
+  NONE, READ_COMMITTED, READ_UNCOMMITTED, REPEATABLE_READ, SERIALIZABLE
 }

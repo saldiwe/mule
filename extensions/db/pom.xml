@@ -17,6 +17,10 @@
     <name>Mule DB Connector</name>
     <description>A Mule extension that provides functionality for connecting to Databases through the JDBC standard</description>
 
+    <properties>
+        <formatterConfigPath>../../formatter.xml</formatterConfigPath>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.mule.modules</groupId>

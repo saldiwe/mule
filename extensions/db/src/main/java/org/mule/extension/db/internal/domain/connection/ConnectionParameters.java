@@ -12,26 +12,24 @@ import org.mule.runtime.extension.api.annotation.param.Optional;
 
 import javax.sql.DataSource;
 
-public class ConnectionParameters
-{
-    /**
-     * Reference to a JDBC DataSource object. This object is typically created using Spring.
-     * When using XA transactions, an XADataSource object must be provided.
-     */
-    @Parameter
-    @Optional
-    private DataSource dataSource;
+public class ConnectionParameters {
 
-    @ParameterGroup
-    private DataSourceConfig dataSourceConfig;
+  /**
+   * Reference to a JDBC DataSource object. This object is typically created using Spring.
+   * When using XA transactions, an XADataSource object must be provided.
+   */
+  @Parameter
+  @Optional
+  private DataSource dataSource;
 
-    public DataSource getDataSource()
-    {
-        return dataSource;
-    }
+  @ParameterGroup
+  private DataSourceConfig dataSourceConfig;
 
-    public DataSourceConfig getDataSourceConfig()
-    {
-        return dataSourceConfig;
-    }
+  public DataSource getDataSource() {
+    return dataSource;
+  }
+
+  public DataSourceConfig getDataSourceConfig() {
+    return dataSourceConfig;
+  }
 }

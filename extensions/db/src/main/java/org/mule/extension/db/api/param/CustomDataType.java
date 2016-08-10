@@ -9,40 +9,36 @@ package org.mule.extension.db.api.param;
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
-public class CustomDataType
-{
+public class CustomDataType {
 
-    /**
-     * Type identifier used by the JDBC driver.
-     */
-    @Parameter
-    private int id;
+  /**
+   * Type identifier used by the JDBC driver.
+   */
+  @Parameter
+  private int id;
 
-    /**
-     * Name of the data type used by the JDBC driver.
-     */
-    @Parameter
-    private String name;
+  /**
+   * Name of the data type used by the JDBC driver.
+   */
+  @Parameter
+  private String name;
 
-    /**
-     * Indicates which Java class must be used to map the DB type.
-     */
-    @Parameter
-    @Optional
-    private String className;
+  /**
+   * Indicates which Java class must be used to map the DB type.
+   */
+  @Parameter
+  @Optional
+  private String className;
 
-    public int getId()
-    {
-        return id;
-    }
+  public int getId() {
+    return id;
+  }
 
-    public String getName()
-    {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public String getClassName()
-    {
-        return className;
-    }
+  public String getClassName() {
+    return className;
+  }
 }

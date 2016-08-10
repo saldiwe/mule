@@ -18,113 +18,102 @@ import java.util.concurrent.TimeUnit;
 /**
  * Maintains configuration information about how to build a {@link javax.sql.DataSource}
  */
-public class DataSourceConfig
-{
+public class DataSourceConfig {
 
-    /**
-     * URL used to connect to the database.
-     */
-    @Parameter
-    @Optional
-    private String url;
+  /**
+   * URL used to connect to the database.
+   */
+  @Parameter
+  @Optional
+  private String url;
 
-    /**
-     * Fully-qualified name of the database driver class.
-     */
-    @Parameter
-    @Optional
-    private String driverClassName;
-
-
-    /**
-     * Maximum time that the data source will wait while attempting to connect to a
-     * database. A value of zero (default) specifies that the timeout is the default system timeout if there is one;
-     * otherwise, it specifies that there is no timeout.
-     */
-    @Parameter
-    @Optional(defaultValue = "0")
-    private Integer connectionTimeout;
+  /**
+   * Fully-qualified name of the database driver class.
+   */
+  @Parameter
+  @Optional
+  private String driverClassName;
 
 
-    /**
-     * A {@link TimeUnit} which qualifies the {@link #connectionTimeout}
-     */
-    @Parameter
-    @Optional(defaultValue = "SECONDS")
-    private TimeUnit connectionTimeoutUnit = SECONDS;
-
-    private String user;
-    private String password;
-
-    /**
-     * The transaction isolation level to set on the driver when connecting the database.
-     */
-    @Parameter
-    @Optional
-    private TransactionIsolation transactionIsolation;
-
-    /**
-     * Indicates whether or not the created datasource has to support XA transactions. Default is false.
-     */
-    @Parameter
-    @Optional(defaultValue = "false")
-    private boolean useXaTransactions = false;
-
-    /**
-     * Provides a way to configure database connection pooling.
-     */
-    @Parameter
-    @Optional
-    private DbPoolingProfile poolingProfile;
+  /**
+   * Maximum time that the data source will wait while attempting to connect to a
+   * database. A value of zero (default) specifies that the timeout is the default system timeout if there is one;
+   * otherwise, it specifies that there is no timeout.
+   */
+  @Parameter
+  @Optional(defaultValue = "0")
+  private Integer connectionTimeout;
 
 
-    public String getUrl()
-    {
-        return url;
-    }
+  /**
+   * A {@link TimeUnit} which qualifies the {@link #connectionTimeout}
+   */
+  @Parameter
+  @Optional(defaultValue = "SECONDS")
+  private TimeUnit connectionTimeoutUnit = SECONDS;
 
-    public void setUrl(String url)
-    {
-        this.url = url;
-    }
+  private String user;
+  private String password;
 
-    public String getDriverClassName()
-    {
-        return driverClassName;
-    }
+  /**
+   * The transaction isolation level to set on the driver when connecting the database.
+   */
+  @Parameter
+  @Optional
+  private TransactionIsolation transactionIsolation;
 
-    public int getConnectionTimeout()
-    {
-        return connectionTimeout;
-    }
+  /**
+   * Indicates whether or not the created datasource has to support XA transactions. Default is false.
+   */
+  @Parameter
+  @Optional(defaultValue = "false")
+  private boolean useXaTransactions = false;
 
-    public TimeUnit getConnectionTimeoutUnit()
-    {
-        return connectionTimeoutUnit;
-    }
+  /**
+   * Provides a way to configure database connection pooling.
+   */
+  @Parameter
+  @Optional
+  private DbPoolingProfile poolingProfile;
 
-    public String getPassword()
-    {
-        return password;
-    }
 
-    public String getUser()
-    {
-        return user;
-    }
+  public String getUrl() {
+    return url;
+  }
 
-    public TransactionIsolation getTransactionIsolation()
-    {
-        return transactionIsolation;
-    }
+  public void setUrl(String url) {
+    this.url = url;
+  }
 
-    public boolean isUseXaTransactions()
-    {
-        return useXaTransactions;
-    }
+  public String getDriverClassName() {
+    return driverClassName;
+  }
 
-    public DbPoolingProfile getPoolingProfile()
-    {
-        return poolingProfile;
-    }
+  public int getConnectionTimeout() {
+    return connectionTimeout;
+  }
+
+  public TimeUnit getConnectionTimeoutUnit() {
+    return connectionTimeoutUnit;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public String getUser() {
+    return user;
+  }
+
+  public TransactionIsolation getTransactionIsolation() {
+    return transactionIsolation;
+  }
+
+  public boolean isUseXaTransactions() {
+    return useXaTransactions;
+  }
+
+  public DbPoolingProfile getPoolingProfile() {
+    return poolingProfile;
+  }
 }

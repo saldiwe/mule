@@ -10,29 +10,26 @@ import org.mule.extension.db.internal.domain.type.JdbcType;
 import org.mule.runtime.extension.api.annotation.Parameter;
 import org.mule.runtime.extension.api.annotation.param.Optional;
 
-public abstract class QueryParameter
-{
+public abstract class QueryParameter {
 
-    /**
-     * The name of the input parameter.
-     */
-    @Parameter
-    private String name;
+  /**
+   * The name of the input parameter.
+   */
+  @Parameter
+  private String name;
 
-    /**
-     * Parameter type name.
-     */
-    @Parameter
-    @Optional
-    private JdbcType type;
+  /**
+   * Parameter type name.
+   */
+  @Parameter
+  @Optional
+  private JdbcType type;
 
-    public String getName()
-    {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public JdbcType getType()
-    {
-        return type;
-    }
+  public JdbcType getType() {
+    return type;
+  }
 }

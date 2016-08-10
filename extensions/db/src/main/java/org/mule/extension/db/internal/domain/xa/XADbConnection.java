@@ -25,88 +25,71 @@ import javax.transaction.xa.XAResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class XADbConnection implements DbConnection, XATransactionalConnection
-{
+public class XADbConnection implements DbConnection, XATransactionalConnection {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(XADbConnection.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(XADbConnection.class);
 
-    private final DbConnection connection;
-    private final XAConnection xaResource;
+  private final DbConnection connection;
+  private final XAConnection xaResource;
 
-    public XADbConnection(DbConnection connection, XAConnection xaResource)
-    {
-        this.connection = connection;
-        this.xaResource = xaResource;
+  public XADbConnection(DbConnection connection, XAConnection xaResource) {
+    this.connection = connection;
+    this.xaResource = xaResource;
+  }
+
+  @Override
+  public XAResource getXAResource() {
+    try {
+      return xaResource.getXAResource();
+    } catch (SQLException e) {
+      throw new MuleRuntimeException(new TransactionException(createStaticMessage("Could not obtain XA Resource"), e));
     }
+  }
 
-    @Override
-    public XAResource getXAResource()
-    {
-        try
-        {
-            return xaResource.getXAResource();
-        }
-        catch (SQLException e)
-        {
-            throw new MuleRuntimeException(new TransactionException(createStaticMessage("Could not obtain XA Resource"), e));
-        }
+  @Override
+  public void close() {
+    connection.release();
+
+    try {
+      xaResource.close();
+    } catch (SQLException e) {
+      LOGGER.info("Exception while explicitly closing the xaConnection (some providers require this). "
+          + "The exception will be ignored and only logged: " + e.getMessage(), e);
     }
+  }
 
-    @Override
-    public void close()
-    {
-        connection.release();
+  @Override
+  public void begin() throws Exception {
+    connection.begin();
+  }
 
-        try
-        {
-            xaResource.close();
-        }
-        catch (SQLException e)
-        {
-            LOGGER.info("Exception while explicitly closing the xaConnection (some providers require this). "
-                        + "The exception will be ignored and only logged: " + e.getMessage(), e);
-        }
-    }
+  @Override
+  public void commit() throws Exception {
+    connection.commit();
+  }
 
-    @Override
-    public void begin() throws Exception
-    {
-        connection.begin();
-    }
+  @Override
+  public void rollback() throws Exception {
+    connection.rollback();
+  }
 
-    @Override
-    public void commit() throws Exception
-    {
-        connection.commit();
-    }
+  @Override
+  public StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler) {
+    return connection.getStatementResultIteratorFactory(resultSetHandler);
+  }
 
-    @Override
-    public void rollback() throws Exception
-    {
-        connection.rollback();
-    }
+  @Override
+  public List<DbType> getVendorDataTypes() {
+    return connection.getVendorDataTypes();
+  }
 
-    @Override
-    public StatementResultIteratorFactory getStatementResultIteratorFactory(ResultSetHandler resultSetHandler)
-    {
-        return connection.getStatementResultIteratorFactory(resultSetHandler);
-    }
+  @Override
+  public Connection getJdbcConnection() {
+    return connection.getJdbcConnection();
+  }
 
-    @Override
-    public List<DbType> getVendorDataTypes()
-    {
-        return connection.getVendorDataTypes();
-    }
-
-    @Override
-    public Connection getJdbcConnection()
-    {
-        return connection.getJdbcConnection();
-    }
-
-    @Override
-    public void release()
-    {
-        connection.release();
-    }
+  @Override
+  public void release() {
+    connection.release();
+  }
 }

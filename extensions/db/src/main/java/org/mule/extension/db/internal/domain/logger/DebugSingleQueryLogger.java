@@ -15,35 +15,30 @@ import org.slf4j.Logger;
 /**
  * Logs a single query in debug level
  */
-public class DebugSingleQueryLogger extends AbstractDebugQueryLogger implements SingleQueryLogger
-{
+public class DebugSingleQueryLogger extends AbstractDebugQueryLogger implements SingleQueryLogger {
 
-    private final Query query;
+  private final Query query;
 
-    public DebugSingleQueryLogger(Logger logger, Query query)
-    {
-        super(logger);
+  public DebugSingleQueryLogger(Logger logger, Query query) {
+    super(logger);
 
-        this.query = query;
+    this.query = query;
 
-        builder.append("Executing query:\n").append(query.getDefinition().getSql());
+    builder.append("Executing query:\n").append(query.getDefinition().getSql());
 
-        if (hasParameters())
-        {
-            builder.append("\nParameters:");
-        }
+    if (hasParameters()) {
+      builder.append("\nParameters:");
     }
+  }
 
-    protected boolean hasParameters()
-    {
-        return query.hasInputParameters();
-    }
+  protected boolean hasParameters() {
+    return query.hasInputParameters();
+  }
 
-    @Override
-    public void addParameter(InputParameter param, int index)
-    {
-        builder.append("\n")
-                .append(param.getName() != null ? param.getName() : index)
-                .append(" = ").append(param.getValue());
-    }
+  @Override
+  public void addParameter(InputParameter param, int index) {
+    builder.append("\n")
+        .append(param.getName() != null ? param.getName() : index)
+        .append(" = ").append(param.getValue());
+  }
 }

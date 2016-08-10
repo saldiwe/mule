@@ -11,24 +11,21 @@ import org.mule.functional.junit4.ExtensionFunctionalTestCase;
 
 import org.junit.Test;
 
-public class DummySchemaTestCase extends ExtensionFunctionalTestCase
-{
+public class DummySchemaTestCase extends ExtensionFunctionalTestCase {
 
-    @Override
-    protected Class<?>[] getAnnotatedExtensionClasses()
-    {
-        return new Class<?>[]{DbConnector.class};
-    }
+  @Override
+  protected Class<?>[] getAnnotatedExtensionClasses() {
+    return new Class<?>[] {DbConnector.class};
+  }
 
-    @Override
-    protected String getConfigFile()
-    {
-        return "integration/select/default-database-config-query-config.xml";
-    }
+  @Override
+  protected String getConfigFile() {
+    return "integration/select/default-database-config-query-config.xml";
+  }
 
-    @Test
-    public void select() {
+  @Test
+  public void select() {
 
-    }
+  }
 
 }

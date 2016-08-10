@@ -14,42 +14,38 @@ import org.mule.runtime.extension.api.annotation.param.Optional;
 
 import java.util.concurrent.TimeUnit;
 
-public class QuerySettings
-{
+public class QuerySettings {
 
 
-    /**
-     * Indicates the minimum amount of time before the JDBC driver attempts to cancel a running statement.
-     * No timeout is used by default.
-     */
-    @Parameter
-    @Optional(defaultValue = "0")
-    private int queryTimeout = 0;
+  /**
+   * Indicates the minimum amount of time before the JDBC driver attempts to cancel a running statement.
+   * No timeout is used by default.
+   */
+  @Parameter
+  @Optional(defaultValue = "0")
+  private int queryTimeout = 0;
 
-    /**
-     * A {@link TimeUnit} which qualifies the {@link #queryTimeout}
-     */
-    @Parameter
-    @Optional(defaultValue = "SECONDS")
-    private TimeUnit queryTimeoutUnit = SECONDS;
+  /**
+   * A {@link TimeUnit} which qualifies the {@link #queryTimeout}
+   */
+  @Parameter
+  @Optional(defaultValue = "SECONDS")
+  private TimeUnit queryTimeoutUnit = SECONDS;
 
-    @Parameter
-    @Optional
-    @XmlHints(allowInlineDefinition = false)
-    private QueryDefinition queryTemplate;
+  @Parameter
+  @Optional
+  @XmlHints(allowInlineDefinition = false)
+  private QueryDefinition queryTemplate;
 
-    public int getQueryTimeout()
-    {
-        return queryTimeout;
-    }
+  public int getQueryTimeout() {
+    return queryTimeout;
+  }
 
-    public TimeUnit getQueryTimeoutUnit()
-    {
-        return queryTimeoutUnit;
-    }
+  public TimeUnit getQueryTimeoutUnit() {
+    return queryTimeoutUnit;
+  }
 
-    public QueryDefinition getQueryTemplate()
-    {
-        return queryTemplate;
-    }
+  public QueryDefinition getQueryTemplate() {
+    return queryTemplate;
+  }
 }

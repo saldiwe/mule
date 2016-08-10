@@ -16,15 +16,14 @@ import org.mule.runtime.core.api.MuleEvent;
 /**
  * Resolves a {@link Query} for a given {@link MuleEvent}
  */
-public interface QueryResolver
-{
+public interface QueryResolver {
 
-    /**
-     * Resolves a query in the context of a given Mule event.
-     *
-     * @param connection connection to the database. not null
-     * @param muleEvent used to resolve any Mule expression. Not null
-     * @return query resolved for the given event
-     */
-    Query resolve(QueryDefinition queryDefinition, DbConnector connector, DbConnection connection) throws QueryResolutionException;
+  /**
+   * Resolves a query in the context of a given Mule event.
+   *
+   * @param connection connection to the database. not null
+   * @param muleEvent used to resolve any Mule expression. Not null
+   * @return query resolved for the given event
+   */
+  Query resolve(QueryDefinition queryDefinition, DbConnector connector, DbConnection connection) throws QueryResolutionException;
 }

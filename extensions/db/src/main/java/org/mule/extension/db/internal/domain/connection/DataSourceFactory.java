@@ -31,133 +31,109 @@ import org.slf4j.LoggerFactory;
 /**
  * Creates {@link DataSource} instances
  */
-public class DataSourceFactory implements Disposable
-{
+public class DataSourceFactory implements Disposable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFactory.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFactory.class);
 
-    private final String name;
-    private final MuleContext muleContext;
-    private final Set<DataSource> pooledDataSources = new ConcurrentHashSet();
-    private final Set<Disposable> disposableDataSources = new ConcurrentHashSet();
-    private final CompositeDataSourceDecorator dataSourceDecorator;
+  private final String name;
+  private final MuleContext muleContext;
+  private final Set<DataSource> pooledDataSources = new ConcurrentHashSet();
+  private final Set<Disposable> disposableDataSources = new ConcurrentHashSet();
+  private final CompositeDataSourceDecorator dataSourceDecorator;
 
-    public DataSourceFactory(String name, MuleContext muleContext)
-    {
-        this.name = name;
-        this.muleContext = muleContext;
-        dataSourceDecorator = new CompositeDataSourceDecorator(muleContext.getRegistry().lookupObjects(DataSourceDecorator.class));
+  public DataSourceFactory(String name, MuleContext muleContext) {
+    this.name = name;
+    this.muleContext = muleContext;
+    dataSourceDecorator = new CompositeDataSourceDecorator(muleContext.getRegistry().lookupObjects(DataSourceDecorator.class));
+  }
+
+  /**
+   * Creates a dataSource from a given dataSource config
+   *
+   * @param dataSourceConfig describes how to create the dataSource
+   * @return a non null dataSource
+   * @throws SQLException in case there is a problem creating the dataSource
+   */
+  public DataSource create(DataSourceConfig dataSourceConfig) throws SQLException {
+    DataSource dataSource;
+
+    if (dataSourceConfig.getPoolingProfile() == null) {
+      dataSource = createSingleDataSource(dataSourceConfig);
+    } else {
+      dataSource = createPooledDataSource(dataSourceConfig);
     }
 
-    /**
-     * Creates a dataSource from a given dataSource config
-     *
-     * @param dataSourceConfig describes how to create the dataSource
-     * @return a non null dataSource
-     * @throws SQLException in case there is a problem creating the dataSource
-     */
-    public DataSource create(DataSourceConfig dataSourceConfig) throws SQLException
-    {
-        DataSource dataSource;
-
-        if (dataSourceConfig.getPoolingProfile() == null)
-        {
-            dataSource = createSingleDataSource(dataSourceConfig);
-        }
-        else
-        {
-            dataSource = createPooledDataSource(dataSourceConfig);
-        }
-
-        if (dataSourceConfig.isUseXaTransactions())
-        {
-            dataSource = decorateDataSource(dataSource, dataSourceConfig.getPoolingProfile(), muleContext);
-        }
-
-        if (!(dataSourceConfig.getPoolingProfile() == null || dataSourceConfig.isUseXaTransactions()))
-        {
-            pooledDataSources.add(dataSource);
-        }
-        else if (dataSource instanceof Disposable)
-        {
-            disposableDataSources.add((Disposable) dataSource);
-        }
-
-        return dataSource;
+    if (dataSourceConfig.isUseXaTransactions()) {
+      dataSource = decorateDataSource(dataSource, dataSourceConfig.getPoolingProfile(), muleContext);
     }
 
-    public DataSource decorateDataSource(DataSource dataSource, DbPoolingProfile poolingProfile, MuleContext muleContext)
-    {
-        return dataSourceDecorator.decorate(dataSource, name, poolingProfile, muleContext);
+    if (!(dataSourceConfig.getPoolingProfile() == null || dataSourceConfig.isUseXaTransactions())) {
+      pooledDataSources.add(dataSource);
+    } else if (dataSource instanceof Disposable) {
+      disposableDataSources.add((Disposable) dataSource);
     }
 
-    protected DataSource createSingleDataSource(DataSourceConfig dataSourceConfig) throws SQLException
-    {
-        StandardDataSource dataSource = dataSourceConfig.isUseXaTransactions() ? new StandardXADataSource() : new StandardDataSource();
-        dataSource.setDriverName(dataSourceConfig.getDriverClassName());
-        if (dataSourceConfig.getConnectionTimeout() >= 0)
-        {
-            dataSource.setLoginTimeout(new Long(dataSourceConfig.getConnectionTimeoutUnit().toSeconds(dataSourceConfig.getConnectionTimeout())).intValue());
-        }
-        dataSource.setPassword(dataSourceConfig.getPassword());
-        dataSource.setTransactionIsolation(dataSourceConfig.getTransactionIsolation().getCode());
-        dataSource.setUrl(dataSourceConfig.getUrl());
-        dataSource.setUser(dataSourceConfig.getUser());
+    return dataSource;
+  }
 
-        return dataSource;
+  public DataSource decorateDataSource(DataSource dataSource, DbPoolingProfile poolingProfile, MuleContext muleContext) {
+    return dataSourceDecorator.decorate(dataSource, name, poolingProfile, muleContext);
+  }
+
+  protected DataSource createSingleDataSource(DataSourceConfig dataSourceConfig) throws SQLException {
+    StandardDataSource dataSource =
+        dataSourceConfig.isUseXaTransactions() ? new StandardXADataSource() : new StandardDataSource();
+    dataSource.setDriverName(dataSourceConfig.getDriverClassName());
+    if (dataSourceConfig.getConnectionTimeout() >= 0) {
+      dataSource.setLoginTimeout(new Long(dataSourceConfig.getConnectionTimeoutUnit()
+          .toSeconds(dataSourceConfig.getConnectionTimeout())).intValue());
+    }
+    dataSource.setPassword(dataSourceConfig.getPassword());
+    dataSource.setTransactionIsolation(dataSourceConfig.getTransactionIsolation().getCode());
+    dataSource.setUrl(dataSourceConfig.getUrl());
+    dataSource.setUser(dataSourceConfig.getUser());
+
+    return dataSource;
+  }
+
+  protected DataSource createPooledDataSource(DataSourceConfig dataSourceConfig) throws SQLException {
+    if (dataSourceConfig.isUseXaTransactions()) {
+      return createSingleDataSource(dataSourceConfig);
+    } else {
+      return createPooledStandardDataSource(createSingleDataSource(dataSourceConfig), dataSourceConfig.getPoolingProfile());
+    }
+  }
+
+  protected DataSource createPooledStandardDataSource(DataSource dataSource, DbPoolingProfile poolingProfile)
+      throws SQLException {
+    Map<String, Object> config = new HashMap<>();
+    config.put("maxPoolSize", poolingProfile.getMaxPoolSize());
+    config.put("minPoolSize", poolingProfile.getMinPoolSize());
+    config.put("initialPoolSize", poolingProfile.getMinPoolSize());
+    config.put("checkoutTimeout", poolingProfile.getMaxWaitUnit().toMinutes(poolingProfile.getMaxWait()));
+    config.put("acquireIncrement", poolingProfile.getAcquireIncrement());
+    config.put("maxStatements", 0);
+    config.put("maxStatementsPerConnection", poolingProfile.getPreparedStatementCacheSize());
+
+    return DataSources.pooledDataSource(dataSource, config);
+  }
+
+  @Override
+  public void dispose() {
+    for (DataSource pooledDataSource : pooledDataSources) {
+      try {
+        DataSources.destroy(pooledDataSource);
+      } catch (SQLException e) {
+        LOGGER.warn("Unable to properly release pooled data source", e);
+      }
     }
 
-    protected DataSource createPooledDataSource(DataSourceConfig dataSourceConfig) throws SQLException
-    {
-        if (dataSourceConfig.isUseXaTransactions())
-        {
-            return createSingleDataSource(dataSourceConfig);
-        }
-        else
-        {
-            return createPooledStandardDataSource(createSingleDataSource(dataSourceConfig), dataSourceConfig.getPoolingProfile());
-        }
+    for (Disposable disposableDataSource : disposableDataSources) {
+      try {
+        disposableDataSource.dispose();
+      } catch (Exception e) {
+        LOGGER.warn("Unable to properly dispose data source", e);
+      }
     }
-
-    protected DataSource createPooledStandardDataSource(DataSource dataSource, DbPoolingProfile poolingProfile) throws SQLException
-    {
-        Map<String, Object> config = new HashMap<>();
-        config.put("maxPoolSize", poolingProfile.getMaxPoolSize());
-        config.put("minPoolSize", poolingProfile.getMinPoolSize());
-        config.put("initialPoolSize", poolingProfile.getMinPoolSize());
-        config.put("checkoutTimeout", poolingProfile.getMaxWaitUnit().toMinutes(poolingProfile.getMaxWait()));
-        config.put("acquireIncrement", poolingProfile.getAcquireIncrement());
-        config.put("maxStatements", 0);
-        config.put("maxStatementsPerConnection", poolingProfile.getPreparedStatementCacheSize());
-
-        return DataSources.pooledDataSource(dataSource, config);
-    }
-
-    @Override
-    public void dispose()
-    {
-        for (DataSource pooledDataSource : pooledDataSources)
-        {
-            try
-            {
-                DataSources.destroy(pooledDataSource);
-            }
-            catch (SQLException e)
-            {
-                LOGGER.warn("Unable to properly release pooled data source", e);
-            }
-        }
-
-        for (Disposable disposableDataSource : disposableDataSources)
-        {
-            try
-            {
-                disposableDataSource.dispose();
-            }
-            catch (Exception e)
-            {
-                LOGGER.warn("Unable to properly dispose data source", e);
-            }
-        }
-    }
+  }
 }
